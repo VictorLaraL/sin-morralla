@@ -16,9 +16,9 @@ Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convie
 
 | Estado | |
 |---|---|
-| Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 34 pruebas unitarias, 31 de punta a punta y 8 de la lógica del firmware en verde |
+| Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 36 pruebas unitarias, 35 de punta a punta y 8 de la lógica del firmware en verde |
 | Pagos CoDi | QR fijo creado con el API de pey y probado con dos pagos reales al mismo QR (23 de noviembre de 2026) |
-| Demo pública | Lista. Muestra su QR real de $0.01 en cuanto la cuenta de pey del proyecto termina su activación |
+| Demo pública | **Funcionando con pagos reales.** El 24 de noviembre de 2026 su QR de $0.01, creado con el API de pey, se pagó dos veces y el garrafón se llenó en vivo |
 | Hardware | Firmware escrito; su lógica de entrega se prueba en la PC y el protocolo con el simulador. Falta la prueba en placa con un monedero real |
 
 ---
@@ -68,6 +68,11 @@ el portal de pey registró **dos transacciones exitosas** de tipo `API_CODI_QR` 
 | `01M85C200V0W5583JZB5WSC8S6` | $0.01 |
 
 El detalle de la prueba y de las hipótesis del MVP está en [docs/MVP.md](docs/MVP.md) (H2).
+
+**Ya en producción (24 de noviembre de 2026).** Desde el portal de Sin Morralla se creó con el API de pey el QR de la
+demo ($0.01) y se pagó dos veces desde una app bancaria. Los registros del Worker en Cloudflare muestran, para cada
+pago, el aviso de pey con firma válida, el pago registrado una sola vez para la máquina demo con 1 pulso y estado
+*entregado*, y la landing llenó el garrafón en vivo. No hubo errores ni avisos rechazados.
 
 ## Uso del API de pey
 
@@ -157,12 +162,17 @@ real de $0.01 de la máquina virtual:
 
 1. Abre la app de tu banco, entra a CoDi y escanea el QR (o usa **Descargar QR** y ábrelo desde la app si estás en el
    celular).
-2. Revisa el beneficiario y el monto de **$0.01**, y paga. Es un pago real a la cuenta del proyecto.
+2. Revisa el beneficiario y el monto de **$0.01**, y paga. Es un pago real con CoDi, procesado por pey.
 3. En segundos la página dice "¡Pago recibido!", la máquina recibe su pulso y **el garrafón se llena**. El contador de
    pagos de hoy sube para todos los que tengan la página abierta.
 
-> Mientras la cuenta de pey del proyecto termina su activación, la tarjeta dice "La demo se está preparando". En ese
-> caso usa la prueba local: es el mismo código y el mismo camino del aviso.
+> Mientras pey aprueba la cuenta CoDi propia del proyecto, el QR de la demo cobra a la cuenta de pruebas "Pruebas Pey"
+> del portal de pey, así que tu banco mostrará el nombre de su titular como beneficiario.
+
+**Portal del dueño en modo jurado.** Abre el [portal](https://sin-morralla.victormlaralopez.workers.dev/portal/) con la
+clave de solo lectura que viene en la entrega del proyecto. Verás las ventas del día y de la semana, las máquinas, los
+pagos por atender y la calcomanía imprimible, tal como los ve el dueño, pero sin poder cambiar nada. Deja el portal
+abierto, paga el QR de la demo y verás llegar el pago en vivo.
 
 ### En tu computadora (3 minutos)
 
@@ -188,8 +198,8 @@ npm run dev                        # http://localhost:8787
 - **Pruebas:**
 
 ```bash
-npm test          # 34 pruebas unitarias: firma, lectura del aviso, pulsos, validaciones, boletos
-npm run e2e       # 31 pruebas de punta a punta contra npm run dev (en otra terminal)
+npm test          # 36 pruebas unitarias: firma, lectura del aviso, pulsos, validaciones, boletos
+npm run e2e       # 35 pruebas de punta a punta contra npm run dev (en otra terminal)
 npm run typecheck # tipos de TypeScript contra los bindings de Cloudflare
 npm run test:firmware  # 8 pruebas de la entrega en dos fases del ESP32 (necesita g++, clang++ o Visual Studio Build Tools)
 ```
@@ -214,6 +224,7 @@ lista de compras y el banco de pruebas (monedero de 12 V y bomba) están en [doc
 | Pagos que no se sirven | Vencen a los 10 minutos y aparecen en "Pagos por atender" con su clave de rastreo |
 | Un módulo robado o clonado | Token por máquina guardado como SHA-256; se cambia desde el portal y el anterior deja de servir |
 | Clave del portal expuesta | Solo viaja en el encabezado `Authorization`; el WebSocket usa un boleto firmado de 60 s |
+| Acceso del jurado | Clave aparte de solo lectura (`JURADO_TOKEN`): ve ventas y máquinas, cualquier cambio responde 403, las claves de rastreo salen recortadas y no ve a los interesados |
 | Calcomanía pegada encima | La calcomanía pide verificar el nombre del beneficiario que muestra el banco antes de pagar |
 | Datos de interesados | El portal pinta todo como texto (sin HTML); el formulario tiene campo trampa y límite de 5 envíos por hora por huella de IP |
 
@@ -245,6 +256,7 @@ npx wrangler d1 create sin-morralla          # copia el database_id a wrangler.j
 npx wrangler secret put PORTAL_TOKEN         # clave larga para el portal
 npx wrangler secret put PEY_API_KEY          # llave del API de pey
 npx wrangler secret put PEY_WEBHOOK_SECRET   # secreto whsec_… del webhook en el portal de pey
+npx wrangler secret put JURADO_TOKEN         # opcional: clave de solo lectura para el jurado
 npm run deploy                               # aplica las migraciones remotas y publica
 ```
 
@@ -268,8 +280,8 @@ Para cumplir con la declaración de código previo de las bases:
 
 - **Hardware sin probar en placa.** La lógica de entrega del firmware se prueba en la PC y su protocolo con el
   simulador, pero falta compilar el sketch completo para el ESP32 y probarlo con un monedero real.
-- **La demo pública espera la activación de la cuenta de pey** (hasta 5 días hábiles). Mientras tanto, la prueba local
-  recorre el mismo camino con avisos firmados.
+- **Cuenta CoDi de pruebas en la demo.** Mientras pey aprueba la cuenta propia del proyecto, el QR de la demo cobra a
+  la cuenta "Pruebas Pey", así que el banco muestra el nombre de su titular y no el de Sin Morralla.
 - **Un solo cliente.** El portal es de un dueño; la multitenencia es el siguiente paso.
 - **QR sin monto sin probar.** Se probó el QR con monto fijo; el de monto libre (para máquinas con varios llenados)
   falta.
