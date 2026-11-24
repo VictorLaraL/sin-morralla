@@ -40,9 +40,9 @@ contra `wrangler dev` + revisión en el navegador integrado.
 | T5 | S3, S4 | inline | hecho | Contrato cubierto por e2e de T4; navegador integrado: QR dibujado, WebSocket "En vivo", pago simulado llena el garrafón y sube el contador, consola sin errores, 375 px sin desplazamiento horizontal |
 | T6 | S5 | inline | hecho | API cubierta por e2e 27/27; navegador integrado: clave incorrecta rechazada, entrada, canal en vivo con boleto, crear QR (simulado), token visible tras refrescos, pulso de prueba recibido y confirmado por el módulo, aviso en vivo de un pago firmado, calcomanía de 10 cm, 375 px sin desplazamiento horizontal |
 | T7 | S6 | inline | hecho | Protocolo de 5 campos y ACK parcial cubiertos por e2e 28/28; entrega en dos fases; **sin compilar** (no hay arduino-cli ni placa en esta máquina) |
-| T8 | S9, S10 | inline | pendiente | — |
-| T9 | S7, S8 | inline | pendiente | — |
-| T10 | S1, S2 | inline | pendiente | — |
+| T8 | S9, S10 | inline | hecho | Unitarias 34/34, e2e 30/30 (dos corridas seguidas), firmware 8/8 (`npm run test:firmware`, MSVC), `typecheck` limpio; navegador integrado en landing y portal; servidor local corriendo en el puerto 8787 |
+| T9 | S7, S8 | inline | hecho | `README.md` con un solo diagrama Mermaid (servicio, flujo y hardware) validado con Mermaid 10.9.1 sin errores; `firmware/README.md` |
+| T10 | S1, S2 | inline | hecho | D1 `sin-morralla` (WNAM), migraciones remotas 0001–0003, Worker en https://sin-morralla.victormlaralopez.workers.dev (salud, landing, portal y demo 200); repo público https://github.com/VictorLaraL/sin-morralla con `main` y `feat/mvp-cloudflare`. Faltan los secretos, que pone el usuario |
 
 - **T1** Estructura del proyecto (Worker, D1, configuración, scripts) sobre la documentación existente.
 - **T2** Núcleo sin dependencias de Cloudflare: verificación de firma Standard Webhooks con Web Crypto, normalización
@@ -120,6 +120,19 @@ explorador de solo lectura.
 - **L14 T7 entregas interrumpidas:** RED 1 e2e (ACK con `parcial=1`); GREEN e2e 28/28. El firmware guarda "en curso"
   antes de los pulsos y "hecho" después; si arranca con una entrega a medias no repite pulsos y confirma con
   `parcial=1`; el pago queda por atender. Esto cierra la advertencia de RDD sobre la reentrega hasta el ACK.
+- **L15 RDD firmware (`cffa3f3..ab3642a`): corrección requerida.** Hallazgo crítico `R4-parcial-perdido-en-reintento`:
+  si el primer ACK con `parcial=1` no llegaba, el módulo ya había marcado el crédito como hecho y el reintento lo
+  confirmaba como entrega normal. Plan de corrección capturado (pronóstico de 20 líneas; el cambio real fue mayor porque
+  la lógica se extrajo a `entrega.h` para poder probarla en la PC). RED: 3 verificaciones fallaban en ese escenario;
+  GREEN 6/6 (`9fd95b2`). gentle-ai recuperó la revisión como linaje nuevo (`scope_changed`) sobre el tramo corregido:
+  **aprobada y confirmada**.
+- **L16 Advertencias del tramo corregido:** atendidas con pruebas (RED: 1 e2e y el firmware sin compilar; GREEN: e2e
+  30/30, firmware 8/8): cerrar una entrega interrumpida como "Recibió todo" sin registrar devolución; ACK pendiente
+  guardado y reintentado aunque el crédito venza; un 200 que no es crédito pone la luz en rojo con espera; el portal solo
+  congela una ficha mientras se escribe en ella y ofrece "Descartar cambios". TLS sin fijar en el módulo queda como
+  limitación documentada del piloto.
+- **L17 Entorno local:** al poner el `database_id` real, wrangler cambia la base local (se indexa por ese id); hubo que
+  reiniciar `npm run dev` para migrar la nueva base local antes de las e2e.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
