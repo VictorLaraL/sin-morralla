@@ -112,6 +112,14 @@ explorador de solo lectura.
   crédito sin servicio vuelve a dar 404 (RED 1 e2e; GREEN 27/27); el latido no puede tumbar la consulta del módulo;
   `npm run deploy` aplica las migraciones remotas antes de publicar. El cambio a boleto no rompe clientes porque el portal
   todavía no se había publicado.
+- **L13 RDD portal (`858ed6a..cffa3f3`):** **aprobada y confirmada**. Advertencias atendidas y verificadas en el
+  navegador: al salir se borran de la página contactos, claves de rastreo y tokens; `currentTarget` se captura antes de
+  esperar; el error de clave es una clase propia; el refresco automático no borra un formulario a medio editar (un pago
+  en vivo llegó y el campo conservó lo escrito); no quedan reconexiones del WebSocket después de salir. Descartada con
+  evidencia: `landing.js` sí se carga como módulo y el QR de la landing se dibujó tras el cambio.
+- **L14 T7 entregas interrumpidas:** RED 1 e2e (ACK con `parcial=1`); GREEN e2e 28/28. El firmware guarda "en curso"
+  antes de los pulsos y "hecho" después; si arranca con una entrega a medias no repite pulsos y confirma con
+  `parcial=1`; el pago queda por atender. Esto cierra la advertencia de RDD sobre la reentrega hasta el ACK.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos

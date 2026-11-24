@@ -59,6 +59,7 @@ try {
 }
 
 class ErrorApi extends Error {}
+class ClaveIncorrecta extends ErrorApi {}
 
 async function api(ruta, { metodo = "GET", cuerpo } = {}) {
   const r = await fetch(ruta, {
@@ -69,7 +70,7 @@ async function api(ruta, { metodo = "GET", cuerpo } = {}) {
   const datos = await r.json().catch(() => ({}));
   if (r.status === 401) {
     salir("La clave no es correcta o cambió.");
-    throw new ErrorApi("Clave incorrecta");
+    throw new ClaveIncorrecta("Clave incorrecta");
   }
   if (!r.ok) throw new ErrorApi(datos.error ?? `Error ${r.status}`);
   return datos;
@@ -83,6 +84,10 @@ function salir(mensaje) {
     // Nada que borrar.
   }
   cerrarVivo();
+  // Nada de lo que se mostró (contactos, claves de rastreo, tokens) queda en la página.
+  datos = null;
+  tokensRecientes.clear();
+  for (const id of ["cifras", "por-atender", "maquinas", "pagos", "contactos"]) $(id).replaceChildren();
   $("panel").hidden = true;
   $("salir").hidden = true;
   $("vivo").hidden = true;
@@ -103,12 +108,10 @@ $("form-entrar").addEventListener("submit", async (e) => {
       // Se usa solo en memoria.
     }
     $("clave").value = "";
-    $("entrar").hidden = true;
-    $("panel").hidden = false;
-    $("salir").hidden = false;
-    conectarVivo();
+    mostrarPanel();
   } catch (error) {
-    if (!(error instanceof ErrorApi) || error.message !== "Clave incorrecta") salir(error.message);
+    // ClaveIncorrecta ya mostró su mensaje al cerrar la sesión.
+    if (!(error instanceof ClaveIncorrecta)) salir(error.message);
   }
 });
 
@@ -135,7 +138,9 @@ function pintar() {
     cifra("Interesados", String(datos.contactos), "desde la landing"),
   );
   pintarPorAtender();
-  pintarMaquinas();
+  // Si el dueño está editando una máquina, el refresco automático no le borra lo que escribió.
+  const caja = $("maquinas");
+  if (!caja.contains(document.activeElement) && !caja.querySelector("form[data-editando]")) pintarMaquinas();
   pintarPagos();
 }
 
@@ -157,7 +162,7 @@ function pintarPorAtender() {
             "div",
             {},
             h("p", { class: "monto" }, `${deCentavos(c.monto_centavos)} · ${c.maquina_nombre}`),
-            h("p", {}, `${ESTADOS[c.estado] ?? c.estado} · ${fecha(c.fecha_pago ?? c.creado_en)}`),
+            h("p", {}, `${c.interrumpido ? "Entrega interrumpida" : (ESTADOS[c.estado] ?? c.estado)} · ${fecha(c.fecha_pago ?? c.creado_en)}`),
             c.nota ? h("p", {}, c.nota) : null,
             c.clave_rastreo ? h("p", {}, `Clave de rastreo: ${c.clave_rastreo}`) : null,
           ),
@@ -167,15 +172,16 @@ function pintarPorAtender() {
               class: "boton secundario chico",
               type: "button",
               onclick: async (e) => {
+                const boton = e.currentTarget; // currentTarget vale null después del primer await
                 if (!confirm(`¿Ya devolviste ${deCentavos(c.monto_centavos)} desde tu banco?`)) return;
-                e.currentTarget.disabled = true;
+                boton.disabled = true;
                 try {
                   await api(`/api/portal/creditos/${encodeURIComponent(c.id)}/devuelto`, { metodo: "POST" });
                   avisar("Pago marcado como devuelto.", "ok");
                   await cargar();
                 } catch (error) {
                   avisar(error.message, "error");
-                  e.currentTarget.disabled = false;
+                  boton.disabled = false;
                 }
               },
             },
@@ -242,6 +248,9 @@ function fichaMaquina(m) {
   const formulario = h(
     "form",
     {
+      oninput: (e) => {
+        e.currentTarget.dataset.editando = "1";
+      },
       onsubmit: async (e) => {
         e.preventDefault();
         const f = new FormData(e.currentTarget);
@@ -256,10 +265,14 @@ function fichaMaquina(m) {
           maxPulsos: Number(f.get("maxPulsos")),
           requiereBoton: f.get("requiereBoton") === "on",
         };
+        const form = e.currentTarget;
         try {
           const r = await api(`/api/portal/maquinas/${encodeURIComponent(m.id)}`, { metodo: "PUT", cuerpo: config });
+          delete form.dataset.editando;
+          document.activeElement?.blur();
           mostrar(r.qrDesactualizado ? "Guardado. El precio cambió: genera un QR nuevo y cambia la calcomanía." : "Guardado.", "ok");
           await cargar();
+          pintarMaquinas();
         } catch (error) {
           mostrar(error.message, "error");
         }
@@ -499,22 +512,28 @@ function recargarPronto() {
 
 async function conectarVivo() {
   if (!clave) return;
+  clearTimeout(reintento);
+  const viejo = ws;
+  ws = null; // su evento close ya no reconecta
+  viejo?.close();
   try {
     // El WebSocket se abre con un boleto de 60 s: la clave del portal nunca va en la URL.
     const { boleto } = await api("/api/portal/boleto", { metodo: "POST" });
     ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/portal/en-vivo?boleto=${encodeURIComponent(boleto)}`);
   } catch {
-    reintento = setTimeout(conectarVivo, Math.min(30_000, 1000 * 2 ** intento++));
+    if (clave) reintento = setTimeout(conectarVivo, Math.min(30_000, 1000 * 2 ** intento++));
     return;
   }
+  const este = ws;
   let latido;
-  ws.addEventListener("open", () => {
+  este.addEventListener("open", () => {
+    if (ws !== este) return este.close();
     intento = 0;
     marcarVivo(true);
     latido = setInterval(() => ws?.readyState === WebSocket.OPEN && ws.send("ping"), 30_000);
   });
-  ws.addEventListener("message", (m) => {
-    if (m.data === "pong") return;
+  este.addEventListener("message", (m) => {
+    if (ws !== este || m.data === "pong") return;
     let evento;
     try {
       evento = JSON.parse(m.data);
@@ -525,9 +544,9 @@ async function conectarVivo() {
     if (evento.tipo === "credito" && evento.estado === "vencido") avisar("Un pago no se sirvió: revisa «Pagos por atender».", "error");
     recargarPronto();
   });
-  ws.addEventListener("close", () => {
+  este.addEventListener("close", () => {
     clearInterval(latido);
-    if (!clave) return;
+    if (!clave || ws !== este) return;
     marcarVivo(false);
     reintento = setTimeout(conectarVivo, Math.min(30_000, 1000 * 2 ** intento++));
   });
@@ -547,13 +566,11 @@ setInterval(() => {
 
 // ---------- Inicio ----------
 
-if (clave) {
-  cargar()
-    .then(() => {
-      $("entrar").hidden = true;
-      $("panel").hidden = false;
-      $("salir").hidden = false;
-      conectarVivo();
-    })
-    .catch(() => {});
+function mostrarPanel() {
+  $("entrar").hidden = true;
+  $("panel").hidden = false;
+  $("salir").hidden = false;
+  conectarVivo();
 }
+
+if (clave) cargar().then(mostrarPanel, () => {});
