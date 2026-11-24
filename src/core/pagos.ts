@@ -39,9 +39,12 @@ export function normalizarPago(webhookId: string, aviso: unknown, ahora = new Da
   if (!coincidencia) return null;
 
   const transactionId = texto(datos.transactionId);
-  // Number(null) y Number("") dan 0: un aviso sin monto no debe pasar como pago de $0.
-  if (datos.amount === undefined || datos.amount === null || datos.amount === "") return null;
-  const monto = Number(datos.amount);
+  // Solo un número, o un texto decimal simple ("13.50"). Number() convierte null, "", true o [5] en números
+  // y un aviso sin monto válido no debe registrarse como pago.
+  const crudo = datos.amount;
+  const montoValido = typeof crudo === "number" || (typeof crudo === "string" && /^\s*\d+(\.\d+)?\s*$/.test(crudo));
+  if (!montoValido) return null;
+  const monto = Number(crudo);
   if (!transactionId || !Number.isFinite(monto) || monto < 0) return null;
 
   const metadataPey = esObjeto(datos.metadata) ? datos.metadata : {};

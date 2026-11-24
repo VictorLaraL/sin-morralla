@@ -51,8 +51,8 @@ test("acepta los campos dentro de data y la metadata como texto JSON", () => {
   assert.deepEqual(p?.metadata, { maquina: "demo" });
 });
 
-test("un aviso sin monto no se toma como pago de $0", () => {
-  for (const amount of [null, undefined, ""]) {
+test("un aviso sin monto, o con un monto que no es número, no se registra", () => {
+  for (const amount of [null, undefined, "", true, false, [], [5], {}, "abc", "1e3", " "]) {
     assert.equal(normalizarPago("m", { ...avisoQr, amount }), null, `amount=${String(amount)}`);
   }
 });

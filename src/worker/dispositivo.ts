@@ -1,0 +1,65 @@
+// API del módulo ESP32 (texto plano; ver src/core/protocolo.ts).
+//
+// GET  /device/poll?espera=<0..25>  consulta larga: responde en cuanto hay un crédito o tras la espera (204).
+// POST /device/ack?id=<credito>     confirma que los pulsos se entregaron.
+//
+// El Worker revisa D1 cada segundo durante la espera. Así no se mantiene despierto un Durable Object
+// por cada máquina y el crédito llega en uno o dos segundos.
+
+import { lineaCredito } from "../core/protocolo.ts";
+import { sha256Hex } from "../core/tokens.ts";
+import { creditoPendiente, entregarCredito, maquinaPorToken, tocarMaquina, type FilaCredito, type FilaMaquina } from "./db.ts";
+import { esperar, log, texto, tokenBearer } from "./http.ts";
+
+const ESPERA_MAXIMA_SEG = 25;
+const INTERVALO_MS = 1000;
+
+export function limiteVigencia(env: Env, ahora = Date.now()): string {
+  const minutos = Number(env.TTL_CREDITO_MIN) || 10;
+  return new Date(ahora - minutos * 60_000).toISOString();
+}
+
+export async function manejarDispositivo(
+  request: Request,
+  env: Env,
+  url: URL,
+  alEntregar?: (maquina: FilaMaquina, credito: FilaCredito) => Promise<void>,
+): Promise<Response> {
+  const token = tokenBearer(request);
+  const m = token ? await maquinaPorToken(env.DB, await sha256Hex(token)) : null;
+  if (!m) return texto("TOKEN INVALIDO\n", 401);
+
+  await tocarMaquina(env.DB, m.id, new Date().toISOString());
+
+  if (request.method === "GET" && url.pathname === "/device/poll") {
+    const pedida = Number(url.searchParams.get("espera") ?? ESPERA_MAXIMA_SEG);
+    const espera = Number.isFinite(pedida) ? Math.min(Math.max(pedida, 0), ESPERA_MAXIMA_SEG) : ESPERA_MAXIMA_SEG;
+    const fin = Date.now() + espera * 1000;
+
+    while (true) {
+      const c = await creditoPendiente(env.DB, m.id, limiteVigencia(env));
+      if (c) {
+        return texto(
+          lineaCredito({ id: c.id, pulsos: c.pulsos, pulsoMs: m.pulso_ms, pausaMs: m.pausa_ms, requiereBoton: m.requiere_boton === 1 }),
+        );
+      }
+      if (Date.now() >= fin || request.signal?.aborted) break;
+      await esperar(INTERVALO_MS);
+    }
+    await tocarMaquina(env.DB, m.id, new Date().toISOString());
+    return new Response(null, { status: 204 });
+  }
+
+  if (request.method === "POST" && url.pathname === "/device/ack") {
+    const id = url.searchParams.get("id") ?? "";
+    const entregado = await entregarCredito(env.DB, id, m.id, new Date().toISOString());
+    if (entregado) {
+      log("credito_entregado", { maquina: m.id, credito: id, pulsos: entregado.pulsos });
+      if (alEntregar) await alEntregar(m, entregado);
+    }
+    // Confirmar dos veces el mismo crédito no es un error: el ESP32 puede reintentar.
+    return texto("OK\n");
+  }
+
+  return texto("NO ENCONTRADO\n", 404);
+}
