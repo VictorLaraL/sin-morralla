@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { inicioDelDiaCdmx, validarConfigMaquina, validarContacto, vigenciaMinutos } from "../src/core/validaciones.ts";
+import { inicioDelDiaCdmx, validarConfigMaquina, validarContacto, validarPulsosPrueba, vigenciaMinutos } from "../src/core/validaciones.ts";
 
 test("la configuración válida de una máquina se normaliza a enteros", () => {
   const r = validarConfigMaquina({
@@ -69,5 +69,20 @@ test("la vigencia de un crédito usa 10 minutos si la configuración no sirve", 
   assert.equal(vigenciaMinutos("1440"), 1440);
   for (const malo of ["0", "-5", "abc", "", undefined, "2.5", "1441"]) {
     assert.equal(vigenciaMinutos(malo), 10, `con ${JSON.stringify(malo)}`);
+  }
+});
+
+test("los cuerpos que no son objeto se rechazan sin romper la validación", () => {
+  for (const cuerpo of [null, undefined, 5, "texto", [1, 2]]) {
+    assert.equal(validarConfigMaquina(cuerpo).ok, false, `config con ${JSON.stringify(cuerpo)}`);
+    assert.equal(validarContacto(cuerpo).ok, false, `contacto con ${JSON.stringify(cuerpo)}`);
+  }
+});
+
+test("los pulsos de prueba deben ser un entero de 1 a 20", () => {
+  assert.deepEqual(validarPulsosPrueba({ pulsos: 2 }), { ok: true, valor: 2 });
+  assert.deepEqual(validarPulsosPrueba({ pulsos: 20 }), { ok: true, valor: 20 });
+  for (const cuerpo of [null, {}, { pulsos: 0 }, { pulsos: 21 }, { pulsos: 1.5 }, { pulsos: "2" }, { pulsos: true }, { pulsos: [2] }]) {
+    assert.equal(validarPulsosPrueba(cuerpo).ok, false, `con ${JSON.stringify(cuerpo)}`);
   }
 });

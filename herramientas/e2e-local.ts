@@ -24,13 +24,23 @@ function sql(comando: string) {
   });
 }
 
+// Lee filas de la base local (para revisar estados que la API no expone).
+// El resultado de `wrangler d1 execute --json` es [{ results: [...] }].
+function consulta(comando: string): Array<Record<string, unknown>> {
+  const salida = execSync(`npx wrangler d1 execute sin-morralla --local --json --command "${comando}"`, {
+    env: { ...process.env, CI: "1" },
+  }).toString();
+  return JSON.parse(salida)[0].results;
+}
+
 const sha256 = (t: string) => createHash("sha256").update(t).digest("hex");
 const dispositivo = { Authorization: `Bearer ${TOKEN}` };
 
 test.before(() => {
   sql(
     `UPDATE maquinas SET qr_id='${QR}', qr_monto_centavos=1300, precio_centavos=1300, requiere_boton=0, ` +
-      `token_hash='${sha256(TOKEN)}' WHERE id='agua-01'; DELETE FROM creditos WHERE maquina_id='agua-01' AND estado='pendiente';`,
+      `token_hash='${sha256(TOKEN)}' WHERE id='agua-01'; DELETE FROM creditos WHERE maquina_id='agua-01' AND estado='pendiente'; ` +
+      `DELETE FROM contactos WHERE nombre LIKE 'Prueba e2e%';`,
   );
 });
 
@@ -229,9 +239,10 @@ test("el portal genera el token del módulo y manda un pulso de prueba", async (
   await fetch(`${BASE}/device/ack?id=${m[1]}`, { method: "POST", headers: nuevo });
 });
 
-test("un crédito que la máquina no recoge vence y aparece por atender", async () => {
-  const p = await fetch(`${BASE}/api/portal/maquinas/agua-01/prueba`, { method: "POST", headers: PORTAL, body: JSON.stringify({ pulsos: 1 }) });
-  const { id } = await leer(p);
+test("un pago que la máquina no recoge vence y aparece por atender", async () => {
+  const transactionId = "SIMTX-VENCE-" + randomBytes(4).toString("hex");
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR, transactionId }));
+  const id = String(consulta(`SELECT id FROM creditos WHERE transaction_id='${transactionId}'`)[0]?.id);
   sql(`UPDATE creditos SET creado_en='2020-01-01T00:00:00.000Z' WHERE id='${id}'`);
   const cron = await fetch(`${BASE}/__scheduled?cron=*+*+*+*+*`);
   assert.equal(cron.status, 200);
@@ -263,4 +274,92 @@ test("el formulario de contacto guarda interesados e ignora bots", async () => {
   const lista = await leer(await fetch(`${BASE}/api/portal/contactos`, { headers: PORTAL }));
   assert.ok(lista.some((c: { nombre: string }) => c.nombre === "Prueba e2e"));
   assert.equal(lista.some((c: { nombre: string }) => c.nombre === "Bot"), false);
+});
+
+// ---------- Correcciones de la revisión RDD de T4 ----------
+
+async function tokenNuevo() {
+  const t = await leer(await fetch(`${BASE}/api/portal/maquinas/agua-01/token`, { method: "POST", headers: PORTAL }));
+  return { Authorization: `Bearer ${t.token}` };
+}
+
+function abreWebSocket(url: string) {
+  return new Promise<boolean>((ok) => {
+    const ws = new WebSocket(url);
+    ws.addEventListener("open", () => {
+      ws.close();
+      ok(true);
+    });
+    ws.addEventListener("error", () => ok(false));
+  });
+}
+
+test("el WebSocket del portal pide un boleto de corta vida, no la clave maestra", async () => {
+  const ws = BASE.replace(/^http/, "ws");
+  assert.equal(await abreWebSocket(`${ws}/api/portal/en-vivo?token=${encodeURIComponent(vars.PORTAL_TOKEN)}`), false);
+  assert.equal((await fetch(`${BASE}/api/portal/boleto`, { method: "POST" })).status, 401);
+  const { boleto } = await leer(await fetch(`${BASE}/api/portal/boleto`, { method: "POST", headers: PORTAL }));
+  assert.equal(await abreWebSocket(`${ws}/api/portal/en-vivo?boleto=${encodeURIComponent(boleto)}`), true);
+});
+
+test("un cuerpo JSON que no es objeto da 400, no 500", async () => {
+  const put = await fetch(`${BASE}/api/portal/maquinas/agua-01`, { method: "PUT", headers: PORTAL, body: "null" });
+  assert.equal(put.status, 400);
+  const contacto = await fetch(`${BASE}/api/contacto`, { method: "POST", headers: { "content-type": "application/json" }, body: "null" });
+  assert.equal(contacto.status, 400);
+});
+
+test("el pulso de prueba exige un número de pulsos válido", async () => {
+  const cuerpos = ["", "{malo", "null", '{"pulsos":true}', '{"pulsos":[2]}', '{"pulsos":0}', '{"pulsos":21}'];
+  for (const cuerpo of cuerpos) {
+    const r = await fetch(`${BASE}/api/portal/maquinas/agua-01/prueba`, { method: "POST", headers: PORTAL, body: cuerpo });
+    assert.equal(r.status, 400, `con ${cuerpo}`);
+  }
+});
+
+test("un pulso de prueba vencido no aparece como pago por devolver", async () => {
+  const p = await leer(await fetch(`${BASE}/api/portal/maquinas/agua-01/prueba`, { method: "POST", headers: PORTAL, body: '{"pulsos":1}' }));
+  sql(`UPDATE creditos SET creado_en='2020-01-01T00:00:00.000Z' WHERE id='${p.id}'`);
+  await fetch(`${BASE}/__scheduled?cron=*+*+*+*+*`);
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(d.porAtender.some((c: { id: string }) => c.id === p.id), false);
+  assert.equal((await fetch(`${BASE}/api/portal/creditos/${p.id}/devuelto`, { method: "POST", headers: PORTAL })).status, 404);
+});
+
+test("si la máquina entrega un crédito ya devuelto, el ACK se acepta y queda anotado", async () => {
+  const modulo = await tokenNuevo();
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR }));
+  const id = /CREDITO (\S+)/.exec(await (await fetch(`${BASE}/device/poll?espera=0`, { headers: modulo })).text())?.[1];
+  assert.ok(id);
+  sql(`UPDATE creditos SET creado_en='2020-01-01T00:00:00.000Z' WHERE id='${id}'`);
+  await fetch(`${BASE}/__scheduled?cron=*+*+*+*+*`);
+  assert.equal((await fetch(`${BASE}/api/portal/creditos/${id}/devuelto`, { method: "POST", headers: PORTAL })).status, 200);
+  const ack = await fetch(`${BASE}/device/ack?id=${id}`, { method: "POST", headers: modulo });
+  assert.equal(ack.status, 200);
+  assert.equal(await ack.text(), "OK\n");
+  const [fila] = consulta(`SELECT estado, nota FROM creditos WHERE id='${id}'`);
+  assert.equal(fila.estado, "devuelto");
+  assert.match(String(fila.nota), /entregó después/);
+});
+
+test("después de consultar, el portal ve la máquina en línea", async () => {
+  const modulo = await tokenNuevo();
+  sql(`UPDATE maquinas SET ultima_conexion=NULL WHERE id='agua-01'`);
+  assert.equal((await fetch(`${BASE}/device/poll?espera=0`, { headers: modulo })).status, 204);
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(d.maquinas.find((m: { id: string }) => m.id === "agua-01")?.enLinea, true);
+});
+
+test("el formulario de contacto limita envíos repetidos y cuerpos enormes", async () => {
+  const enviar = () =>
+    fetch(`${BASE}/api/contacto`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ nombre: "Prueba e2e límite", telefono: "5512345678" }),
+    });
+  const estados: number[] = [];
+  for (let i = 0; i < 6; i++) estados.push((await enviar()).status);
+  assert.ok(estados.includes(429), `estados: ${estados.join(", ")}`);
+  const enorme = await fetch(`${BASE}/api/contacto`, { method: "POST", headers: { "content-type": "application/json" }, body: "x".repeat(10_000) });
+  assert.equal(enorme.status, 413);
 });

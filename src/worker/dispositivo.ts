@@ -47,6 +47,7 @@ export async function manejarDispositivo(
       if (Date.now() >= fin || request.signal.aborted) break;
       await esperar(INTERVALO_MS);
     }
+    await tocarMaquina(env.DB, m.id, new Date().toISOString());
     return new Response(null, { status: 204 });
   }
 

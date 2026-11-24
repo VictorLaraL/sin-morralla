@@ -6,12 +6,15 @@
 // POST /api/contacto       "Quiero probarlo en mi máquina".
 
 import { firmarAviso } from "../core/firma.ts";
-import { generarId } from "../core/tokens.ts";
+import { generarId, sha256Hex } from "../core/tokens.ts";
 import { inicioDelDiaCdmx, validarContacto } from "../core/validaciones.ts";
 import { maquina, type FilaMaquina } from "./db.ts";
 import { json } from "./http.ts";
 import { crearQrFijo } from "./pey.ts";
 import { manejarAviso, type PagoProcesado } from "./webhook.ts";
+
+const CONTACTO_MAX_BYTES = 4096;
+const CONTACTOS_POR_HORA = 5;
 
 export async function estadisticasDemo(db: D1Database) {
   const fila = await db
@@ -89,21 +92,34 @@ export async function manejarPublico(
   }
 
   if (metodo === "POST" && url.pathname === "/api/contacto") {
+    if (Number(request.headers.get("content-length") ?? 0) > CONTACTO_MAX_BYTES) return json({ error: "Mensaje demasiado largo" }, 413);
     const texto = await request.text();
-    if (texto.length > 4096) return json({ error: "Mensaje demasiado largo" }, 413);
-    let datos: Record<string, unknown>;
+    if (texto.length > CONTACTO_MAX_BYTES) return json({ error: "Mensaje demasiado largo" }, 413);
+    let datos: unknown;
     try {
       datos = JSON.parse(texto);
     } catch {
       return json({ error: "Formato inválido" }, 400);
     }
     // Campo trampa invisible: las personas lo dejan vacío, los bots lo llenan.
-    if (String(datos.sitio ?? "").trim()) return json({ ok: true });
+    const trampa = typeof datos === "object" && datos !== null ? (datos as { sitio?: unknown }).sitio : undefined;
+    if (String(trampa ?? "").trim()) return json({ ok: true });
     const contacto = validarContacto(datos);
     if (!contacto.ok) return json({ error: contacto.error }, 400);
+
+    // Límite por IP (guardada como huella con sal, no en claro) para que un script no llene la tabla.
+    const ip = request.headers.get("cf-connecting-ip") ?? "desconocida";
+    const huella = await sha256Hex(`contacto:${env.PORTAL_TOKEN ?? ""}:${ip}`);
+    const ahora = new Date();
+    const haceUnaHora = new Date(ahora.getTime() - 3_600_000).toISOString();
+    const previos = await env.DB.prepare("SELECT COUNT(*) AS n FROM contactos WHERE ip_hash = ? AND creado_en >= ?")
+      .bind(huella, haceUnaHora)
+      .first<{ n: number }>();
+    if ((previos?.n ?? 0) >= CONTACTOS_POR_HORA) return json({ error: "Ya recibimos tus datos. Intenta más tarde." }, 429);
+
     const c = contacto.valor;
-    await env.DB.prepare("INSERT INTO contactos (nombre, telefono, correo, mensaje, creado_en) VALUES (?, ?, ?, ?, ?)")
-      .bind(c.nombre, c.telefono, c.correo, c.mensaje, new Date().toISOString())
+    await env.DB.prepare("INSERT INTO contactos (nombre, telefono, correo, mensaje, creado_en, ip_hash) VALUES (?, ?, ?, ?, ?, ?)")
+      .bind(c.nombre, c.telefono, c.correo, c.mensaje, ahora.toISOString(), huella)
       .run();
     return json({ ok: true });
   }

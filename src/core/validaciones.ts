@@ -14,12 +14,17 @@ export interface ConfigMaquina {
   requiereBoton: boolean;
 }
 
+function esObjeto(valor: unknown): valor is Record<string, unknown> {
+  return typeof valor === "object" && valor !== null && !Array.isArray(valor);
+}
+
 function entero(valor: unknown, min: number, max: number): number | null {
   const n = typeof valor === "number" ? valor : typeof valor === "string" && valor.trim() !== "" ? Number(valor) : Number.NaN;
   return Number.isInteger(n) && n >= min && n <= max ? n : null;
 }
 
-export function validarConfigMaquina(e: Record<string, unknown>): Resultado<ConfigMaquina> {
+export function validarConfigMaquina(e: unknown): Resultado<ConfigMaquina> {
+  if (!esObjeto(e)) return { ok: false, error: "Formato inválido" };
   const nombre = String(e.nombre ?? "").trim();
   if (!nombre || nombre.length > 60) return { ok: false, error: "Escribe un nombre de hasta 60 caracteres" };
   const ubicacion = String(e.ubicacion ?? "").trim();
@@ -51,7 +56,8 @@ export interface Contacto {
   mensaje: string | null;
 }
 
-export function validarContacto(e: Record<string, unknown>): Resultado<Contacto> {
+export function validarContacto(e: unknown): Resultado<Contacto> {
+  if (!esObjeto(e)) return { ok: false, error: "Formato inválido" };
   const nombre = String(e.nombre ?? "").trim();
   const telefono = String(e.telefono ?? "").trim();
   const correo = String(e.correo ?? "").trim();
@@ -75,4 +81,13 @@ export function inicioDelDiaCdmx(fecha = new Date()): string {
 /** Minutos que un crédito espera a la máquina antes de vencer (TTL_CREDITO_MIN). Fuera de 1–1440 usa 10. */
 export function vigenciaMinutos(valor: unknown): number {
   return entero(valor, 1, 1440) ?? 10;
+}
+
+/** Pulsos de prueba desde el portal: mueven hardware real, así que solo se acepta un entero de 1 a 20. */
+export function validarPulsosPrueba(e: unknown): Resultado<number> {
+  const pulsos = esObjeto(e) ? e.pulsos : undefined;
+  if (typeof pulsos !== "number" || !Number.isInteger(pulsos) || pulsos < 1 || pulsos > 20) {
+    return { ok: false, error: "Indica entre 1 y 20 pulsos" };
+  }
+  return { ok: true, valor: pulsos };
 }

@@ -54,7 +54,11 @@ export default {
       if (url.pathname === "/webhooks/pey" && request.method === "POST") return await manejarAviso(request, env, alProcesar);
       if (url.pathname.startsWith("/device/")) {
         return await manejarDispositivo(request, env, url, async (m, c) => {
-          ctx.waitUntil(difusor(env).difundir("portal", { tipo: "credito", maquinaId: m.id, id: c.id, estado: c.estado, pulsos: c.pulsos }));
+          ctx.waitUntil(
+            difusor(env)
+              .difundir("portal", { tipo: "credito", maquinaId: m.id, id: c.id, estado: c.estado, pulsos: c.pulsos })
+              .catch((e) => log("aviso_en_vivo_fallido", { canal: "portal", mensaje: String(e) })),
+          );
         });
       }
       if (url.pathname.startsWith("/api/portal/")) return await manejarPortal(request, env, url, (canal) => conectar(request, env, canal));

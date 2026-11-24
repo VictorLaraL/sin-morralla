@@ -1,7 +1,8 @@
 // API del portal del dueño (un solo cliente). Todo exige la clave PORTAL_TOKEN.
 //
 // GET  /api/portal/resumen                   máquinas, ventas de hoy y de la semana, pagos y créditos por atender
-// GET  /api/portal/en-vivo?token=…            WebSocket con los pagos y entregas en vivo
+// POST /api/portal/boleto                    boleto de 60 s para abrir el WebSocket (la clave no va en la URL)
+// GET  /api/portal/en-vivo?boleto=…           WebSocket con los pagos y entregas en vivo
 // PUT  /api/portal/maquinas/:id              configuración (precio, pulsos, botón)
 // POST /api/portal/maquinas/:id/qr           crea el QR fijo de la máquina en pey
 // POST /api/portal/maquinas/:id/token        genera el token del módulo ESP32 (se muestra una sola vez)
@@ -9,13 +10,22 @@
 // POST /api/portal/creditos/:id/devuelto     marca un pago por atender como devuelto
 // GET  /api/portal/contactos                 interesados que dejaron sus datos en la landing
 
-import { compararSecreto, generarToken, sha256Hex } from "../core/tokens.ts";
-import { inicioDelDiaCdmx, validarConfigMaquina } from "../core/validaciones.ts";
+import { compararSecreto, firmarBoleto, generarToken, sha256Hex, verificarBoleto } from "../core/tokens.ts";
+import { inicioDelDiaCdmx, validarConfigMaquina, validarPulsosPrueba } from "../core/validaciones.ts";
 import { crearCreditoPrueba, maquina, type FilaMaquina } from "./db.ts";
 import { json, log, tokenBearer } from "./http.ts";
 import { crearQrFijo } from "./pey.ts";
 
-const EN_LINEA_MS = 60_000;
+// El módulo late cada 20 s como mínimo (LATIDO_MS); 90 s deja margen para una consulta larga y una reconexión.
+const EN_LINEA_MS = 90_000;
+
+async function leerJson(request: Request): Promise<unknown> {
+  try {
+    return JSON.parse(await request.text());
+  } catch {
+    return undefined;
+  }
+}
 
 function vistaMaquina(m: FilaMaquina, hoy: { pagos: number; total: number } | undefined, ahora: number) {
   return {
@@ -56,7 +66,7 @@ async function resumen(db: D1Database) {
     ),
     db.prepare(
       `SELECT c.*, m.nombre AS maquina_nombre FROM creditos c JOIN maquinas m ON m.id = c.maquina_id
-       WHERE c.estado IN ('vencido', 'sin-servicio') ORDER BY c.creado_en DESC LIMIT 50`,
+       WHERE c.origen = 'codi' AND c.estado IN ('vencido', 'sin-servicio') ORDER BY c.creado_en DESC LIMIT 50`,
     ),
     db.prepare("SELECT COUNT(*) AS n FROM contactos"),
   ]);
@@ -83,13 +93,20 @@ export async function manejarPortal(
   conectar: (canal: "portal") => Promise<Response>,
 ): Promise<Response> {
   if (!env.PORTAL_TOKEN) return json({ error: "Falta configurar PORTAL_TOKEN" }, 503);
-  // El navegador no puede mandar encabezados al abrir un WebSocket: ahí la clave va en ?token=.
-  const recibido = url.pathname === "/api/portal/en-vivo" ? (url.searchParams.get("token") ?? "") : tokenBearer(request);
-  if (!(await compararSecreto(recibido, env.PORTAL_TOKEN))) return json({ error: "Clave incorrecta" }, 401);
-
   const metodo = request.method;
+
+  // El navegador no puede mandar encabezados al abrir un WebSocket: ahí se usa un boleto de corta vida.
+  if (url.pathname === "/api/portal/en-vivo") {
+    if (!(await verificarBoleto(env.PORTAL_TOKEN, url.searchParams.get("boleto") ?? ""))) return json({ error: "Boleto inválido" }, 401);
+    return conectar("portal");
+  }
+  if (!(await compararSecreto(tokenBearer(request), env.PORTAL_TOKEN))) return json({ error: "Clave incorrecta" }, 401);
+
+  if (metodo === "POST" && url.pathname === "/api/portal/boleto") {
+    const venceSeg = Math.floor(Date.now() / 1000) + 60;
+    return json({ boleto: await firmarBoleto(env.PORTAL_TOKEN, venceSeg), venceEn: new Date(venceSeg * 1000).toISOString() });
+  }
   if (metodo === "GET" && url.pathname === "/api/portal/resumen") return json(await resumen(env.DB));
-  if (metodo === "GET" && url.pathname === "/api/portal/en-vivo") return conectar("portal");
   if (metodo === "GET" && url.pathname === "/api/portal/contactos") {
     const r = await env.DB.prepare("SELECT * FROM contactos ORDER BY creado_en DESC LIMIT 100").all();
     return json(r.results);
@@ -98,7 +115,7 @@ export async function manejarPortal(
   const devuelto = /^\/api\/portal\/creditos\/(c_[0-9a-f]{12})\/devuelto$/.exec(url.pathname);
   if (metodo === "POST" && devuelto) {
     const r = await env.DB.prepare(
-      "UPDATE creditos SET estado = 'devuelto' WHERE id = ? AND estado IN ('vencido', 'sin-servicio') RETURNING id",
+      "UPDATE creditos SET estado = 'devuelto' WHERE id = ? AND origen = 'codi' AND estado IN ('vencido', 'sin-servicio') RETURNING id",
     )
       .bind(devuelto[1])
       .first();
@@ -112,13 +129,7 @@ export async function manejarPortal(
   const accion = ruta[2];
 
   if (metodo === "PUT" && !accion) {
-    let datos: Record<string, unknown>;
-    try {
-      datos = await request.json();
-    } catch {
-      return json({ error: "Formato inválido" }, 400);
-    }
-    const config = validarConfigMaquina(datos);
+    const config = validarConfigMaquina(await leerJson(request));
     if (!config.ok) return json({ error: config.error }, 400);
     const c = config.valor;
     await env.DB.prepare(
@@ -131,11 +142,19 @@ export async function manejarPortal(
   }
 
   if (metodo === "POST" && accion === "qr") {
-    const qr = await crearQrFijo(env, { montoCentavos: m.precio_centavos, concepto: m.nombre, metadata: { maquina: m.id } });
+    let qr;
+    try {
+      qr = await crearQrFijo(env, { montoCentavos: m.precio_centavos, concepto: m.nombre, metadata: { maquina: m.id } });
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : String(error);
+      log("qr_fallido", { maquina: m.id, mensaje });
+      return json({ error: `No se pudo crear el QR en pey: ${mensaje}` }, 502);
+    }
+    // Si la escritura en D1 fallara, el log permite recuperar el QR ya creado en pey (sus pagos llegan igual por la metadata).
+    log("qr_recibido", { maquina: m.id, qrId: qr.id, simulado: qr.simulado });
     await env.DB.prepare("UPDATE maquinas SET qr_id = ?, qr_string = ?, qr_monto_centavos = ? WHERE id = ?")
       .bind(qr.id, qr.qrString, m.precio_centavos, m.id)
       .run();
-    log("qr_creado", { maquina: m.id, simulado: qr.simulado });
     return json({ qrString: qr.qrString, qrMontoCentavos: m.precio_centavos, simulado: qr.simulado });
   }
 
@@ -149,14 +168,9 @@ export async function manejarPortal(
 
   if (metodo === "POST" && accion === "prueba") {
     if (m.virtual === 1) return json({ error: "La máquina demo no tiene módulo" }, 400);
-    let pulsos = 1;
-    try {
-      pulsos = Number(((await request.json()) as { pulsos?: unknown }).pulsos ?? 1);
-    } catch {
-      // Sin cuerpo: un pulso.
-    }
-    if (!Number.isInteger(pulsos) || pulsos < 1 || pulsos > 20) return json({ error: "Entre 1 y 20 pulsos" }, 400);
-    return json(await crearCreditoPrueba(env.DB, m, pulsos, new Date().toISOString()), 201);
+    const pulsos = validarPulsosPrueba(await leerJson(request));
+    if (!pulsos.ok) return json({ error: pulsos.error }, 400);
+    return json(await crearCreditoPrueba(env.DB, m, pulsos.valor, new Date().toISOString()), 201);
   }
 
   return json({ error: "No encontrado" }, 404);

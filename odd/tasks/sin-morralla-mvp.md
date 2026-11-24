@@ -100,6 +100,13 @@ explorador de solo lectura.
   creado por un segundo aviso, ACK de otra máquina, vigencia inválida); GREEN: unitarias 31/31, e2e 19/19 dos veces
   seguidas sobre la misma base. Además: el aviso en vivo ya no puede tumbar la respuesta del webhook, el latido del
   módulo escribe a lo más cada 30 s y la consulta larga se corta con `enable_request_signal`.
+- **L11 RDD T4 + corrección (`15399d6..6446c16`):** revisión con lentes riesgo, resiliencia y confiabilidad:
+  **aprobada y confirmada**. Advertencias atendidas con pruebas (RED: 7 e2e y 2 unitarias; GREEN: unitarias 34/34,
+  e2e 26/26 dos veces): boleto de 60 s para el WebSocket del portal en lugar de la clave en la URL; límite de 5
+  contactos por hora por huella de IP y tamaño revisado antes de leer; JSON `null` da 400; el pulso de prueba exige un
+  entero de 1 a 20; los pulsos de prueba vencidos no aparecen como pagos por devolver; el ACK de un crédito ya devuelto
+  se acepta y queda anotado; latido cada 20 s con 90 s de margen; un fallo al crear el QR en pey responde 502 con el
+  motivo.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos

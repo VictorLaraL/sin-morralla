@@ -49,9 +49,14 @@ export function maquinaPorToken(db: D1Database, tokenHash: string) {
   return db.prepare("SELECT * FROM maquinas WHERE token_hash = ? AND virtual = 0").bind(tokenHash).first<FilaMaquina>();
 }
 
-/** Latido del módulo. Escribe a lo más una vez cada 30 s para no gastar escrituras de D1 en cada consulta. */
+/**
+ * Latido del módulo. Escribe a lo más una vez cada 20 s para no gastar escrituras de D1 en cada consulta.
+ * El portal da la máquina por desconectada tras 90 s sin latido (src/worker/portal.ts).
+ */
+export const LATIDO_MS = 20_000;
+
 export async function tocarMaquina(db: D1Database, id: string, ahora: string): Promise<void> {
-  const antesDe = new Date(Date.parse(ahora) - 30_000).toISOString();
+  const antesDe = new Date(Date.parse(ahora) - LATIDO_MS).toISOString();
   await db
     .prepare("UPDATE maquinas SET ultima_conexion = ? WHERE id = ? AND (ultima_conexion IS NULL OR ultima_conexion < ?)")
     .bind(ahora, id, antesDe)
@@ -156,7 +161,10 @@ export async function vencerCreditos(db: D1Database, antesDe: string): Promise<F
   const r = await db
     .prepare(
       `UPDATE creditos SET estado = 'vencido',
-         nota = 'La máquina no lo recogió a tiempo: requiere devolución si el cliente la pide'
+         nota = CASE origen
+           WHEN 'codi' THEN 'La máquina no lo recogió a tiempo: requiere devolución si el cliente la pide'
+           ELSE 'Pulso de prueba que la máquina no recogió'
+         END
        WHERE estado = 'pendiente' AND creado_en < ? RETURNING *`,
     )
     .bind(antesDe)
@@ -204,9 +212,15 @@ export async function entregarCredito(
     .bind(ahora, id, maquinaId)
     .first<FilaCredito>();
   if (credito) return { resultado: "entregado", credito };
-  const previo = await db
-    .prepare("SELECT estado FROM creditos WHERE id = ? AND maquina_id = ?")
-    .bind(id, maquinaId)
-    .first<{ estado: string }>();
-  return { resultado: previo?.estado === "entregado" ? "ya-entregado" : "desconocido" };
+  // Un crédito devuelto que la máquina entrega tarde: se acepta para que el módulo no reintente, y se anota.
+  const tardio = await db
+    .prepare(
+      `UPDATE creditos SET nota = 'La máquina lo entregó después de marcarse como devuelto: el cliente recibió servicio y devolución',
+         entregado_en = ? WHERE id = ? AND maquina_id = ? AND estado = 'devuelto' AND entregado_en IS NULL RETURNING id`,
+    )
+    .bind(ahora, id, maquinaId)
+    .first();
+  if (tardio) return { resultado: "ya-entregado" };
+  const previo = await db.prepare("SELECT estado FROM creditos WHERE id = ? AND maquina_id = ?").bind(id, maquinaId).first();
+  return { resultado: previo ? "ya-entregado" : "desconocido" };
 }
