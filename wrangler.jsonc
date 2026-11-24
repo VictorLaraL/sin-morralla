@@ -16,8 +16,8 @@
     {
       "binding": "DB",
       "database_name": "sin-morralla",
-      // Se reemplaza por el id real al crear la base en Cloudflare (`wrangler d1 create sin-morralla`).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Base creada con `wrangler d1 create sin-morralla --location wnam`. Para tu propia cuenta, crea la tuya y cambia el id.
+      "database_id": "83402b76-1883-4ad8-b7b7-6a5ad3614db7",
       "migrations_dir": "migrations"
     }
   ],

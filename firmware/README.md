@@ -3,9 +3,11 @@
 El módulo se conecta **en paralelo** a la línea de pulsos (COIN) del monedero. Para la tarjeta de la máquina, un pago
 CoDi se ve igual que una moneda: el ESP32 cierra el optoacoplador tantas veces como pulsos tenga el crédito.
 
-> **Estado:** el código está escrito y su protocolo está probado contra el Worker con el simulador
-> (`npm run simular:maquina`), pero **todavía no se compila ni se prueba en una placa real**. Ese es el siguiente paso
-> en el banco de pruebas (`docs/hardware-mvp.md`, sección 2).
+> **Estado:** la lógica de entrega ([entrega.h](sin-morralla-esp32/entrega.h)) se compila y se prueba en la PC con
+> `npm run test:firmware` (6 pruebas: entrega normal, ACK perdido, corte a media entrega, ACK parcial perdido, botón e
+> ids largos) y el protocolo se prueba contra el Worker con el simulador (`npm run simular:maquina`). **El sketch
+> completo todavía no se compila para el ESP32 ni se prueba en una placa real.** Ese es el siguiente paso en el banco de
+> pruebas (`docs/hardware-mvp.md`, sección 2).
 
 ## Conexiones
 
@@ -49,6 +51,7 @@ El crédito se guarda en la memoria no volátil como **en curso** antes de dar l
 |---|---|
 | Se perdió el `OK` del servidor | El servidor vuelve a mandar el crédito; el módulo ve que está **hecho** y solo confirma |
 | Se fue la luz a media entrega | Al volver, el crédito está **en curso**: no repite pulsos, confirma con `parcial=1` y el pago aparece en el portal |
+| Tampoco llegó el aviso parcial | No lo marca como **hecho** hasta que el servidor lo recibe: el reenvío vuelve a avisar como parcial |
 | El cliente no presiona el botón en 60 s | No da pulsos ni confirma; el crédito sigue pendiente y se vuelve a ofrecer hasta que vence (10 min) |
 | El módulo no recoge un pago en 10 min | El Worker lo marca como vencido y aparece en "Pagos por atender" |
 
