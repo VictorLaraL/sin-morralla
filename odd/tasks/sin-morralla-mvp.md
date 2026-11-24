@@ -40,7 +40,7 @@ contra `wrangler dev` + revisión en el navegador integrado.
 | T5 | S3, S4 | inline | hecho | Contrato cubierto por e2e de T4; navegador integrado: QR dibujado, WebSocket "En vivo", pago simulado llena el garrafón y sube el contador, consola sin errores, 375 px sin desplazamiento horizontal |
 | T6 | S5 | inline | hecho | API cubierta por e2e 27/27; navegador integrado: clave incorrecta rechazada, entrada, canal en vivo con boleto, crear QR (simulado), token visible tras refrescos, pulso de prueba recibido y confirmado por el módulo, aviso en vivo de un pago firmado, calcomanía de 10 cm, 375 px sin desplazamiento horizontal |
 | T7 | S6 | inline | hecho | Protocolo de 5 campos y ACK parcial cubiertos por e2e 28/28; entrega en dos fases; **sin compilar** (no hay arduino-cli ni placa en esta máquina) |
-| T8 | S9, S10 | inline | hecho | Unitarias 34/34, e2e 30/30 (dos corridas seguidas), firmware 8/8 (`npm run test:firmware`, MSVC), `typecheck` limpio; navegador integrado en landing y portal; servidor local corriendo en el puerto 8787 |
+| T8 | S9, S10 | inline | hecho | Unitarias 34/34, e2e 31/31 (30/30 dos corridas seguidas antes de la última prueba), firmware 8/8 (`npm run test:firmware`, MSVC), `typecheck` limpio; navegador integrado en landing y portal; servidor local corriendo en el puerto 8787 |
 | T9 | S7, S8 | inline | hecho | `README.md` con un solo diagrama Mermaid (servicio, flujo y hardware) validado con Mermaid 10.9.1 sin errores; `firmware/README.md` |
 | T10 | S1, S2 | inline | hecho | D1 `sin-morralla` (WNAM), migraciones remotas 0001–0003, Worker en https://sin-morralla.victormlaralopez.workers.dev (salud, landing, portal y demo 200); repo público https://github.com/VictorLaraL/sin-morralla con `main` y `feat/mvp-cloudflare`. Faltan los secretos, que pone el usuario |
 
@@ -133,6 +133,12 @@ explorador de solo lectura.
   limitación documentada del piloto.
 - **L17 Entorno local:** al poner el `database_id` real, wrangler cambia la base local (se indexa por ese id); hubo que
   reiniciar `npm run dev` para migrar la nueva base local antes de las e2e.
+- **L18 RDD última corrección (`9fd95b2..54d3ed9`):** **aprobada y confirmada**. Advertencias: el ACK tardío de un
+  crédito vencido no tenía prueba de punta a punta (agregada: e2e 31/31, pasa sin cambiar código). Descartadas con
+  evidencia: el ACK pendiente sí termina ante un rechazo permanente, porque `confirmarConServidor` trata el 404 como final
+  y un crédito devuelto responde 200; el token del módulo sobrevive a los refrescos porque vive en `tokensRecientes`.
+  Pendiente menor, sin cambio por ahora: "Descartar cambios" repinta todas las fichas, así que un dueño editando dos
+  máquinas a la vez perdería lo de la otra.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos

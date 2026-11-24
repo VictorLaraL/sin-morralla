@@ -417,3 +417,18 @@ test("solo las entregas interrumpidas se cierran como atendidas", async () => {
   const [fila] = consulta(`SELECT id FROM creditos WHERE transaction_id='${transactionId}'`);
   assert.equal((await fetch(`${BASE}/api/portal/creditos/${fila.id}/atendido`, { method: "POST", headers: PORTAL })).status, 404);
 });
+
+test("un ACK tardío de un crédito ya vencido lo pasa a entregado y sale de por atender", async () => {
+  const modulo = await tokenNuevo();
+  const transactionId = "SIMTX-TARDE-" + randomBytes(4).toString("hex");
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR, transactionId }));
+  const id = String(consulta(`SELECT id FROM creditos WHERE transaction_id='${transactionId}'`)[0]?.id);
+  sql(`UPDATE creditos SET creado_en='2020-01-01T00:00:00.000Z' WHERE id='${id}'`);
+  await fetch(`${BASE}/__scheduled?cron=*+*+*+*+*`);
+  assert.equal(consulta(`SELECT estado FROM creditos WHERE id='${id}'`)[0].estado, "vencido");
+  const ack = await fetch(`${BASE}/device/ack?id=${id}`, { method: "POST", headers: modulo });
+  assert.equal(await ack.text(), "OK\n");
+  assert.equal(consulta(`SELECT estado FROM creditos WHERE id='${id}'`)[0].estado, "entregado");
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(d.porAtender.some((c: { id: string }) => c.id === id), false);
+});

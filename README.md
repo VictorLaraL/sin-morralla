@@ -16,7 +16,7 @@ Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convie
 
 | Estado | |
 |---|---|
-| Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 34 pruebas unitarias, 30 de punta a punta y 8 de la lógica del firmware en verde |
+| Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 34 pruebas unitarias, 31 de punta a punta y 8 de la lógica del firmware en verde |
 | Pagos CoDi | QR fijo creado con el API de pey y probado con dos pagos reales al mismo QR (23 de noviembre de 2026) |
 | Demo pública | Lista. Muestra su QR real de $1 en cuanto la cuenta de pey del proyecto termina su activación |
 | Hardware | Firmware escrito; su lógica de entrega se prueba en la PC y el protocolo con el simulador. Falta la prueba en placa con un monedero real |
@@ -189,7 +189,7 @@ npm run dev                        # http://localhost:8787
 
 ```bash
 npm test          # 34 pruebas unitarias: firma, lectura del aviso, pulsos, validaciones, boletos
-npm run e2e       # 30 pruebas de punta a punta contra npm run dev (en otra terminal)
+npm run e2e       # 31 pruebas de punta a punta contra npm run dev (en otra terminal)
 npm run typecheck # tipos de TypeScript contra los bindings de Cloudflare
 npm run test:firmware  # 8 pruebas de la entrega en dos fases del ESP32 (necesita g++, clang++ o Visual Studio Build Tools)
 ```
