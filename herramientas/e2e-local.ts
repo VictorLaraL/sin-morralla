@@ -40,7 +40,10 @@ test.before(() => {
   sql(
     `UPDATE maquinas SET qr_id='${QR}', qr_monto_centavos=1300, precio_centavos=1300, requiere_boton=0, ` +
       `token_hash='${sha256(TOKEN)}' WHERE id='agua-01'; DELETE FROM creditos WHERE maquina_id='agua-01' AND estado='pendiente'; ` +
-      `DELETE FROM contactos WHERE nombre LIKE 'Prueba e2e%';`,
+      `DELETE FROM contactos WHERE nombre LIKE 'Prueba e2e%'; ` +
+      // La demo cobra $0.01; en local su QR es simulado y se vuelve a crear con ese monto.
+      `UPDATE maquinas SET precio_centavos=1, qr_id=NULL, qr_string=NULL, qr_monto_centavos=NULL ` +
+      `WHERE id='demo' AND (qr_id IS NULL OR qr_id LIKE 'SIMQR%');`,
   );
 });
 
@@ -174,7 +177,7 @@ test("la demo pública ofrece su QR en modo simulación", async () => {
   assert.equal(r.status, 200);
   const d = await leer(r);
   assert.equal(d.simulacion, true);
-  assert.equal(d.montoCentavos, 100);
+  assert.equal(d.montoCentavos, 1, "la demo cobra un centavo");
   assert.ok(d.qrString, "la demo debe tener QR");
 });
 
@@ -192,7 +195,7 @@ test("un pago a la demo llega en vivo a la landing por WebSocket", async () => {
   assert.equal(r.status, 200);
   const e = (await Promise.race([evento, limite(5000)])) as Record<string, unknown>;
   assert.equal(e.tipo, "pago");
-  assert.equal(e.montoCentavos, 100);
+  assert.equal(e.montoCentavos, antes.montoCentavos);
   ws.close();
   const despues = await leer(await fetch(`${BASE}/api/demo`));
   assert.equal(despues.pagosHoy, antes.pagosHoy + 1);
@@ -431,4 +434,14 @@ test("un ACK tardío de un crédito ya vencido lo pasa a entregado y sale de por
   assert.equal(consulta(`SELECT estado FROM creditos WHERE id='${id}'`)[0].estado, "entregado");
   const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
   assert.equal(d.porAtender.some((c: { id: string }) => c.id === id), false);
+});
+
+test("un pago de un centavo a la demo cuenta como servido y no queda por atender", async () => {
+  assert.equal((await fetch(`${BASE}/api/demo/simular`, { method: "POST" })).status, 200);
+  const [credito] = consulta(`SELECT id, estado, pulsos, nota FROM creditos WHERE maquina_id='demo' ORDER BY creado_en DESC LIMIT 1`);
+  assert.equal(credito.estado, "entregado");
+  assert.equal(credito.pulsos, 1);
+  assert.equal(credito.nota, null);
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(d.porAtender.some((c: { id: string }) => c.id === credito.id), false);
 });

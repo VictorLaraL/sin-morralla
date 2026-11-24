@@ -42,3 +42,11 @@ export function calcularCredito(config: ConfigPulsos, montoCentavos: number): Cr
 
   return { pulsos, excedenteCentavos, nota };
 }
+
+/**
+ * La máquina demo de la landing no tiene monedero: cualquier pago a su QR llena el garrafón una vez. Así la demo puede
+ * cobrar un centavo sin que cada pago aparezca en "Pagos por atender".
+ */
+export function creditoDemo(_montoCentavos: number): Credito {
+  return { pulsos: 1, excedenteCentavos: 0, nota: null };
+}

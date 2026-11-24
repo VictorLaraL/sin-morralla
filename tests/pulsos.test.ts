@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { calcularCredito } from "../src/core/pulsos.ts";
+import { calcularCredito, creditoDemo } from "../src/core/pulsos.ts";
 import { lineaCredito, leerLineaCredito } from "../src/core/protocolo.ts";
 
 const agua = { valorPulsoCentavos: 100, maxPulsos: 50, precioCentavos: 0 };
@@ -50,4 +50,9 @@ test("la línea de crédito para el ESP32 se arma y se lee igual", () => {
   assert.equal(linea, "CREDITO c_1a2b 13 50 60 1\n");
   assert.deepEqual(leerLineaCredito(linea), { id: "c_1a2b", pulsos: 13, pulsoMs: 50, pausaMs: 60, requiereBoton: true });
   assert.equal(leerLineaCredito("OTRA COSA"), null);
+});
+
+test("la máquina demo cuenta cualquier pago como servido: un centavo llena el garrafón", () => {
+  assert.deepEqual(creditoDemo(1), { pulsos: 1, excedenteCentavos: 0, nota: null });
+  assert.deepEqual(creditoDemo(100), { pulsos: 1, excedenteCentavos: 0, nota: null });
 });

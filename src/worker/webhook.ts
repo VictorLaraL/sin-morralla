@@ -7,7 +7,7 @@
 
 import { verificarAviso } from "../core/firma.ts";
 import { esEventoDePago, normalizarPago } from "../core/pagos.ts";
-import { calcularCredito } from "../core/pulsos.ts";
+import { calcularCredito, creditoDemo } from "../core/pulsos.ts";
 import { maquina, maquinaPorQr, registrarPago, type FilaCredito, type FilaMaquina } from "./db.ts";
 import { json, log } from "./http.ts";
 
@@ -62,16 +62,18 @@ export async function manejarAviso(
   let destino: FilaMaquina | null = pago.codiQrId ? await maquinaPorQr(env.DB, pago.codiQrId) : null;
   if (!destino && typeof pago.metadata.maquina === "string") destino = await maquina(env.DB, pago.metadata.maquina);
 
-  const credito = destino
-    ? calcularCredito(
+  const credito = !destino
+    ? null
+    : destino.virtual === 1
+      ? creditoDemo(pago.montoCentavos)
+      : calcularCredito(
         {
           valorPulsoCentavos: destino.valor_pulso_centavos,
           maxPulsos: destino.max_pulsos,
           precioCentavos: destino.precio_centavos,
         },
         pago.montoCentavos,
-      )
-    : null;
+      );
 
   const ahora = new Date().toISOString();
   const resultado = await registrarPago(env.DB, pago, destino && credito ? { maquina: destino, credito } : null, ahora);

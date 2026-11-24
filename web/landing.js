@@ -49,7 +49,7 @@ async function cargarDemo() {
     if (!demo) estado.textContent = "La demo no está disponible en este momento.";
     return;
   }
-  $("monto").textContent = pesos.format(demo.montoCentavos / 100);
+  for (const el of document.querySelectorAll("[data-monto]")) el.textContent = pesos.format(demo.montoCentavos / 100);
   if (!ocupado) estado.textContent = textoEspera();
   pintarContadores(demo.pagosHoy, demo.ultimoPago);
   pintarQr(demo.qrString);

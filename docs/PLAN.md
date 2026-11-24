@@ -11,7 +11,7 @@ Al cerrar la semana debe estar listo:
 
 1. **Repositorio público** `VictorLaraL/sin-morralla` en GitHub.
 2. **Todo publicado en tu cuenta de Cloudflare**, con una dirección HTTPS fija.
-3. **Landing con demo en vivo:** cualquiera paga $1 con CoDi y ve llenarse un garrafón en la página.
+3. **Landing con demo en vivo:** cualquiera paga $0.01 con CoDi y ve llenarse un garrafón en la página.
 4. **Portal del dueño** (un solo cliente): ventas en tiempo real, estado de la máquina, calcomanía para imprimir y
    pulso de prueba.
 5. **ESP32 real en el banco de pruebas** entregando agua con un pago CoDi real.
@@ -81,7 +81,7 @@ flowchart LR
 ### Landing (primera impresión del jurado)
 
 1. **Encabezado:** "Tu máquina de siempre, ahora sin monedas." y la demo al lado.
-2. **Demo en vivo:** una máquina virtual con su QR CoDi real de **$1**. El visitante paga desde su banco y el garrafón
+2. **Demo en vivo:** una máquina virtual con su QR CoDi real de **$0.01** (antes $1; se bajó para que nadie dude en probarlo). El visitante paga desde su banco y el garrafón
    de la página se llena al llegar el aviso de pago, con "Pago recibido hace 2 s" y un contador de pagos de la demo.
    La página dice claramente que el pago es real.
 3. **Cómo funciona:** se enchufa el módulo, se pega la calcomanía, se cobra con CoDi.
@@ -170,4 +170,4 @@ Detalle paso a paso en la sección "Lo que tienes que hacer" del visor del plan.
 | Las cuentas aparecen como "Pendiente" | La de pruebas ya recibe pagos (probado el 23 de noviembre); la tuya se usa cuando pase a activa |
 | Durable Objects o D1 se complican | El prototipo actual ya funciona en Node; se puede publicar temporalmente en otro servicio |
 | El ESP32 no se conecta por HTTPS | Probar primero en tu WiFi; usar certificados raíz de Cloudflare en el firmware |
-| Abuso de la demo pública | Es un cobro real de $1; límite de avisos por minuto en la página |
+| Abuso de la demo pública | Es un cobro real de $0.01; límite de avisos por minuto en la página |

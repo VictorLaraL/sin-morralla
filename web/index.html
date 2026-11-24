@@ -44,7 +44,7 @@
             escanea la calcomanía, paga desde la app de su banco y la máquina sirve como si le hubieran echado monedas.
           </p>
           <div class="acciones">
-            <a class="boton" href="#demo">Pruébalo con $1</a>
+            <a class="boton" href="#demo">Pruébalo con <span data-monto>$0.01</span></a>
             <a class="boton secundario" href="#como-funciona">Cómo funciona</a>
           </div>
           <ul class="ventajas">
@@ -64,7 +64,7 @@
             <figure class="calcomania" aria-describedby="calcomania-ayuda">
               <div class="calcomania-cabeza">
                 <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
-                <strong>Paga <span id="monto">$1.00</span> con CoDi</strong>
+                <strong>Paga <span id="monto" data-monto>$0.01</span> con CoDi</strong>
               </div>
               <div class="qr" id="qr" role="img" aria-label="Código QR CoDi de la demo">
                 <span class="qr-cargando">Cargando QR…</span>
@@ -123,7 +123,7 @@
                 <text x="270" y="301" text-anchor="middle" fill="#2743A8" font-family="Inter, Segoe UI, sans-serif" font-size="8" font-weight="700">CoDi</text>
                 <rect x="252" y="336" width="36" height="26" rx="6" fill="#1B2F7A"/>
               </svg>
-              <p class="estado" id="estado" role="status" aria-live="polite">Esperando tu pago de $1.00</p>
+              <p class="estado" id="estado" role="status" aria-live="polite">Esperando tu pago de $0.01</p>
               <p class="pulsos" id="pulsos" aria-hidden="true">&nbsp;</p>
             </div>
           </div>
@@ -135,12 +135,12 @@
 
           <div class="demo-pie">
             <p id="nota-pago" class="nota-pago">
-              Es un <strong>pago real de $1.00</strong> con CoDi a la cuenta del proyecto. Abre la app de tu banco,
-              entra a CoDi y escanea el QR. ¿Estás en el celular? Descarga el QR y ábrelo desde la app de tu banco. Si quieres que te devolvamos tu peso, escríbenos.
+              Es un <strong>pago real de <span data-monto>$0.01</span></strong> con CoDi a la cuenta del proyecto. Abre la app de tu banco,
+              entra a CoDi y escanea el QR. ¿Estás en el celular? Descarga el QR y ábrelo desde la app de tu banco. Si quieres que te lo devolvamos, escríbenos.
             </p>
             <div class="demo-botones">
               <button class="boton secundario chico" id="descargar" type="button" disabled>Descargar QR</button>
-              <button class="boton ambar chico" id="simular" type="button" hidden>Simular pago de $1</button>
+              <button class="boton ambar chico" id="simular" type="button" hidden>Simular pago de <span data-monto>$0.01</span></button>
             </div>
           </div>
         </div>

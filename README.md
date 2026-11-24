@@ -18,7 +18,7 @@ Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convie
 |---|---|
 | Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 34 pruebas unitarias, 31 de punta a punta y 8 de la lógica del firmware en verde |
 | Pagos CoDi | QR fijo creado con el API de pey y probado con dos pagos reales al mismo QR (23 de noviembre de 2026) |
-| Demo pública | Lista. Muestra su QR real de $1 en cuanto la cuenta de pey del proyecto termina su activación |
+| Demo pública | Lista. Muestra su QR real de $0.01 en cuanto la cuenta de pey del proyecto termina su activación |
 | Hardware | Firmware escrito; su lógica de entrega se prueba en la PC y el protocolo con el simulador. Falta la prueba en placa con un monedero real |
 
 ---
@@ -53,7 +53,7 @@ por SPEI con su clave de rastreo. Con el API de pey creamos un QR fijo por máqu
 `expiration: 0`) y recibimos cada pago por webhook. El 23 de noviembre comprobamos que **un mismo QR fijo acepta
 varios pagos**, que era la hipótesis que hacía posible poner una calcomanía en lugar de una pantalla.
 
-**La demo** de la landing es una máquina virtual con su propio QR real de $1: quien paga desde su banco ve cómo se
+**La demo** de la landing es una máquina virtual con su propio QR real de **un centavo**: quien paga desde su banco ve cómo se
 llena un garrafón en la página, en vivo, con el mismo camino que usaría una máquina real.
 
 ## Un cobro real
@@ -153,11 +153,11 @@ flowchart LR
 ### En línea
 
 Abre la **[demo en vivo](https://sin-morralla.victormlaralopez.workers.dev)**. La tarjeta "Demo en vivo" muestra el QR
-real de $1 de la máquina virtual:
+real de $0.01 de la máquina virtual:
 
 1. Abre la app de tu banco, entra a CoDi y escanea el QR (o usa **Descargar QR** y ábrelo desde la app si estás en el
    celular).
-2. Revisa el beneficiario y el monto de **$1.00**, y paga. Es un pago real a la cuenta del proyecto.
+2. Revisa el beneficiario y el monto de **$0.01**, y paga. Es un pago real a la cuenta del proyecto.
 3. En segundos la página dice "¡Pago recibido!", la máquina recibe su pulso y **el garrafón se llena**. El contador de
    pagos de hoy sube para todos los que tengan la página abierta.
 
@@ -176,7 +176,7 @@ cp .dev.vars.example .dev.vars    # modo SIMULACION=1: no necesita llaves de pey
 npm run dev                        # http://localhost:8787
 ```
 
-- **Landing:** abre <http://localhost:8787> y presiona **Simular pago de $1**. El botón manda un aviso **firmado** al
+- **Landing:** abre <http://localhost:8787> y presiona **Simular pago de $0.01**. El botón manda un aviso **firmado** al
   mismo `/webhooks/pey` que usa pey, así que recorre el camino completo: firma, D1, Durable Object y garrafón. En modo
   local todo lo simulado dice **SIMULADO**.
 - **Portal:** abre <http://localhost:8787/portal/> con la clave `PORTAL_TOKEN` de tu `.dev.vars`. Ahí puedes crear el

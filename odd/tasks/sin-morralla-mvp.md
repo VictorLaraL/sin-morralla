@@ -139,6 +139,10 @@ explorador de solo lectura.
   y un crédito devuelto responde 200; el token del módulo sobrevive a los refrescos porque vive en `tokensRecientes`.
   Pendiente menor, sin cambio por ahora: "Descartar cambios" repinta todas las fichas, así que un dueño editando dos
   máquinas a la vez perdería lo de la otra.
+- **L19 (2026-11-23) Demo a un centavo:** "Sí, ajústala a $0.01". La máquina demo cuenta cualquier pago como servido
+  (`creditoDemo`), la migración 0004 baja su precio a 1 centavo si aún no tiene QR, y los textos de la landing toman el
+  monto del servidor. RED: 1 unitaria y 1 e2e; GREEN: unitarias 35/35, e2e 32/32; navegador: todos los montos dicen $0.01
+  y un pago simulado de un centavo llena el garrafón.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
