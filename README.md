@@ -6,8 +6,8 @@
 Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convierte en los pulsos del monedero.</p>
 
 <p align="center">
-  <a href="https://sin-morralla.victormlaralopez.workers.dev"><b>Demo en vivo</b></a> ·
-  <a href="https://sin-morralla.victormlaralopez.workers.dev/portal/">Portal del dueño</a> ·
+  <a href="https://sinmorralla.com"><b>Demo en vivo</b></a> ·
+  <a href="https://sinmorralla.com/portal/">Portal del dueño</a> ·
   <a href="#pruébalo">Pruébalo</a> ·
   <a href="#cómo-funciona-por-dentro">Diagrama</a> ·
   <a href="firmware/README.md">Firmware</a> ·
@@ -157,7 +157,7 @@ flowchart LR
 
 ### En línea
 
-Abre la **[demo en vivo](https://sin-morralla.victormlaralopez.workers.dev)**. La tarjeta "Demo en vivo" muestra el QR
+Abre la **[demo en vivo](https://sinmorralla.com)**. La tarjeta "Demo en vivo" muestra el QR
 real de $0.01 de la máquina virtual:
 
 1. Abre la app de tu banco, entra a CoDi y escanea el QR (o usa **Descargar QR** y ábrelo desde la app si estás en el
@@ -169,7 +169,7 @@ real de $0.01 de la máquina virtual:
 > Mientras pey aprueba la cuenta CoDi propia del proyecto, el QR de la demo cobra a la cuenta de pruebas "Pruebas Pey"
 > del portal de pey, así que tu banco mostrará el nombre de su titular como beneficiario.
 
-**Portal del dueño en modo jurado.** Abre el [portal](https://sin-morralla.victormlaralopez.workers.dev/portal/) con la
+**Portal del dueño en modo jurado.** Abre el [portal](https://sinmorralla.com/portal/) con la
 clave de solo lectura que viene en la entrega del proyecto. Verás las ventas del día y de la semana, las máquinas, los
 pagos por atender y la calcomanía imprimible, tal como los ve el dueño, pero sin poder cambiar nada. Deja el portal
 abierto, paga el QR de la demo y verás llegar el pago en vivo.

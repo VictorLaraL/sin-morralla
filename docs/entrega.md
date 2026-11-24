@@ -6,8 +6,8 @@ Textos listos para copiar en el formulario de entrega (bases §10.1). La entrega
 | Campo (§10.1) | Qué poner | Estado |
 |---|---|---|
 | 1. Nombre y descripción (máx. 500 palabras) | Sección 1 de este documento (426 palabras) | Listo |
-| 2. Demo pública | https://sin-morralla.victormlaralopez.workers.dev | Funcionando con pagos reales |
-| 2. Credenciales de prueba | Portal https://sin-morralla.victormlaralopez.workers.dev/portal/ con la clave de jurado (solo en el formulario, nunca en el repositorio) | Falta configurar `JURADO_TOKEN` |
+| 2. Demo pública | https://sinmorralla.com | Funcionando con pagos reales |
+| 2. Credenciales de prueba | Portal https://sinmorralla.com/portal/ con la clave de jurado (solo en el formulario, nunca en el repositorio) | Falta configurar `JURADO_TOKEN` |
 | 3. Video (máx. 3 minutos, público) | Link del video | Por grabar |
 | 4. Repositorio | https://github.com/VictorLaraL/sin-morralla | Listo |
 | 5. Componentes previos y de terceros | Sección 2 de este documento | Listo |
@@ -81,7 +81,7 @@ llena un garrafón en la página, en vivo, con el mismo camino que usaría una m
 
 **1. La demo en línea (2 minutos, cobro real de un centavo)**
 
-1. Abre https://sin-morralla.victormlaralopez.workers.dev. La tarjeta "Demo en vivo" muestra el QR CoDi real de $0.01
+1. Abre https://sinmorralla.com. La tarjeta "Demo en vivo" muestra el QR CoDi real de $0.01
    de una máquina de agua virtual. Ese QR lo creó el portal de Sin Morralla con el API de pey (`POST /codi/qr`).
 2. Abre la app de tu banco, entra a CoDi y escanea el QR. Si estás en el celular, presiona "Descargar QR" y ábrelo
    desde la app del banco (opción de leer un QR desde una imagen).
@@ -93,7 +93,7 @@ llena un garrafón en la página, en vivo, con el mismo camino que usaría una m
 
 **2. El portal del dueño en modo jurado**
 
-1. Abre https://sin-morralla.victormlaralopez.workers.dev/portal/ y entra con la clave de solo lectura:
+1. Abre https://sinmorralla.com/portal/ y entra con la clave de solo lectura:
    `[CLAVE DE JURADO]`.
 2. Verás lo mismo que el dueño: ventas del día y de la semana, máquinas en línea, pagos por atender, últimos pagos y la
    calcomanía imprimible de cada máquina ("Ver calcomanía"). Las claves de rastreo se muestran recortadas y los datos

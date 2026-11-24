@@ -6,6 +6,14 @@
   // La consulta larga del ESP32 deja de leer D1 si el módulo corta la conexión (request.signal).
   "compatibility_flags": ["enable_request_signal"],
 
+  // Dominio propio. Cloudflare crea los registros DNS y los certificados al publicar.
+  // workers.dev sigue activo: ahí apunta el webhook registrado en pey.
+  "routes": [
+    { "pattern": "sinmorralla.com", "custom_domain": true },
+    { "pattern": "www.sinmorralla.com", "custom_domain": true }
+  ],
+  "workers_dev": true,
+
   // Landing, demo y portal: archivos estáticos. Las rutas /api, /webhooks y /device las atiende el Worker.
   "assets": {
     "directory": "./web",

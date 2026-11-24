@@ -5,7 +5,7 @@
 #define WIFI_PASS      "MiClave"
 
 // Dirección del Worker, sin diagonal al final. En pruebas locales: http://192.168.1.50:8787
-#define SERVIDOR_URL   "https://sin-morralla.tu-subdominio.workers.dev"
+#define SERVIDOR_URL   "https://sinmorralla.com"
 // Se genera en el portal ("Token del módulo") y se muestra una sola vez.
 #define MAQUINA_TOKEN  "pega-aqui-el-token-del-modulo"
 
