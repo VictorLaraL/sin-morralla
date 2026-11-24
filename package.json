@@ -13,6 +13,7 @@
     "typecheck": "wrangler types && tsc --noEmit",
     "e2e": "node herramientas/e2e-local.ts",
     "simular:pago": "node herramientas/simular-pago.ts",
+    "simular:maquina": "node herramientas/simular-maquina.ts",
     "db:remote": "wrangler d1 migrations apply sin-morralla --remote",
     "deploy": "wrangler d1 migrations apply sin-morralla --remote && wrangler deploy"
   },

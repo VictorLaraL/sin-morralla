@@ -39,7 +39,7 @@ contra `wrangler dev` + revisión en el navegador integrado.
 | T4 | S2, S4, S5 | inline | hecho | RED: validaciones inexistente y e2e 7/14; GREEN: unitarias 29/29, e2e 14/14, `tsc` limpio |
 | T5 | S3, S4 | inline | hecho | Contrato cubierto por e2e de T4; navegador integrado: QR dibujado, WebSocket "En vivo", pago simulado llena el garrafón y sube el contador, consola sin errores, 375 px sin desplazamiento horizontal |
 | T6 | S5 | inline | hecho | API cubierta por e2e 27/27; navegador integrado: clave incorrecta rechazada, entrada, canal en vivo con boleto, crear QR (simulado), token visible tras refrescos, pulso de prueba recibido y confirmado por el módulo, aviso en vivo de un pago firmado, calcomanía de 10 cm, 375 px sin desplazamiento horizontal |
-| T7 | S6 | inline | pendiente | — |
+| T7 | S6 | inline | hecho | Protocolo de 5 campos y ACK parcial cubiertos por e2e 28/28; entrega en dos fases; **sin compilar** (no hay arduino-cli ni placa en esta máquina) |
 | T8 | S9, S10 | inline | pendiente | — |
 | T9 | S7, S8 | inline | pendiente | — |
 | T10 | S1, S2 | inline | pendiente | — |
