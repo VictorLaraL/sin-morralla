@@ -99,3 +99,116 @@ test("ignora eventos que no son pagos", async () => {
   assert.equal(r.status, 200);
   assert.deepEqual(await r.json(), { ok: true, ignorado: true });
 });
+
+// ---------- T4: demo en vivo, portal, contacto y cron ----------
+
+const PORTAL = { Authorization: `Bearer ${vars.PORTAL_TOKEN}`, "content-type": "application/json" };
+// Respuestas JSON de la API: en las pruebas se leen sin tipar.
+const leer = async (r: Response): Promise<any> => r.json();
+const limite = (ms: number) => new Promise((_, mal) => setTimeout(() => mal(new Error(`sin respuesta en ${ms} ms`)), ms));
+
+test("la demo pública ofrece su QR en modo simulación", async () => {
+  const r = await fetch(`${BASE}/api/demo`);
+  assert.equal(r.status, 200);
+  const d = await leer(r);
+  assert.equal(d.simulacion, true);
+  assert.equal(d.montoCentavos, 100);
+  assert.ok(d.qrString, "la demo debe tener QR");
+});
+
+test("un pago a la demo llega en vivo a la landing por WebSocket", async () => {
+  const ws = new WebSocket(`${BASE.replace(/^http/, "ws")}/api/demo/en-vivo`);
+  await new Promise((ok, mal) => {
+    ws.addEventListener("open", () => ok(null));
+    ws.addEventListener("error", () => mal(new Error("no abrió el WebSocket")));
+  });
+  const evento = new Promise<Record<string, unknown>>((ok) => {
+    ws.addEventListener("message", (m) => ok(JSON.parse(String(m.data))));
+  });
+  const antes = await leer(await fetch(`${BASE}/api/demo`));
+  const r = await fetch(`${BASE}/api/demo/simular`, { method: "POST" });
+  assert.equal(r.status, 200);
+  const e = (await Promise.race([evento, limite(5000)])) as Record<string, unknown>;
+  assert.equal(e.tipo, "pago");
+  assert.equal(e.montoCentavos, 100);
+  ws.close();
+  const despues = await leer(await fetch(`${BASE}/api/demo`));
+  assert.equal(despues.pagosHoy, antes.pagosHoy + 1);
+});
+
+test("el portal exige su clave", async () => {
+  assert.equal((await fetch(`${BASE}/api/portal/resumen`)).status, 401);
+  assert.equal((await fetch(`${BASE}/api/portal/resumen`, { headers: { Authorization: "Bearer otra" } })).status, 401);
+  const r = await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL });
+  assert.equal(r.status, 200);
+  const d = await leer(r);
+  assert.deepEqual(d.maquinas.map((m: { id: string }) => m.id).sort(), ["agua-01", "demo"]);
+});
+
+test("el portal valida la configuración de la máquina", async () => {
+  const malo = await fetch(`${BASE}/api/portal/maquinas/agua-01`, {
+    method: "PUT",
+    headers: PORTAL,
+    body: JSON.stringify({ nombre: "Despachador", ubicacion: "", precioCentavos: 1300, valorPulsoCentavos: 100, pulsoMs: 5, pausaMs: 50, maxPulsos: 50, requiereBoton: false }),
+  });
+  assert.equal(malo.status, 400);
+  assert.match((await leer(malo)).error, /ancho del pulso/);
+  const bueno = await fetch(`${BASE}/api/portal/maquinas/agua-01`, {
+    method: "PUT",
+    headers: PORTAL,
+    body: JSON.stringify({ nombre: "Despachador de agua", ubicacion: "Banco de pruebas", precioCentavos: 1300, valorPulsoCentavos: 100, pulsoMs: 50, pausaMs: 50, maxPulsos: 50, requiereBoton: false }),
+  });
+  assert.equal(bueno.status, 200);
+});
+
+test("el portal genera el token del módulo y manda un pulso de prueba", async () => {
+  const t = await fetch(`${BASE}/api/portal/maquinas/agua-01/token`, { method: "POST", headers: PORTAL });
+  assert.equal(t.status, 200);
+  const { token } = await leer(t);
+  assert.match(token, /^[A-Za-z0-9_-]{32}$/);
+  const nuevo = { Authorization: `Bearer ${token}` };
+  assert.equal((await fetch(`${BASE}/device/poll?espera=0`, { headers: dispositivo })).status, 401, "el token anterior deja de servir");
+
+  const p = await fetch(`${BASE}/api/portal/maquinas/agua-01/prueba`, { method: "POST", headers: PORTAL, body: JSON.stringify({ pulsos: 2 }) });
+  assert.equal(p.status, 201);
+  const poll = await fetch(`${BASE}/device/poll?espera=0`, { headers: nuevo });
+  const m = /^CREDITO (c_[0-9a-f]{12}) 2 50 50 0\n$/.exec(await poll.text());
+  assert.ok(m);
+  await fetch(`${BASE}/device/ack?id=${m[1]}`, { method: "POST", headers: nuevo });
+});
+
+test("un crédito que la máquina no recoge vence y aparece por atender", async () => {
+  const p = await fetch(`${BASE}/api/portal/maquinas/agua-01/prueba`, { method: "POST", headers: PORTAL, body: JSON.stringify({ pulsos: 1 }) });
+  const { id } = await leer(p);
+  sql(`UPDATE creditos SET creado_en='2020-01-01T00:00:00.000Z' WHERE id='${id}'`);
+  const cron = await fetch(`${BASE}/__scheduled?cron=*+*+*+*+*`);
+  assert.equal(cron.status, 200);
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  const vencido = d.porAtender.find((c: { id: string }) => c.id === id);
+  assert.equal(vencido?.estado, "vencido");
+
+  const dev = await fetch(`${BASE}/api/portal/creditos/${id}/devuelto`, { method: "POST", headers: PORTAL });
+  assert.equal(dev.status, 200);
+  const d2 = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(d2.porAtender.some((c: { id: string }) => c.id === id), false);
+});
+
+test("el formulario de contacto guarda interesados e ignora bots", async () => {
+  const ok = await fetch(`${BASE}/api/contacto`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ nombre: "Prueba e2e", telefono: "5512345678", mensaje: "Tengo una purificadora" }),
+  });
+  assert.equal(ok.status, 200);
+  const malo = await fetch(`${BASE}/api/contacto`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nombre: "" }) });
+  assert.equal(malo.status, 400);
+  const bot = await fetch(`${BASE}/api/contacto`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ nombre: "Bot", telefono: "1", sitio: "http://spam" }),
+  });
+  assert.equal(bot.status, 200, "al bot se le responde igual, pero no se guarda");
+  const lista = await leer(await fetch(`${BASE}/api/portal/contactos`, { headers: PORTAL }));
+  assert.ok(lista.some((c: { nombre: string }) => c.nombre === "Prueba e2e"));
+  assert.equal(lista.some((c: { nombre: string }) => c.nombre === "Bot"), false);
+});

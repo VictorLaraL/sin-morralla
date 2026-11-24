@@ -138,6 +138,44 @@ export function creditoPendiente(db: D1Database, maquinaId: string, noAntesDe: s
     .first<FilaCredito>();
 }
 
+/** Marca como vencidos los créditos pendientes que la máquina no recogió a tiempo. */
+export async function vencerCreditos(db: D1Database, antesDe: string): Promise<FilaCredito[]> {
+  const r = await db
+    .prepare(
+      `UPDATE creditos SET estado = 'vencido',
+         nota = 'La máquina no lo recogió a tiempo: requiere devolución si el cliente la pide'
+       WHERE estado = 'pendiente' AND creado_en < ? RETURNING *`,
+    )
+    .bind(antesDe)
+    .all<FilaCredito>();
+  return r.results;
+}
+
+/** Pulsos de prueba desde el portal (sin pago). */
+export async function crearCreditoPrueba(db: D1Database, m: FilaMaquina, pulsos: number, ahora: string): Promise<FilaCredito> {
+  const c: FilaCredito = {
+    id: generarId("c"),
+    maquina_id: m.id,
+    transaction_id: null,
+    monto_centavos: pulsos * m.valor_pulso_centavos,
+    pulsos,
+    excedente_centavos: 0,
+    origen: "prueba",
+    estado: "pendiente",
+    nota: "Pulso de prueba desde el portal",
+    creado_en: ahora,
+    entregado_en: null,
+  };
+  await db
+    .prepare(
+      `INSERT INTO creditos (id, maquina_id, transaction_id, monto_centavos, pulsos, excedente_centavos, origen, estado, nota, creado_en)
+       VALUES (?, ?, NULL, ?, ?, 0, 'prueba', 'pendiente', ?, ?)`,
+    )
+    .bind(c.id, c.maquina_id, c.monto_centavos, c.pulsos, c.nota, c.creado_en)
+    .run();
+  return c;
+}
+
 /** Marca un crédito como entregado. Se acepta aunque ya hubiera vencido: la máquina sí lo entregó. */
 export async function entregarCredito(db: D1Database, id: string, maquinaId: string, ahora: string): Promise<FilaCredito | null> {
   return db

@@ -20,6 +20,15 @@
     }
   ],
 
+  // Difusor: reparte en vivo los pagos a la landing y al portal con WebSockets en hibernación.
+  "durable_objects": {
+    "bindings": [{ "name": "DIFUSOR", "class_name": "Difusor" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Difusor"] }],
+
+  // Cada minuto: vence los créditos que la máquina no recogió a tiempo.
+  "triggers": { "crons": ["* * * * *"] },
+
   "vars": {
     "TTL_CREDITO_MIN": "10",
     "DEMO_MONTO_CENTAVOS": "100"

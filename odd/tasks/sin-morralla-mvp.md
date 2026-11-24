@@ -35,8 +35,8 @@ contra `wrangler dev` + revisión en el navegador integrado.
 |---|---|---|---|---|
 | T1 | S1, S3 | inline | hecho | Docs en `main`: `f1714e5`; estructura `5a8a4f2` (dev local: salud 200, landing 200) |
 | T2 | S6 | inline | hecho | `76d28ff` (RED: módulos inexistentes; GREEN: 18/18) + corrección de advertencias RDD (RED 3, GREEN 25/25) |
-| T3 | S2, S6 | inline | hecho | RED: tokens inexistente y e2e 0/7; GREEN: unitarias 25/25, e2e 7/7 (`npm run e2e` contra `npm run dev`) |
-| T4 | S2, S4, S5 | inline | pendiente | — |
+| T3 | S2, S6 | inline | hecho | `15399d6`. RED: tokens inexistente y e2e 0/7; GREEN: unitarias 25/25, e2e 7/7 (`npm run e2e` contra `npm run dev`) |
+| T4 | S2, S4, S5 | inline | hecho | RED: validaciones inexistente y e2e 7/14; GREEN: unitarias 29/29, e2e 14/14, `tsc` limpio |
 | T5 | S3, S4 | inline | pendiente | — |
 | T6 | S5 | inline | pendiente | — |
 | T7 | S6 | inline | pendiente | — |
@@ -88,5 +88,15 @@ explorador de solo lectura.
 - **L7 RDD tramo de corrección (`76d28ff..117c83e`):** revisión `review-34589394c2811466` (riesgo, confiabilidad):
   **aprobada y confirmada**. Advertencia restante (un `amount` como `true` o `[5]` se convertía en número) atendida con
   prueba dentro de T3, que toca la entrada del webhook.
+- **L8 RDD T3 (`117c83e..15399d6`, riesgo alto, revisión sola):** `review-69d6213200d50a29` con lentes riesgo,
+  resiliencia y confiabilidad: **aprobada y confirmada**. Advertencias no bloqueantes que se atienden con pruebas en un
+  commit de corrección: un aviso firmado pero mal formado se ignoraba sin dejar rastro; si un primer aviso llegó sin
+  máquina y un segundo sí la trae, se creaba el crédito y se respondía "duplicado" sin registro ni aviso en vivo; los
+  créditos vencidos quedaban mudos (resuelto en T4 con el cron); un fallo del aviso en vivo devolvía 500 aunque el pago
+  ya estaba guardado; la consulta larga no se detenía al cortarse la conexión; faltaba cobertura de vigencia, de
+  aislamiento entre máquinas y de las respuestas 400/413/503. Reentrega hasta el ACK: se resuelve en el firmware (T7)
+  guardando el último crédito servido en memoria no volátil antes de dar pulsos.
+- **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
+  ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
   transacciones exitosas (`docs/MVP.md`, H2).
