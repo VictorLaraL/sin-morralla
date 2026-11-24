@@ -6,7 +6,7 @@
 // Responde 500 ante errores inesperados para que pey reintente.
 
 import { verificarAviso } from "../core/firma.ts";
-import { normalizarPago } from "../core/pagos.ts";
+import { esEventoDePago, normalizarPago } from "../core/pagos.ts";
 import { calcularCredito } from "../core/pulsos.ts";
 import { maquina, maquinaPorQr, registrarPago, type FilaCredito, type FilaMaquina } from "./db.ts";
 import { json, log } from "./http.ts";
@@ -51,7 +51,13 @@ export async function manejarAviso(
   }
 
   const pago = normalizarPago(encabezados["webhook-id"], aviso);
-  if (!pago) return json({ ok: true, ignorado: true });
+  if (!pago) {
+    // Se responde 200 porque reintentar no lo arregla, pero queda en el log para conciliar con pey.
+    const motivo = esEventoDePago(aviso) ? "pago incompleto" : "no es un pago";
+    const tipo = typeof aviso === "object" && aviso !== null ? String((aviso as { type?: unknown }).type ?? "") : "";
+    log(motivo === "pago incompleto" ? "aviso_pago_incompleto" : "aviso_ignorado", { motivo, tipo, webhookId: encabezados["webhook-id"] });
+    return json({ ok: true, ignorado: true, motivo });
+  }
 
   let destino: FilaMaquina | null = pago.codiQrId ? await maquinaPorQr(env.DB, pago.codiQrId) : null;
   if (!destino && typeof pago.metadata.maquina === "string") destino = await maquina(env.DB, pago.metadata.maquina);
@@ -79,8 +85,14 @@ export async function manejarAviso(
     estado: resultado.credito?.estado ?? "sin-maquina",
   });
 
+  // El pago ya quedó guardado: si falla el aviso en vivo no se responde 500, porque el reintento de pey
+  // caería en "duplicado" y tampoco lo repetiría. Se registra y se sigue.
   if (alProcesar) {
-    await alProcesar({ maquina: destino, credito: resultado.credito, montoCentavos: pago.montoCentavos, fechaPago: pago.fechaPago });
+    try {
+      await alProcesar({ maquina: destino, credito: resultado.credito, montoCentavos: pago.montoCentavos, fechaPago: pago.fechaPago });
+    } catch (error) {
+      log("aviso_en_vivo_fallido", { transactionId: pago.transactionId, mensaje: error instanceof Error ? error.message : String(error) });
+    }
   }
   return json({ ok: true, duplicado: false });
 }

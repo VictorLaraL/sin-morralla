@@ -3,6 +3,8 @@
   "name": "sin-morralla",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-11-23",
+  // La consulta larga del ESP32 deja de leer D1 si el módulo corta la conexión (request.signal).
+  "compatibility_flags": ["enable_request_signal"],
 
   // Landing, demo y portal: archivos estáticos. Las rutas /api, /webhooks y /device las atiende el Worker.
   "assets": {

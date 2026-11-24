@@ -39,8 +39,12 @@ export function avisoDePago(a: AvisoSimulado) {
 }
 
 /** Envía un aviso firmado igual que pey. */
-export async function enviarAviso(url: string, secreto: string, aviso: unknown, webhookId = "msg_" + randomBytes(8).toString("hex")) {
-  const cuerpo = JSON.stringify(aviso);
+export function enviarAviso(url: string, secreto: string, aviso: unknown, webhookId?: string) {
+  return enviarCuerpoFirmado(url, secreto, JSON.stringify(aviso), webhookId);
+}
+
+/** Firma y envía un cuerpo tal cual (para probar cuerpos que no son JSON o demasiado grandes). */
+export async function enviarCuerpoFirmado(url: string, secreto: string, cuerpo: string, webhookId = "msg_" + randomBytes(8).toString("hex")) {
   const ts = Math.floor(Date.now() / 1000);
   const firma = await firmarAviso(secreto, webhookId, ts, cuerpo);
   return fetch(url, {

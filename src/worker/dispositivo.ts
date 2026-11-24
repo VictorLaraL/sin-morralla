@@ -8,6 +8,7 @@
 
 import { lineaCredito } from "../core/protocolo.ts";
 import { sha256Hex } from "../core/tokens.ts";
+import { vigenciaMinutos } from "../core/validaciones.ts";
 import { creditoPendiente, entregarCredito, maquinaPorToken, tocarMaquina, type FilaCredito, type FilaMaquina } from "./db.ts";
 import { esperar, log, texto, tokenBearer } from "./http.ts";
 
@@ -15,8 +16,7 @@ const ESPERA_MAXIMA_SEG = 25;
 const INTERVALO_MS = 1000;
 
 export function limiteVigencia(env: Env, ahora = Date.now()): string {
-  const minutos = Number(env.TTL_CREDITO_MIN) || 10;
-  return new Date(ahora - minutos * 60_000).toISOString();
+  return new Date(ahora - vigenciaMinutos(env.TTL_CREDITO_MIN) * 60_000).toISOString();
 }
 
 export async function manejarDispositivo(
@@ -43,19 +43,30 @@ export async function manejarDispositivo(
           lineaCredito({ id: c.id, pulsos: c.pulsos, pulsoMs: m.pulso_ms, pausaMs: m.pausa_ms, requiereBoton: m.requiere_boton === 1 }),
         );
       }
-      if (Date.now() >= fin || request.signal?.aborted) break;
+      // Con enable_request_signal, la señal se activa si el módulo cortó la conexión: deja de consultar D1.
+      if (Date.now() >= fin || request.signal.aborted) break;
       await esperar(INTERVALO_MS);
     }
-    await tocarMaquina(env.DB, m.id, new Date().toISOString());
     return new Response(null, { status: 204 });
   }
 
   if (request.method === "POST" && url.pathname === "/device/ack") {
     const id = url.searchParams.get("id") ?? "";
-    const entregado = await entregarCredito(env.DB, id, m.id, new Date().toISOString());
-    if (entregado) {
-      log("credito_entregado", { maquina: m.id, credito: id, pulsos: entregado.pulsos });
-      if (alEntregar) await alEntregar(m, entregado);
+    const r = await entregarCredito(env.DB, id, m.id, new Date().toISOString());
+    if (r.resultado === "desconocido") {
+      // No existe o es de otra máquina: el módulo deja de reintentar.
+      log("ack_desconocido", { maquina: m.id, credito: id });
+      return texto("CREDITO DESCONOCIDO\n", 404);
+    }
+    if (r.resultado === "entregado") {
+      log("credito_entregado", { maquina: m.id, credito: id, pulsos: r.credito.pulsos });
+      if (alEntregar) {
+        try {
+          await alEntregar(m, r.credito);
+        } catch (error) {
+          log("aviso_en_vivo_fallido", { credito: id, mensaje: error instanceof Error ? error.message : String(error) });
+        }
+      }
     }
     // Confirmar dos veces el mismo crédito no es un error: el ESP32 puede reintentar.
     return texto("OK\n");

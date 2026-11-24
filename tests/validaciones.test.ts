@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { inicioDelDiaCdmx, validarConfigMaquina, validarContacto } from "../src/core/validaciones.ts";
+import { inicioDelDiaCdmx, validarConfigMaquina, validarContacto, vigenciaMinutos } from "../src/core/validaciones.ts";
 
 test("la configuración válida de una máquina se normaliza a enteros", () => {
   const r = validarConfigMaquina({
@@ -61,4 +61,13 @@ test("el inicio del día se calcula en hora de la Ciudad de México (UTC-6)", ()
   // 23 nov 2026 a las 03:00 UTC todavía es 22 nov en CDMX (21:00).
   assert.equal(inicioDelDiaCdmx(new Date("2026-11-23T03:00:00Z")), "2026-11-22T06:00:00.000Z");
   assert.equal(inicioDelDiaCdmx(new Date("2026-11-23T18:00:00Z")), "2026-11-23T06:00:00.000Z");
+});
+
+test("la vigencia de un crédito usa 10 minutos si la configuración no sirve", () => {
+  assert.equal(vigenciaMinutos("10"), 10);
+  assert.equal(vigenciaMinutos("3"), 3);
+  assert.equal(vigenciaMinutos("1440"), 1440);
+  for (const malo of ["0", "-5", "abc", "", undefined, "2.5", "1441"]) {
+    assert.equal(vigenciaMinutos(malo), 10, `con ${JSON.stringify(malo)}`);
+  }
 });

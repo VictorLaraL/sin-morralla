@@ -8,7 +8,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
-import { avisoDePago, enviarAviso, leerDevVars } from "./comun.ts";
+import { avisoDePago, enviarAviso, enviarCuerpoFirmado, leerDevVars } from "./comun.ts";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:8787";
 const vars = leerDevVars();
@@ -97,7 +97,59 @@ test("un pago menor al precio no da servicio", async () => {
 test("ignora eventos que no son pagos", async () => {
   const r = await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, { type: "bank.account.updated", codiStatus: "ACTIVE" });
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true, ignorado: true });
+  assert.deepEqual(await r.json(), { ok: true, ignorado: true, motivo: "no es un pago" });
+});
+
+// ---------- Correcciones de la revisión RDD de T3 ----------
+
+test("un aviso de pago incompleto se ignora pero dice por qué", async () => {
+  const r = await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, { type: "codi.qr.payment_received", amount: 13, codiQrId: QR });
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { ok: true, ignorado: true, motivo: "pago incompleto" });
+});
+
+test("un aviso firmado que no es JSON da 400 y uno enorme da 413", async () => {
+  assert.equal((await enviarCuerpoFirmado(`${BASE}/webhooks/pey`, SECRETO, "no soy json")).status, 400);
+  assert.equal((await enviarCuerpoFirmado(`${BASE}/webhooks/pey`, SECRETO, "x".repeat(70_000))).status, 413);
+});
+
+test("si el primer aviso de un pago no tenía máquina, otro aviso del mismo pago no crea crédito", async () => {
+  const transactionId = "SIMTX-SINQR-" + randomBytes(4).toString("hex");
+  const r1 = await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: "QR-AJENO", transactionId }));
+  assert.deepEqual(await r1.json(), { ok: true, duplicado: false });
+  const r2 = await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR, transactionId }));
+  assert.deepEqual(await r2.json(), { ok: true, duplicado: true });
+  assert.equal((await fetch(`${BASE}/device/poll?espera=0`, { headers: dispositivo })).status, 204, "no debe dar servicio");
+});
+
+test("si falta el QR, el pago se ubica por la máquina guardada en la metadata", async () => {
+  const aviso = { ...avisoDePago({ montoCentavos: 1300, codiQrId: "QR-ANTERIOR" }), metadata: { trackingKey: "SIM", externalMetadata: { maquina: "agua-01" } } };
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, aviso);
+  const linea = await (await fetch(`${BASE}/device/poll?espera=0`, { headers: dispositivo })).text();
+  const m = /^CREDITO (c_[0-9a-f]{12}) 13 /.exec(linea);
+  assert.ok(m, `línea inesperada: ${JSON.stringify(linea)}`);
+  await fetch(`${BASE}/device/ack?id=${m[1]}`, { method: "POST", headers: dispositivo });
+});
+
+test("una máquina no puede confirmar créditos de otra y confirmar dos veces no falla", async () => {
+  const otro = "token-e2e-otra-" + randomBytes(6).toString("hex");
+  sql(`INSERT INTO maquinas (id, nombre, virtual, precio_centavos, token_hash, creado_en) VALUES ('agua-e2e', 'Otra', 0, 1300, '${sha256(otro)}', '2026-01-01T00:00:00.000Z')`);
+  try {
+    await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR }));
+    const id = /CREDITO (\S+)/.exec(await (await fetch(`${BASE}/device/poll?espera=0`, { headers: dispositivo })).text())?.[1];
+    assert.ok(id);
+    const ajena = await fetch(`${BASE}/device/ack?id=${id}`, { method: "POST", headers: { Authorization: `Bearer ${otro}` } });
+    assert.equal(ajena.status, 404);
+    assert.equal(await ajena.text(), "CREDITO DESCONOCIDO\n");
+    const sigue = await (await fetch(`${BASE}/device/poll?espera=0`, { headers: dispositivo })).text();
+    assert.match(sigue, new RegExp(`^CREDITO ${id} `), "el crédito sigue pendiente para su máquina");
+    for (let i = 0; i < 2; i++) {
+      const confirmacion: Response = await fetch(`${BASE}/device/ack?id=${id}`, { method: "POST", headers: dispositivo });
+      assert.equal(await confirmacion.text(), "OK\n");
+    }
+  } finally {
+    sql(`DELETE FROM maquinas WHERE id='agua-e2e'`);
+  }
 });
 
 // ---------- T4: demo en vivo, portal, contacto y cron ----------

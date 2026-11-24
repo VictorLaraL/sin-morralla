@@ -71,3 +71,8 @@ export function inicioDelDiaCdmx(fecha = new Date()): string {
   const cdmx = new Date(fecha.getTime() - 6 * 3_600_000);
   return new Date(Date.UTC(cdmx.getUTCFullYear(), cdmx.getUTCMonth(), cdmx.getUTCDate(), 6)).toISOString();
 }
+
+/** Minutos que un crédito espera a la máquina antes de vencer (TTL_CREDITO_MIN). Fuera de 1–1440 usa 10. */
+export function vigenciaMinutos(valor: unknown): number {
+  return entero(valor, 1, 1440) ?? 10;
+}

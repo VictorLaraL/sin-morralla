@@ -49,8 +49,13 @@ export function maquinaPorToken(db: D1Database, tokenHash: string) {
   return db.prepare("SELECT * FROM maquinas WHERE token_hash = ? AND virtual = 0").bind(tokenHash).first<FilaMaquina>();
 }
 
+/** Latido del módulo. Escribe a lo más una vez cada 30 s para no gastar escrituras de D1 en cada consulta. */
 export async function tocarMaquina(db: D1Database, id: string, ahora: string): Promise<void> {
-  await db.prepare("UPDATE maquinas SET ultima_conexion = ? WHERE id = ?").bind(ahora, id).run();
+  const antesDe = new Date(Date.parse(ahora) - 30_000).toISOString();
+  await db
+    .prepare("UPDATE maquinas SET ultima_conexion = ? WHERE id = ? AND (ultima_conexion IS NULL OR ultima_conexion < ?)")
+    .bind(ahora, id, antesDe)
+    .run();
 }
 
 /**
@@ -104,8 +109,12 @@ export async function registrarPago(
     sentencias.push(
       db
         .prepare(
+          // Solo si el pago se acaba de guardar con este mismo aviso: si el primer aviso de un pago llegó sin
+          // máquina, un aviso posterior no debe crear un crédito que nadie registró ni avisó.
           `INSERT INTO creditos (id, maquina_id, transaction_id, monto_centavos, pulsos, excedente_centavos, origen, estado, nota, creado_en, entregado_en)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (transaction_id) DO NOTHING`,
+           SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+           WHERE EXISTS (SELECT 1 FROM pagos WHERE transaction_id = ? AND webhook_id = ? AND recibido_en = ? AND maquina_id IS ?)
+           ON CONFLICT (transaction_id) DO NOTHING`,
         )
         .bind(
           credito.id,
@@ -119,6 +128,10 @@ export async function registrarPago(
           credito.nota,
           credito.creado_en,
           credito.entregado_en,
+          pago.transactionId,
+          pago.webhookId,
+          ahora,
+          m.id,
         ),
     );
   }
@@ -177,12 +190,23 @@ export async function crearCreditoPrueba(db: D1Database, m: FilaMaquina, pulsos:
 }
 
 /** Marca un crédito como entregado. Se acepta aunque ya hubiera vencido: la máquina sí lo entregó. */
-export async function entregarCredito(db: D1Database, id: string, maquinaId: string, ahora: string): Promise<FilaCredito | null> {
-  return db
+export async function entregarCredito(
+  db: D1Database,
+  id: string,
+  maquinaId: string,
+  ahora: string,
+): Promise<{ resultado: "entregado"; credito: FilaCredito } | { resultado: "ya-entregado" | "desconocido" }> {
+  const credito = await db
     .prepare(
       `UPDATE creditos SET estado = 'entregado', entregado_en = ?
        WHERE id = ? AND maquina_id = ? AND estado IN ('pendiente', 'vencido') RETURNING *`,
     )
     .bind(ahora, id, maquinaId)
     .first<FilaCredito>();
+  if (credito) return { resultado: "entregado", credito };
+  const previo = await db
+    .prepare("SELECT estado FROM creditos WHERE id = ? AND maquina_id = ?")
+    .bind(id, maquinaId)
+    .first<{ estado: string }>();
+  return { resultado: previo?.estado === "entregado" ? "ya-entregado" : "desconocido" };
 }

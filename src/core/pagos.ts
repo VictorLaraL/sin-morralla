@@ -27,15 +27,27 @@ function texto(valor: unknown): string | null {
   return valor === undefined || valor === null || valor === "" ? null : String(valor);
 }
 
+const TIPO_PAGO = /^codi\.(qr|pn)\.payment_received$/;
+
+/** Cuerpo del evento: los campos van en la raíz (como en la documentación) o dentro de `data`. */
+function cuerpoDelAviso(aviso: Objeto): Objeto {
+  return esObjeto(aviso.data) ? { ...aviso.data, type: aviso.type ?? aviso.data.type } : aviso;
+}
+
+/** true si el evento dice ser un pago CoDi recibido, aunque le falten datos. */
+export function esEventoDePago(aviso: unknown): boolean {
+  return esObjeto(aviso) && TIPO_PAGO.test(String(cuerpoDelAviso(aviso).type ?? ""));
+}
+
 /**
  * Regresa null si el evento no es un pago CoDi recibido o le faltan datos.
  * Acepta los campos en la raíz (como en la documentación) o dentro de `data`.
  */
 export function normalizarPago(webhookId: string, aviso: unknown, ahora = new Date()): PagoRecibido | null {
   if (!esObjeto(aviso)) return null;
-  const datos: Objeto = esObjeto(aviso.data) ? { ...aviso.data, type: aviso.type ?? aviso.data.type } : aviso;
+  const datos = cuerpoDelAviso(aviso);
 
-  const coincidencia = /^codi\.(qr|pn)\.payment_received$/.exec(String(datos.type ?? ""));
+  const coincidencia = TIPO_PAGO.exec(String(datos.type ?? ""));
   if (!coincidencia) return null;
 
   const transactionId = texto(datos.transactionId);

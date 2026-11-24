@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { normalizarPago } from "../src/core/pagos.ts";
+import { esEventoDePago, normalizarPago } from "../src/core/pagos.ts";
 
 // Forma documentada por pey para codi.qr.payment_received (docs.pey.mx/docs/webhooks/codi/qr).
 const avisoQr = {
@@ -68,4 +68,13 @@ test("ignora eventos que no son pagos CoDi recibidos", () => {
   assert.equal(normalizarPago("m", { type: "bank.account.updated", codiStatus: "ACTIVE" }), null);
   assert.equal(normalizarPago("m", { type: "codi.qr.payment_received", amount: 5 }), null, "sin transactionId");
   assert.equal(normalizarPago("m", "texto"), null);
+});
+
+test("distingue un evento que no es pago de un pago con datos incompletos", () => {
+  assert.equal(esEventoDePago({ type: "codi.qr.payment_received" }), true);
+  assert.equal(esEventoDePago({ type: "codi.pn.payment_received", amount: 1 }), true);
+  assert.equal(esEventoDePago({ type: "evento", data: { type: "codi.qr.payment_received" } }), false, "manda el tipo de la raíz");
+  assert.equal(esEventoDePago({ data: { type: "codi.qr.payment_received" } }), true);
+  assert.equal(esEventoDePago({ type: "bank.account.updated" }), false);
+  for (const raro of [null, "codi.qr.payment_received", 5, []]) assert.equal(esEventoDePago(raro), false);
 });

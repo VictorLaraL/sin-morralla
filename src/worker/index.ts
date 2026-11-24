@@ -38,10 +38,14 @@ export default {
         estado: r.credito?.estado ?? "sin-maquina",
         fecha: r.fechaPago,
       };
-      ctx.waitUntil(difusor(env).difundir("portal", evento));
+      const fallo = (canal: string) => (e: unknown) => log("aviso_en_vivo_fallido", { canal, mensaje: String(e) });
+      ctx.waitUntil(difusor(env).difundir("portal", evento).catch(fallo("portal")));
       if (r.maquina?.virtual === 1) {
-        const stats = await estadisticasDemo(env.DB);
-        ctx.waitUntil(difusor(env).difundir("demo", { tipo: "pago", montoCentavos: r.montoCentavos, fecha: r.fechaPago, ...stats }));
+        ctx.waitUntil(
+          estadisticasDemo(env.DB)
+            .then((stats) => difusor(env).difundir("demo", { tipo: "pago", montoCentavos: r.montoCentavos, fecha: r.fechaPago, ...stats }))
+            .catch(fallo("demo")),
+        );
       }
     };
 

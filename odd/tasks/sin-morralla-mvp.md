@@ -96,6 +96,10 @@ explorador de solo lectura.
   ya estaba guardado; la consulta larga no se detenía al cortarse la conexión; faltaba cobertura de vigencia, de
   aislamiento entre máquinas y de las respuestas 400/413/503. Reentrega hasta el ACK: se resuelve en el firmware (T7)
   guardando el último crédito servido en memoria no volátil antes de dar pulsos.
+- **L10 Corrección de advertencias de T3:** RED con 4 e2e y 2 unitarias nuevas (pago incompleto con motivo, crédito
+  creado por un segundo aviso, ACK de otra máquina, vigencia inválida); GREEN: unitarias 31/31, e2e 19/19 dos veces
+  seguidas sobre la misma base. Además: el aviso en vivo ya no puede tumbar la respuesta del webhook, el latido del
+  módulo escribe a lo más cada 30 s y la consulta larga se corta con `enable_request_signal`.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
