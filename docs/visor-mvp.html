@@ -1,0 +1,566 @@
+<title>Sin Morralla MVP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: documento de una columna (~760px) con índice fijo a la izquierda; diagrama de pulsos del monedero en el encabezado */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --ink: #161b2a;
+  --muted: #586079;
+  --line: #d9deea;
+  --accent: #2743a8;
+  --accent-soft: #e4e9fb;
+  --accent-ink: #ffffff;
+  --coin: #a8730c;
+  --warn: #8a5a00;
+  --warn-soft: #fdf0d2;
+  --risk: #b3261e;
+  --risk-soft: #fbe5e3;
+  --ok: #0a7a3d;
+  --ok-soft: #e0f1e6;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1218; --surface: #171b24; --ink: #e6e9f2; --muted: #9ba3b8; --line: #2a303d;
+    --accent: #93abff; --accent-soft: #1c2548; --accent-ink: #0a1030; --coin: #f0c15a;
+    --warn: #f0c15a; --warn-soft: #3a2d0f; --risk: #ff8d84; --risk-soft: #3e1a17; --ok: #46d083; --ok-soft: #153823;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1218; --surface: #171b24; --ink: #e6e9f2; --muted: #9ba3b8; --line: #2a303d;
+  --accent: #93abff; --accent-soft: #1c2548; --accent-ink: #0a1030; --coin: #f0c15a;
+  --warn: #f0c15a; --warn-soft: #3a2d0f; --risk: #ff8d84; --risk-soft: #3e1a17; --ok: #46d083; --ok-soft: #153823;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- encabezado ---------- */
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow { font: 600 12px/1.3 var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 800 clamp(44px, 7vw, 72px)/1 var(--display); letter-spacing: -0.02em; margin: 10px 0 14px; text-wrap: balance; }
+.lead { font-size: 19px; line-height: 1.5; margin: 0; max-width: 60ch; }
+.lead strong { color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin-top: 18px; font-size: 14px; color: var(--muted); }
+.pill { display: inline-flex; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 13px; }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.changes { margin-top: 14px; font-size: 14px; color: var(--muted); max-width: 62ch; }
+.changes b { color: var(--ink); }
+
+.demo { margin: 0; display: grid; gap: 10px; }
+.scope-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 16px 10px; display: grid; gap: 6px; }
+.scope-card .top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+.scope-card .top b { color: var(--ink); font-weight: 600; }
+.scope-card svg { width: 100%; height: auto; display: block; }
+.wave { fill: none; stroke: var(--coin); stroke-width: 3; stroke-linejoin: round; }
+.grid-line { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+.svg-label { fill: var(--muted); font: 500 11px var(--mono); }
+.svg-strong { fill: var(--ink); font: 600 12px var(--body); }
+.bracket { stroke: var(--muted); stroke-width: 1; fill: none; }
+.demo figcaption { font-size: 13px; color: var(--muted); }
+
+/* ---------- índice y documento ---------- */
+.layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 56px; margin-top: 36px; }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; font-size: 14px; }
+.toc .eyebrow { margin: 0 0 8px 8px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.toc a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 8px; color: var(--muted); text-decoration: none; }
+.toc a:hover { background: var(--surface); color: var(--ink); }
+.toc .n { font: 500 12px/1.9 var(--mono); color: var(--accent); min-width: 1.6em; }
+
+.doc { min-width: 0; max-width: 760px; display: grid; gap: 52px; }
+section { display: grid; gap: 14px; scroll-margin-top: 20px; min-width: 0; }
+h2 { font: 700 27px/1.2 var(--display); margin: 0; display: flex; gap: 12px; align-items: baseline; text-wrap: balance; }
+h2 .n { font: 500 14px var(--mono); color: var(--accent); }
+h3 { font: 600 15px/1.3 var(--body); margin: 6px 0 0; }
+p { margin: 0; max-width: 68ch; }
+ul, ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.callout { background: var(--warn-soft); color: var(--ink); padding: 12px 16px; border-radius: 10px; font-size: 15px; }
+.callout b { color: var(--warn); }
+.evidence { background: var(--ok-soft); color: var(--ink); padding: 12px 16px; border-radius: 10px; font-size: 15px; }
+.evidence b { color: var(--ok); }
+.notes { display: grid; gap: 8px; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+tr.pick td { background: var(--accent-soft); }
+td.k { font: 500 14px var(--mono); color: var(--accent); white-space: nowrap; }
+td.dato { color: var(--muted); width: 48%; }
+.tbd { display: inline-block; padding: 1px 8px; border: 1px dashed var(--warn); border-radius: 6px; color: var(--warn); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.lvl { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.lvl.alto { background: var(--risk-soft); color: var(--risk); }
+.lvl.medio { background: var(--warn-soft); color: var(--warn); }
+.lvl.bajo { background: var(--ok-soft); color: var(--ok); }
+.cero { font-weight: 700; color: var(--accent); }
+
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.box h3 { margin: 0; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.box.key h3 { color: var(--accent); }
+.tagline { font: 700 clamp(24px, 4vw, 32px)/1.2 var(--display); color: var(--accent); margin: 4px 0; }
+.costo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; font-size: 15px; color: var(--muted); }
+.costo b { font: 800 28px/1 var(--display); color: var(--coin); font-variant-numeric: tabular-nums; }
+
+.goals { display: grid; gap: 10px; }
+.goal { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.goal b { font-size: 14px; }
+.goal.main { border-color: var(--accent); background: var(--accent-soft); }
+
+.scope { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.scope .box.out { background: transparent; }
+.scope .box.out li { color: var(--muted); }
+
+.steps { list-style: none; padding: 0; counter-reset: paso; display: grid; gap: 10px; }
+.steps li { counter-increment: paso; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; align-items: start; }
+.steps li::before {
+  content: counter(paso);
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent);
+  font: 600 13px var(--mono);
+}
+.steps li.star::before { background: var(--accent); color: var(--accent-ink); }
+
+.check { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; }
+.check li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 15px; }
+.check li::before { content: ""; width: 16px; height: 16px; margin-top: 4px; border: 1.5px solid var(--muted); border-radius: 4px; }
+
+.timeline { list-style: none; padding: 0; gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+.timeline li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.timeline li:last-child { border-bottom: 0; }
+.timeline time { font: 500 14px/1.6 var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
+.timeline li.hito { background: var(--warn-soft); }
+.timeline li.hito time { color: var(--warn); }
+
+.questions { counter-reset: q; list-style: none; padding: 0; gap: 0; border-top: 1px solid var(--line); }
+.questions li { counter-increment: q; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.questions li::before { content: counter(q) "."; font: 500 14px/1.7 var(--mono); color: var(--accent); }
+.questions small { display: block; color: var(--muted); font-size: 13px; }
+
+.foot { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+code { font: 500 0.88em var(--mono); background: var(--surface); border: 1px solid var(--line); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; gap: 28px; }
+  .toc { position: static; }
+  .toc ol { display: flex; flex-wrap: wrap; gap: 6px; }
+  .toc a { background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; }
+}
+@media (max-width: 760px) {
+  .head { grid-template-columns: 1fr; gap: 28px; }
+  .two, .scope, .check { grid-template-columns: 1fr; }
+  .goal { grid-template-columns: 1fr; gap: 4px; }
+  .timeline li { grid-template-columns: 1fr; gap: 2px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="eyebrow">Hackatón México 2026 · Definición del MVP</div>
+      <h1>Sin Morralla</h1>
+      <p class="lead">Un módulo que se instala en las máquinas de monedas <strong>que ya existen</strong>, empezando por despachadores de agua purificada, para que también cobren con CoDi <strong>sin cambiar la máquina y sin comisión</strong>. El cliente escanea la calcomanía de la máquina y paga desde la app de su banco.</p>
+      <div class="meta">
+        <span class="pill">Versión 0.6</span>
+        <span>23 de noviembre de 2026</span>
+        <span class="pill warn">Borrador para validar con el cliente piloto</span>
+      </div>
+      <p class="changes"><b>Cambios en la v0.6:</b> validamos que un QR fijo acepta varios pagos. <b>En la v0.5:</b> una sola calcomanía por máquina y segmentos para buscar prospectos. <b>En la v0.4:</b> el piloto va sin pantalla, con un módulo base con luz de estado, bip y botón; plan B si el QR fijo no acepta varios pagos: pantalla de tinta electrónica.</p>
+    </div>
+    <figure class="demo">
+      <div class="scope-card">
+        <div class="top"><span>Línea COIN del monedero</span><b>Pago CoDi de $10</b></div>
+        <svg viewBox="0 0 640 150" role="img" aria-label="Diez pulsos de 50 milisegundos en la línea de monedas: la máquina recibe 10 pesos de crédito">
+          <line class="grid-line" x1="20" y1="34" x2="620" y2="34"/>
+          <line class="grid-line" x1="20" y1="84" x2="620" y2="84"/>
+          <text class="svg-label" x="20" y="24">5–12 V · reposo</text>
+          <text class="svg-label" x="20" y="104">0 V · "moneda"</text>
+          <path class="wave" d="M20 34 H60 V84 H82 V34 H104 V84 H126 V34 H148 V84 H170 V34 H192 V84 H214 V34 H236 V84 H258 V34 H280 V84 H302 V34 H324 V84 H346 V34 H368 V84 H390 V34 H412 V84 H434 V34 H456 V84 H478 V34 H620"/>
+          <path class="bracket" d="M60 116 V122 H82 V116"/>
+          <text class="svg-label" x="56" y="140">50 ms</text>
+          <text class="svg-strong" x="500" y="64">10 pulsos = $10</text>
+        </svg>
+      </div>
+      <figcaption>La máquina recibe los mismos pulsos que si le metieran diez monedas de $1</figcaption>
+    </figure>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Índice">
+      <div class="eyebrow">Índice</div>
+      <ol>
+        <li><a href="#problema"><span class="n">2</span>El problema</a></li>
+        <li><a href="#cliente"><span class="n">3</span>Cliente piloto</a></li>
+        <li><a href="#valor"><span class="n">4</span>Propuesta de valor</a></li>
+        <li><a href="#objetivos"><span class="n">5</span>Objetivos</a></li>
+        <li><a href="#hipotesis"><span class="n">6</span>Hipótesis</a></li>
+        <li><a href="#metricas"><span class="n">7</span>Métricas</a></li>
+        <li><a href="#alcance"><span class="n">8</span>Alcance</a></li>
+        <li><a href="#flujo"><span class="n">9</span>Cómo se usa</a></li>
+        <li><a href="#requisitos"><span class="n">10</span>No negociables</a></li>
+        <li><a href="#conectividad"><span class="n">11</span>Si no hay WiFi</a></li>
+        <li><a href="#levantamiento"><span class="n">12</span>Levantamiento técnico</a></li>
+        <li><a href="#dependencias"><span class="n">13</span>API de pey</a></li>
+        <li><a href="#riesgos"><span class="n">14</span>Riesgos</a></li>
+        <li><a href="#plan"><span class="n">15</span>Plan del piloto</a></li>
+        <li><a href="#preguntas"><span class="n">16</span>Entrevista</a></li>
+        <li><a href="#decisiones"><span class="n">17</span>Decisiones</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc">
+      <section id="problema">
+        <h2><span class="n">02</span>El problema</h2>
+        <ul>
+          <li>Si el cliente <b>no trae monedas</b>, la venta se pierde o tiene que ir a buscar cambio.</li>
+          <li>El dueño tiene que <b>recolectar y contar monedas</b>, con riesgo de robo o vandalismo para sacarlas (hay notas recientes de esto), monederos atascados y monedas falsas.</li>
+          <li>Volver "cashless" una máquina hoy es caro: hay que <b>reemplazarla o poner una terminal</b> que cobra comisión. Con tickets de $13 a $26 por garrafón, la comisión no conviene.</li>
+          <li>El dueño <b>no sabe cuánto vende cada máquina</b> hasta que va a recolectar: casi ninguna tiene internet.</li>
+        </ul>
+        <p class="callout"><b>Por validar:</b> cuál de estos dolores pesa más para el dueño y cuánto le cuesta.</p>
+      </section>
+
+      <section id="cliente">
+        <h2><span class="n">03</span>Cliente piloto</h2>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td class="dato">Dueño / negocio</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">Número de máquinas y ubicación</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">Marca y modelo de la máquina</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">Llenados que ofrece y precio de cada uno</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">Ventas promedio por día por máquina</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">¿Cada cuánto recolecta monedas? ¿Quién lo hace?</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">¿Hay WiFi cerca? ¿Señal de celular y de qué compañía?</td><td><span class="tbd">por llenar</span></td></tr>
+              <tr><td class="dato">¿Cuenta bancaria a su nombre? ¿Banco?</td><td><span class="tbd">por llenar</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="valor">
+        <h2><span class="n">04</span>Propuesta de valor</h2>
+        <p class="tagline">"Tu máquina de siempre, ahora sin monedas."</p>
+        <div class="two">
+          <div class="box key">
+            <h3>Para el dueño de la máquina</h3>
+            <ul>
+              <li><b>Vende también a quien no trae monedas.</b></li>
+              <li><b>No cambia su máquina:</b> el módulo se enchufa en paralelo al monedero, sin cortar cables, y se puede quitar. Las monedas siguen funcionando igual.</li>
+              <li><b>Sin comisión por venta</b> (CoDi).</li>
+              <li><b>Ve sus ventas CoDi en tiempo real</b> y sabe si su máquina está en línea; hoy casi ninguna máquina tiene esto.</li>
+              <li><b>Menos efectivo</b> que recolectar, contar y cuidar.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Para quien compra el agua</h3>
+            <ul>
+              <li>Escanea el QR de la máquina y paga desde la app de su banco; no necesita monedas.</li>
+            </ul>
+            <div class="costo"><b>≈ $700–1,500</b><span>MXN por máquina en el piloto (módulo base y calcomanías); en volumen ≈ $350–500 de material</span></div>
+          </div>
+        </div>
+        <h3>Contra qué competimos hoy</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Alternativa actual</th><th>Qué le falta</th></tr></thead>
+            <tbody>
+              <tr><td>Solo monedas</td><td>Ventas perdidas, recolección, robo, monederos atascados</td></tr>
+              <tr><td>Reemplazar por una máquina nueva con pago digital</td><td>Inversión alta: las máquinas cuestan de $16,000 a $135,000</td></tr>
+              <tr><td>Kits de pago con tarjeta para máquinas</td><td>Equipo caro y comisión en cada venta; no conviene con tickets chicos</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>En México no encontramos un módulo CoDi para estas máquinas; en Brasil existe uno equivalente para Pix.</p>
+      </section>
+
+      <section id="objetivos">
+        <h2><span class="n">05</span>Objetivos</h2>
+        <div class="goals">
+          <div class="goal main"><b>Del MVP (aprender)</b><p>Demostrar que una máquina de agua real entrega su servicio pagado con CoDi de forma <b>confiable</b>, <b>sin modificar la máquina</b>, y que sus usuarios lo usan.</p></div>
+          <div class="goal"><b>Para el hackatón</b><p>Video con la máquina real entregando agua después de un pago CoDi, más métricas del piloto. Pesan <i>uso de CoDi</i> (30 %) e <i>impacto</i> (25 %).</p></div>
+          <div class="goal"><b>Todavía no</b><p>Vender módulos, instalar en varias máquinas ni otros tipos de máquina.</p></div>
+        </div>
+      </section>
+
+      <section id="hipotesis">
+        <h2><span class="n">06</span>Hipótesis a validar</h2>
+        <p>Ordenadas de la más riesgosa a la menos.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Hipótesis</th><th>Cómo la validamos</th><th>Señal de éxito (propuesta)</th></tr></thead>
+            <tbody>
+              <tr><td class="k">H1</td><td>El monedero de la máquina piloto manda pulsos y podemos imitarlos en paralelo sin afectar las monedas</td><td>Levantamiento técnico y prueba en banco con un monedero igual</td><td>1 pulso de prueba = $1 de crédito; las monedas siguen funcionando</td></tr>
+              <tr><td class="k">H2</td><td>Un QR fijo de CoDi se puede pagar muchas veces</td><td><b>Validada el 23 de noviembre</b></td><td>El mismo QR de $0.01 se pagó dos veces desde BBVA y pey registró dos transacciones exitosas</td></tr>
+              <tr><td class="k">H3</td><td>Los usuarios de la máquina tienen CoDi y lo prefieren a buscar monedas, aun para $13–26</td><td>Contar pagos CoDi vs. ventas totales durante el piloto</td><td>Al menos 10 % de las ventas por CoDi en la semana</td></tr>
+              <tr><td class="k">H4</td><td>El cliente entiende la calcomanía y la luz sin ayuda</td><td>Observar a los primeros clientes reales</td><td>9 de cada 10 pagan sin ayuda</td></tr>
+              <tr><td class="k">H5</td><td>El tiempo de pago es aceptable en la máquina</td><td>Observar pagos reales</td><td>Menos de 5 s del aviso de pago a la máquina con crédito</td></tr>
+              <tr><td class="k">H6</td><td>Hay conexión estable en el sitio (WiFi del local o router 4G)</td><td>Monitorear disponibilidad del módulo</td><td>En línea 95 % del horario de operación</td></tr>
+              <tr><td class="k">H7</td><td>El dueño pagaría por el módulo o una mensualidad</td><td>Pregunta de cierre con precio de referencia</td><td>Acepta un precio de referencia</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="evidence"><b>H2, antecedentes y prueba:</b> Banxico contempla que el QR de CoDi "puede estar estático en un establecimiento" (<a href="https://www.banxico.org.mx/sistemas-de-pago/codi-cobro-digital-banco-me.html">Banxico</a>). En pey, un QR sin vencimiento se crea con <code>expiration: 0</code>, y su API lista las transacciones de un mismo QR, 20 por página (<a href="https://docs.pey.mx/docs/api/get-co-di-qr-transactions">docs de pey</a>). Ambos indican que un QR fijo recibe varios pagos, y Transfiéreme (un producto de una edición anterior de este hackatón) ya ofrece un QR fijo imprimible para el mostrador. <b>La prueba del 23 de noviembre lo confirmó:</b> un QR fijo de $0.01 sin vencimiento se pagó dos veces desde BBVA (dos claves de rastreo, comisión $0.00, el banco mostró el nombre del beneficiario) y pey registró dos transacciones exitosas. Falta probar el QR sin monto, que solo se necesita para máquinas con varios llenados.</p>
+      </section>
+
+      <section id="metricas">
+        <h2><span class="n">07</span>Métricas del piloto</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Métrica</th><th>Meta (propuesta, ajustar con el dueño)</th></tr></thead>
+            <tbody>
+              <tr><td>Ventas CoDi por día</td><td>Medir; subir semana a semana</td></tr>
+              <tr><td>% de ventas CoDi vs. monedas (con lo que reporta el dueño al recolectar)</td><td>10 % o más</td></tr>
+              <tr><td>Pagos sin servicio o servicio sin pago</td><td><span class="cero">Cero</span></td></tr>
+              <tr><td>Pagos que llegan mientras el módulo está sin conexión</td><td>Registrar todos</td></tr>
+              <tr><td>Tiempo entre el aviso de pago y los pulsos en la máquina</td><td>Menos de 3 s</td></tr>
+              <tr><td>Disponibilidad del módulo (en línea)</td><td>95 % o más</td></tr>
+              <tr><td>Incidentes que requirieron devolución manual</td><td>Registrar todos</td></tr>
+              <tr><td>Satisfacción del dueño (1 a 10) y "¿lo dejarías instalado?"</td><td>8 o más, y sí</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="alcance">
+        <h2><span class="n">08</span>Alcance del MVP</h2>
+        <div class="scope">
+          <div class="box key">
+            <h3>Incluye</h3>
+            <ol>
+              <li><b>Módulo base</b> en una máquina real: ESP32 con optoacoplador, arnés en Y al conector del monedero (normalmente JST XH de 4 pines), sin cortar cables, y cargador propio aislado de la máquina.</li>
+              <li><b>Una calcomanía por máquina</b> con su QR fijo: con el monto exacto si la máquina tiene un solo precio, o sin monto si tiene varios llenados o cobra por tiempo (la máquina acumula el crédito como con monedas). El servidor sabe qué máquina se pagó y manda los pulsos, una sola vez.</li>
+              <li><b>Luz de estado y bip:</b> verde = CoDi disponible; parpadeo y bip = pago recibido; roja = sin conexión, usar monedas.</li>
+              <li><b>Botón "Servir con CoDi"</b>, solo en máquinas que sirven al instante: el pago espera a que el cliente coloque su garrafón y lo presione.</li>
+              <li><b>Sin cambio con CoDi:</b> la calcomanía lo avisa.</li>
+              <li><b>Panel mínimo para el dueño:</b> ventas CoDi del día, máquina en línea o no, y alertas.</li>
+              <li><b>Configuración desde el celular:</b> precios, parámetros del pulso y pulso de prueba.</li>
+              <li><b>Aclaraciones:</b> teléfono del dueño en la calcomanía.</li>
+            </ol>
+          </div>
+          <div class="box">
+            <h3>Deseable</h3>
+            <ul>
+              <li><b>Modo "aprender":</b> el instalador mete una moneda de $1 y una de $10 y el módulo copia cómo son los pulsos de esa máquina.</li>
+              <li>Leer la señal de "fuera de servicio" para apagar la luz verde cuando la máquina no puede servir.</li>
+              <li>Alertas por WhatsApp o correo, incluida una caída brusca de ventas CoDi.</li>
+              <li>Conteo de monedas reales.</li>
+            </ul>
+          </div>
+          <div class="box out">
+            <h3>No incluye</h3>
+            <ul>
+              <li>Máquinas MDB (24 V) y billeteros</li>
+              <li>Grúas de peluches y maquinitas (riesgo legal de juego)</li>
+              <li>Pantalla (tableta o tinta electrónica)</li>
+              <li>Módem celular integrado (en el piloto, router 4G aparte)</li>
+              <li>Varias máquinas o dueños</li>
+              <li>Venta del módulo</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="flujo">
+        <h2><span class="n">09</span>Cómo se usa</h2>
+        <ol class="steps">
+          <li>Llega un cliente sin monedas y ve la luz verde y la calcomanía de la máquina.</li>
+          <li>Abre la app de su banco → CoDi → escanea → escribe el monto si la calcomanía no lo trae → <b>verifica que diga el nombre del dueño</b> → confirma.</li>
+          <li class="star">Segundos después, el módulo hace bip y la máquina muestra el crédito <b>como si le hubieran metido monedas</b>. En máquinas que sirven al instante, coloca su garrafón y presiona "Servir con CoDi".</li>
+          <li>Usa la máquina como siempre y sale el agua.</li>
+          <li>El dueño ve la venta en su panel.</li>
+        </ol>
+        <div class="notes">
+          <p class="callout"><b>Si el cliente se va sin servirse:</b> en máquinas que acumulan crédito, el crédito se queda en la máquina, como pasa hoy cuando alguien deja monedas. En máquinas que sirven al instante, el pago espera 10 minutos a que presione "Servir con CoDi" y luego se marca para devolución si el cliente la pide.</p>
+          <p class="callout"><b>Si paga de menos o de más (QR sin monto):</b> el crédito se acumula en la máquina como con monedas y la máquina sirve cuando alcanza el precio. CoDi no da cambio.</p>
+          <p class="callout"><b>Si la máquina no responde:</b> el cliente llama o escribe al teléfono de la calcomanía; el dueño revisa el panel y le devuelve el pago desde su banco. Solo hay devoluciones si el cliente las pide.</p>
+          <p class="callout"><b>Si el módulo pierde conexión:</b> la luz se pone roja y la calcomanía dice que en ese caso no se pague con CoDi. Si alguien paga de todos modos, el crédito se entrega al volver la conexión (dentro de 10 minutos) o se devuelve si lo pide.</p>
+        </div>
+      </section>
+
+      <section id="requisitos">
+        <h2><span class="n">10</span>Requisitos no negociables</h2>
+        <ul>
+          <li><b>Nunca dar servicio sin un pago válido</b> (solo avisos de pey con firma verificada).</li>
+          <li><b>Nunca cobrar sin dar servicio sin que el dueño se entere:</b> todo pago sin servicio genera alerta.</li>
+          <li><b>Un pago CoDi nunca se convierte en monedas:</b> sin cambio y sin devolución del crédito CoDi en monedas. Si no, se podría vaciar el hopper o sacar efectivo con pagos digitales.</li>
+          <li><b>No modificar ni dañar la máquina:</b> instalación reversible; las monedas siguen funcionando.</li>
+          <li><b>Sin conexión, la luz lo avisa;</b> los pagos que lleguen se entregan al reconectar o se devuelven a solicitud.</li>
+          <li><b>Seguridad eléctrica:</b> salida aislada con optoacoplador, caja cerrada resistente a salpicaduras y lejos del agua.</li>
+          <li><b>El dinero llega directo a la cuenta del dueño;</b> nosotros nunca lo tocamos.</li>
+        </ul>
+      </section>
+
+      <section id="conectividad">
+        <h2><span class="n">11</span>Conectividad: ¿y si no hay WiFi?</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Situación</th><th>Solución</th><th>Notas</th></tr></thead>
+            <tbody>
+              <tr><td>Hay WiFi del local cerca</td><td>Conectar el módulo a ese WiFi</td><td>Lo más barato. Si la señal llega débil, repetidor o antena exterior</td></tr>
+              <tr class="pick"><td><b>No hay WiFi (piloto)</b></td><td><b>Router 4G de bolsillo con chip de prepago</b>, conectado al contacto de 110 V de la máquina; el módulo se conecta a él por WiFi</td><td>No requiere cambiar el módulo. Costo del equipo y del plan por cotizar</td></tr>
+              <tr><td>No hay WiFi (producto)</td><td>Módulo celular integrado (LTE-M o 4G) con chip para dispositivos</td><td>Necesita su propia fuente: el eliminador de 12 V a 2 A de la máquina no aguanta los picos del módem</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>El módulo gasta pocos datos. Con datos celulares conviene una conexión que se quede abierta (MQTT) en lugar de preguntar cada 25 segundos. Medirlo en el piloto.</li>
+          <li>Revisar en la visita qué compañía tiene mejor señal en el sitio.</li>
+          <li>No usar módulos 2G: esas redes se están apagando.</li>
+        </ul>
+      </section>
+
+      <section id="levantamiento">
+        <h2><span class="n">12</span>Levantamiento técnico en la visita</h2>
+        <ul class="check">
+          <li>Marca y modelo de la máquina; fotos de la tarjeta controladora y su etiqueta</li>
+          <li>Modelo del monedero (CH-926, 616, DG600F, ICT…) y si es de pulsos o MDB (24 V)</li>
+          <li>Conector del monedero (¿JST XH de 4 pines?): fotos del conector y de los colores</li>
+          <li>Voltaje de alimentación (¿12 V?) y de la línea de pulsos en reposo (¿5 o 12 V?)</li>
+          <li>Switches del monedero: N.O./N.C. y velocidad del pulso</li>
+          <li>Cuántos pulsos manda cada moneda ($1, $2, $5, $10)</li>
+          <li>¿Sirve en cuanto entra la moneda, o acumula crédito y se presiona un botón?</li>
+          <li>¿La pantallita de la máquina muestra el crédito acumulado?</li>
+          <li>Llenados que ofrece y precio de cada uno</li>
+          <li>¿Da cambio (hopper)? ¿Tiene botón para devolver crédito? ¿Se puede desactivar?</li>
+          <li>¿Tiene conectada la señal de "fuera de servicio" (inhibit)? ¿Qué pasa sin agua?</li>
+          <li>WiFi disponible, o señal celular y de qué compañía</li>
+          <li>Contacto de 110 V y espacio en el gabinete para el módulo (y el router 4G)</li>
+          <li>Lugar detrás de la mica para las calcomanías y la luz, que se vean bien desde afuera</li>
+          <li>Quién tiene la llave y quién estará en la instalación</li>
+        </ul>
+        <p>Detalles de marcas, monederos y conectores en <code>sin-morralla/investigacion-maquinas-agua.md</code>.</p>
+      </section>
+
+      <section id="dependencias">
+        <h2><span class="n">13</span>Dependencias del API de pey</h2>
+        <h3>¿A qué cuenta llega el dinero?</h3>
+        <div class="two">
+          <div class="box"><h3>Opción A</h3><p>Registramos la CLABE del dueño como cuenta de cobro en nuestra API key; el dinero va directo a él. Confirmar con legal@pey.mx que es válido (regla 7.4).</p></div>
+          <div class="box"><h3>Opción B</h3><p>El dueño abre su propia cuenta en pey y nos comparte una API key para su máquina.</p></div>
+        </div>
+        <ul>
+          <li>La cuenta tarda <b>hasta 5 días hábiles</b> en activarse.</li>
+          <li>Este proyecto usa <b>su propia API key</b> y su propio webhook (regla 8.1).</li>
+          <li><b>Un QR fijo por máquina</b>, sin vencimiento (<code>expiration: 0</code>), creado una sola vez al instalar: con monto exacto si la máquina tiene un solo precio, o sin monto (<code>amount: 0</code>) si tiene varios. Si cambia un precio fijo, se crea un QR nuevo y se reimprime la calcomanía.</li>
+          <li>No hay ambiente de pruebas: probamos con cobros de $0.01. Ya confirmamos que el mismo QR acepta varios pagos.</li>
+          <li>No hay reembolsos por API: las devoluciones las hace el dueño desde su banco.</li>
+          <li>Base técnica existente: <code>hackaton-mexico-2026/apps/sin-morralla</code> (ya liga cada QR con su máquina), el firmware en <code>hackaton-mexico-2026/firmware</code> y la guía de hardware en <code>hackaton-mexico-2026/docs</code>. Hay que agregar la luz con el bip y el botón; el firmware aún no se prueba en una placa real.</li>
+        </ul>
+      </section>
+
+      <section id="riesgos">
+        <h2><span class="n">14</span>Riesgos</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Riesgo</th><th>Impacto</th><th>Mitigación</th></tr></thead>
+            <tbody>
+              <tr><td>El monedero no es de pulsos (MDB a 24 V)</td><td><span class="lvl alto">Alto</span></td><td>Revisarlo en la visita antes de comprar material; MDB queda fuera de la versión 1</td></tr>
+              <tr><td>Alguien saca monedas con crédito pagado por CoDi (botón de devolver crédito o cambio)</td><td><span class="lvl alto">Alto</span></td><td>El monto exacto no deja sobrante. Revisar si la máquina devuelve crédito y desactivarlo; si no se puede, el módulo "presiona" el botón del llenado para usar el crédito de inmediato</td></tr>
+              <tr><td>Daño eléctrico a la máquina</td><td><span class="lvl alto">Alto</span></td><td>Pruebas primero en banco, optoacoplador, fusible e instalación con el dueño presente</td></tr>
+              <tr><td>La cuenta del dueño no se activa a tiempo</td><td><span class="lvl alto">Alto</span></td><td>Iniciar el alta pronto; mientras, pruebas con nuestra cuenta y $0.01</td></tr>
+              <tr><td>Alguien pega un QR falso sobre la calcomanía</td><td><span class="lvl medio">Medio</span></td><td>Calcomanías por dentro de la mica; la calcomanía pide verificar el nombre del dueño en la app del banco; alerta si las ventas CoDi caen de golpe</td></tr>
+              <tr><td>La máquina sirve en cuanto recibe pulsos y el garrafón no está puesto</td><td><span class="lvl medio">Medio</span></td><td>Botón "Servir con CoDi": los pulsos salen solo al presionarlo</td></tr>
+              <tr><td>No hay WiFi junto a la máquina</td><td><span class="lvl medio">Medio</span></td><td>Router 4G de bolsillo con chip de prepago</td></tr>
+              <tr><td>Alguien paga sin conexión aunque la luz esté roja</td><td><span class="lvl bajo">Bajo</span></td><td>El crédito se entrega al reconectar o se devuelve a solicitud</td></tr>
+              <tr><td>Alguien paga el QR desde una foto, lejos de la máquina</td><td><span class="lvl bajo">Bajo</span></td><td>El crédito queda en la máquina; lo pierde quien pagó; devolución a solicitud</td></tr>
+              <tr><td>Cambia el precio de una máquina con QR de monto fijo</td><td><span class="lvl bajo">Bajo</span></td><td>Crear un QR nuevo y reimprimir la calcomanía</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="plan">
+        <h2><span class="n">15</span>Plan del piloto</h2>
+        <ol class="timeline">
+          <li><time>24–25 nov</time><span>Visita al dueño: entrevista, levantamiento técnico y fotos; iniciar el alta de la cuenta</span></li>
+          <li><time>25–26 nov</time><span>Comprar el módulo base y un monedero igual al de la máquina; router 4G si no hay WiFi</span></li>
+          <li><time>27–30 nov</time><span>Banco de pruebas: módulo, monedero y bomba; QR de la máquina; imprimir calcomanías</span></li>
+          <li><time>1–2 dic</time><span>Instalación en la máquina real con el dueño presente</span></li>
+          <li><time>2–8 dic</time><span>Piloto en vivo con revisión diaria</span></li>
+          <li><time>9 dic</time><span>Entrevista de cierre, métricas y testimonio</span></li>
+          <li class="hito"><time>10 dic</time><span><b>Cierre de postulación</b> (23:59)</span></li>
+          <li class="hito"><time>11–12 dic</time><span>Video con la máquina real y <b>entrega</b> (12 dic, 23:59)</span></li>
+        </ol>
+      </section>
+
+      <section id="preguntas">
+        <h2><span class="n">16</span>Entrevista inicial con el dueño</h2>
+        <ol class="questions">
+          <li>¿Cuántos garrafones vende al día cada máquina? ¿Qué llenados ofrece y a qué precio?</li>
+          <li>¿Cuántos clientes se van porque no traen monedas o no tienen cambio?</li>
+          <li>¿Cada cuánto recolectas las monedas? ¿Has tenido robos, atascos o monedas falsas?</li>
+          <li>¿Quién le da mantenimiento a la máquina? ¿Tiene garantía vigente?</li>
+          <li>¿Hay WiFi cerca de la máquina? Si no, ¿qué compañía de celular tiene buena señal ahí?</li>
+          <li>¿Nos permitirías abrir el gabinete e instalar un módulo que se puede quitar?</li>
+          <li>¿Tu máquina da cambio? ¿Se puede pedir la devolución del crédito con un botón?</li>
+          <li>¿Estás de acuerdo con que las devoluciones de pagos CoDi las hagas tú desde tu banco, solo si el cliente las pide?</li>
+          <li>¿Cuántas máquinas tienes? ¿Conoces a otros dueños?</li>
+          <li>¿Tu cuenta bancaria está a tu nombre? ¿En qué banco?<small>La CLABE se captura directamente en el portal de pey, no por chat.</small></li>
+          <li>Si te funciona, ¿cuánto pagarías por el módulo o al mes?</li>
+        </ol>
+      </section>
+
+      <section id="decisiones">
+        <h2><span class="n">17</span>Decisiones y pendientes</h2>
+        <div class="two">
+          <div class="box key">
+            <h3>Decidido</h3>
+            <ul>
+              <li>Solo CoDi (sin tarjeta).</li>
+              <li>Es un <b>complemento para máquinas que ya existen</b>; empezamos con agua purificada.</li>
+              <li><b>Piloto sin pantalla:</b> una calcomanía por máquina con su QR fijo (con monto si hay un solo precio, sin monto si hay varios) y un módulo base con luz, bip y botón. Validado: un QR fijo acepta varios pagos.</li>
+              <li><b>Segmentos:</b> empezar con agua purificada y buscar prospectos en montables infantiles, masajeadores, lavanderías y autolavados. Fuera: grúas de peluches y maquinitas.</li>
+              <li>Si el cliente se va sin servirse, el crédito se queda en la máquina, como con las monedas.</li>
+              <li><b>Los pagos CoDi no dan cambio ni se devuelven en monedas;</b> la calcomanía lo avisa.</li>
+              <li>Devoluciones solo si el cliente las pide, hechas por el dueño desde su banco.</li>
+              <li>Sin WiFi, en el piloto se usa un router 4G de bolsillo con chip de prepago.</li>
+              <li>El conteo de monedas reales queda para después del MVP.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pendiente</h3>
+            <ul>
+              <li>Probar el QR sin monto (solo para máquinas con varios llenados).</li>
+              <li>Datos del cliente piloto (3) y levantamiento técnico (12).</li>
+              <li>Cuenta de cobro: opción A o B (13).</li>
+              <li>Cómo evitar la devolución de crédito en monedas según la máquina piloto (14).</li>
+              <li>Metas numéricas definitivas (6 y 7).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <p class="foot">Fuente: <code>sin-morralla/MVP.md</code> · Este visor se actualiza cada vez que cambia el documento.</p>
+</div>

@@ -1,0 +1,358 @@
+<title>Sin Morralla · Plan de software</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: plan de trabajo de una columna; arriba "lo que tienes que hacer", luego arquitectura, identidad y semana. Usa la identidad de Sin Morralla. */
+:root {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --ink: #141a2e;
+  --muted: #59617a;
+  --line: #dbe0ec;
+  --accent: #2743a8;
+  --accent-soft: #e4e9fb;
+  --accent-ink: #ffffff;
+  --coin: #f2a71b;
+  --coin-soft: #fdf1d6;
+  --coin-ink: #7a4e00;
+  --water: #1fb5d6;
+  --water-soft: #dff5fa;
+  --risk: #b3261e;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1220; --surface: #161c2e; --ink: #e8ebf4; --muted: #9ea6bd; --line: #283049;
+    --accent: #8fa6ff; --accent-soft: #1d2650; --accent-ink: #0b1030;
+    --coin: #f2a71b; --coin-soft: #3a2a08; --coin-ink: #f6c66a;
+    --water: #4fd0ea; --water-soft: #0f3540; --risk: #ff8d84;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1220; --surface: #161c2e; --ink: #e8ebf4; --muted: #9ea6bd; --line: #283049;
+  --accent: #8fa6ff; --accent-soft: #1d2650; --accent-ink: #0b1030;
+  --coin: #f2a71b; --coin-soft: #3a2a08; --coin-ink: #f6c66a;
+  --water: #4fd0ea; --water-soft: #0f3540; --risk: #ff8d84;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 56px;
+}
+
+header { display: grid; gap: 18px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.brandline { display: flex; align-items: center; gap: 14px; }
+.brandline svg { width: 56px; height: 56px; flex: none; }
+.word { font: 800 30px/1 var(--display); letter-spacing: -0.01em; }
+.word .sin { color: var(--accent); font-weight: 600; }
+.eyebrow { font: 600 12px/1.3 var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 800 clamp(36px, 6vw, 56px)/1.05 var(--display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.lead { font-size: 18px; margin: 0; max-width: 64ch; }
+.pill { display: inline-flex; padding: 3px 10px; border-radius: 999px; background: var(--coin-soft); color: var(--coin-ink); font-weight: 600; font-size: 13px; }
+
+section { display: grid; gap: 16px; min-width: 0; scroll-margin-top: 20px; }
+h2 { font: 700 28px/1.2 var(--display); margin: 0; text-wrap: balance; }
+h3 { font: 600 17px/1.3 var(--body); margin: 0; }
+p { margin: 0; max-width: 70ch; }
+ul, ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+
+.goals { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.goals li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 4px; }
+.goals b { font: 700 15px/1.3 var(--display); }
+.goals span { font-size: 14px; color: var(--muted); }
+
+/* tareas del usuario */
+.todo { display: grid; gap: 12px; }
+.task { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 10px; }
+.task.first { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.task-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.task-head .when { font: 500 12px var(--mono); color: var(--coin-ink); background: var(--coin-soft); padding: 2px 8px; border-radius: 6px; }
+.task ol { gap: 8px; }
+.note { font-size: 14px; color: var(--muted); }
+pre.cmd { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; overflow-x: auto; font: 500 13px/1.5 var(--mono); }
+code { font: 500 0.88em var(--mono); background: var(--bg); border: 1px solid var(--line); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+.warn { color: var(--risk); font-weight: 600; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+td.k { font-weight: 600; white-space: nowrap; }
+td code { white-space: nowrap; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; overflow-x: auto; }
+.callout { background: var(--water-soft); padding: 12px 16px; border-radius: 10px; font-size: 15px; }
+
+/* identidad */
+.brand-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; }
+.logo-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 18px; align-content: center; }
+.logo-row { display: flex; align-items: center; gap: 14px; }
+.logo-row svg { width: 64px; height: 64px; flex: none; }
+.logo-row .word { font-size: 36px; }
+.logo-dark { background: #141a2e; border-radius: 10px; padding: 16px; }
+.logo-dark .word { color: #ffffff; }
+.logo-dark .word .sin { color: #8fa6ff; }
+.swatches { display: grid; gap: 8px; }
+.sw { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+.chip { width: 44px; height: 44px; border-radius: 8px; border: 1px solid rgb(0 0 0 / 0.08); }
+.sw b { font-size: 14px; display: block; }
+.sw span { font: 500 12px var(--mono); color: var(--muted); }
+
+.repo { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font: 500 13px/1.6 var(--mono); }
+
+.week td:first-child { font: 600 14px var(--mono); white-space: nowrap; color: var(--accent); }
+
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 760px) {
+  .brand-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brandline">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+      <div class="word"><span class="sin">sin</span> morralla</div>
+    </div>
+    <div class="eyebrow">Plan de software · Semana del 24 al 30 de noviembre</div>
+    <h1>Del QR a la máquina, publicado en Cloudflare</h1>
+    <p class="lead">Lo que vamos a construir esta semana, cómo se monta todo en tu cuenta de Cloudflare, la identidad visual y lo que tienes que hacer en pey antes de escribir código.</p>
+    <div><span class="pill">Propuesta para aprobar</span></div>
+  </header>
+
+  <section aria-label="Meta de la semana">
+    <h2>Meta de la semana</h2>
+    <ul class="goals">
+      <li><b>Repo público</b><span>VictorLaraL/sin-morralla en GitHub</span></li>
+      <li><b>Todo en Cloudflare</b><span>Una dirección HTTPS fija en tu cuenta</span></li>
+      <li><b>Landing con demo</b><span>Pagas $1 con CoDi y se llena el garrafón</span></li>
+      <li><b>Portal del dueño</b><span>Ventas en vivo, máquina y calcomanía</span></li>
+      <li><b>ESP32 real</b><span>Sale agua en el banco de pruebas con un pago real</span></li>
+    </ul>
+  </section>
+
+  <section id="tu-parte" aria-label="Lo que tienes que hacer">
+    <h2>Lo que tienes que hacer</h2>
+    <div class="todo">
+      <div class="task first">
+        <div class="task-head"><span class="when">Hecho</span><h3>1. Activar pey</h3></div>
+        <p class="note">Listo el 23 de noviembre: tu cuenta "Sin Morralla" está registrada (pendiente de activarse) y la API key de pruebas está ligada a la cuenta de pruebas de pey.</p>
+        <ol>
+          <li>Entra a <code>portal.pey.mx</code> con tu cuenta.</li>
+          <li><b>Registra tu cuenta bancaria:</b> alias, tu nombre como titular, CLABE de 18 dígitos y tipo persona física. <b>Tarda hasta 5 días hábiles</b> en quedar activa.</li>
+          <li><b>Crea una API key.</b> Mientras tu cuenta se activa, lígala a la cuenta de pruebas que publica pey en su documentación (tutorial "Crear una API key", apartado "Comienza a probar de inmediato"). Los pagos a esa cuenta no se devuelven: usa solo $0.01.</li>
+          <li>Guarda la API key en tu gestor de contraseñas. <span class="warn">No la pegues en el chat ni en el código.</span></li>
+          <li>Activa CoDi en la app de tu banco, si no lo tienes. La primera vez suele pedir registrar tu celular.</li>
+        </ol>
+      </div>
+
+      <div class="task">
+        <div class="task-head"><span class="when">Hecho</span><h3>2. Probar el QR fijo (sin programar)</h3></div>
+        <p class="note">Resultado: el mismo QR aceptó dos pagos de $0.01 y pey registró dos transacciones exitosas. Falta, cuando haga falta, la prueba sin monto.</p>
+        <p>Dejé un script en <code>sin-morralla/herramientas/prueba-qr-pey.ps1</code>. Crea un QR sin vencimiento, lo abre como imagen, tú lo pagas <b>dos veces</b> desde tu banco y al final muestra cuántos pagos registró pey. Te pide la API key sin mostrarla y no la guarda.</p>
+        <p>Desde la carpeta <code>sin-morralla</code>, primero con monto fijo:</p>
+        <pre class="cmd">powershell -ExecutionPolicy Bypass -File .\herramientas\prueba-qr-pey.ps1 -Monto 0.01</pre>
+        <p>Después sin monto (el cliente lo escribe; paga $0.01):</p>
+        <pre class="cmd">powershell -ExecutionPolicy Bypass -File .\herramientas\prueba-qr-pey.ps1 -Monto 0</pre>
+        <p class="note">Cuéntame cuántos pagos aparecieron en cada prueba y qué nombre de beneficiario te mostró tu app. No me compartas la API key ni CLABEs.</p>
+      </div>
+
+      <div class="task">
+        <div class="task-head"><span class="when">Hoy</span><h3>3. Preguntar a pey</h3></div>
+        <ul>
+          <li>¿Un QR fijo (sin vencimiento) acepta muchos pagos, con monto y sin monto?</li>
+          <li>¿Qué límites de solicitudes tiene el API?</li>
+          <li>¿Podemos registrar la CLABE de un cliente como cuenta de cobro en nuestra API key? (regla 7.4)</li>
+        </ul>
+        <p class="note">Por los mentores del hackatón o por el soporte de pey.</p>
+      </div>
+
+      <div class="task">
+        <div class="task-head"><span class="when">Hoy</span><h3>4. GitHub con tu cuenta personal</h3></div>
+        <p>Inicia sesión en GitHub con tu cuenta personal (<b>VictorLaraL</b>); si tienes varias, cambia a esa:</p>
+        <pre class="cmd">gh auth login</pre>
+        <pre class="cmd">gh auth switch --user VictorLaraL</pre>
+      </div>
+
+      <div class="task">
+        <div class="task-head"><span class="when">Hoy</span><h3>5. Cuenta de Cloudflare</h3></div>
+        <ol>
+          <li>Crea tu cuenta gratuita en <code>dash.cloudflare.com</code> y verifica tu correo.</li>
+          <li>En Workers, elige tu subdominio de <code>workers.dev</code> (por ejemplo, <code>sinmorralla</code>).</li>
+          <li>Cuando empecemos a programar te pediré correr <code>npx wrangler login</code>, que abre el navegador para que autorices.</li>
+        </ol>
+      </div>
+
+      <div class="task">
+        <div class="task-head"><span class="when">Esta semana</span><h3>6. Compras y cliente</h3></div>
+        <ul>
+          <li><b>Hardware para el viernes:</b> ESP32, optoacoplador, luz, zumbador, botón, multímetro y banco de pruebas (lista en <code>hardware-mvp.md</code>). Para el banco basta un monedero CH-926 genérico de 12 V.</li>
+          <li><b>Cliente:</b> buscar al dueño de la máquina de agua para el piloto.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Infraestructura">
+    <h2>¿Se puede montar todo en Cloudflare? Sí</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pieza</th><th>Servicio</th><th>Para qué</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Servidor</td><td>Workers</td><td>Recibe los avisos de pey, atiende al ESP32 y sirve la API</td></tr>
+          <tr><td class="k">Páginas</td><td>Workers static assets</td><td>Landing, demo y portal</td></tr>
+          <tr><td class="k">Tiempo real</td><td>Durable Objects (uno por máquina)</td><td>Cola de créditos, conexión del ESP32, avisos en vivo, detección de "sin conexión"</td></tr>
+          <tr><td class="k">Base de datos</td><td>D1 (SQLite)</td><td>Máquinas, QR, pagos, créditos, contactos</td></tr>
+          <tr><td class="k">Tareas programadas</td><td>Cron Triggers y alarmas</td><td>Vencer créditos y revisar máquinas desconectadas</td></tr>
+          <tr><td class="k">Llaves</td><td>Secrets</td><td>API key y secreto del webhook de pey</td></tr>
+          <tr><td class="k">Acceso al portal</td><td>Cloudflare Access</td><td>Entrar con un código por correo, sin programar un login</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout">pey necesita una dirección HTTPS fija para mandar los avisos, y Workers la da desde el primer deploy. Para empezar alcanza el plan gratuito: un ESP32 que pregunta cada 25 segundos hace unas 3,500 solicitudes al día. Hay que confirmar los límites vigentes al crear la cuenta.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  B[App del banco] -- paga el QR --> P[API de pey]
+  P -- aviso firmado --> W[Worker]
+  W --> D1[(D1)]
+  W --> DO[Durable Object de la máquina]
+  DO -- consulta HTTPS --> E[ESP32]
+  E -- pulsos --> M[Monedero de la máquina]
+  DO -- en vivo --> L[Landing: máquina virtual]
+  DO -- en vivo --> PO[Portal del dueño]
+</pre>
+    </div>
+  </section>
+
+  <section aria-label="Qué construimos">
+    <h2>Qué vamos a construir</h2>
+    <h3>Landing (lo primero que ve el jurado)</h3>
+    <ol>
+      <li><b>Encabezado:</b> "Tu máquina de siempre, ahora sin monedas." con la demo al lado.</li>
+      <li><b>Demo en vivo:</b> una máquina virtual con su QR CoDi real de <b>$1</b>. Pagas desde tu banco y el garrafón de la página se llena al llegar el aviso, con "Pago recibido hace 2 s" y un contador de pagos. La página dice claramente que el pago es real.</li>
+      <li><b>Cómo funciona</b>, <b>para el dueño</b>, <b>máquinas compatibles</b> y <b>seguridad</b>.</li>
+      <li><b>Contacto:</b> "Quiero probarlo en mi máquina".</li>
+      <li><b>Pie:</b> CoDi es marca de Banco de México; Sin Morralla no está afiliado.</li>
+    </ol>
+    <h3>Portal del dueño (un solo cliente)</h3>
+    <ul>
+      <li>Ventas CoDi del día y de la semana, máquina en línea o no, últimos pagos.</li>
+      <li>Pagos por atender (sin servicio o vencidos) para devolverlos si el cliente lo pide.</li>
+      <li>Configuración de la máquina y pulso de prueba.</li>
+      <li>Calcomanía lista para imprimir: QR, nombre del dueño, "verifica el nombre antes de pagar", "sin cambio" y teléfono.</li>
+    </ul>
+    <h3>Rutas del servidor</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ruta</th><th>Quién</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td><code>/</code></td><td>Público</td><td>Landing con la demo</td></tr>
+          <tr><td><code>/api/demo/en-vivo</code></td><td>Público</td><td>Avisos en vivo de la máquina virtual</td></tr>
+          <tr><td><code>/api/contacto</code></td><td>Público</td><td>Formulario de interesados</td></tr>
+          <tr><td><code>/webhooks/pey</code></td><td>pey</td><td>Verifica la firma, registra el pago una sola vez y crea el crédito</td></tr>
+          <tr><td><code>/device/poll</code>, <code>/device/ack</code></td><td>ESP32</td><td>Pide créditos y confirma la entrega</td></tr>
+          <tr><td><code>/device/estado</code></td><td>ESP32</td><td>Botón presionado y estado del módulo</td></tr>
+          <tr><td><code>/portal</code></td><td>Dueño</td><td>Panel protegido con Cloudflare Access</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Firmware</h3>
+    <p>El envío de pulsos con confirmación ya existe. Falta: luz verde/roja, bip, botón "Servir con CoDi", apuntar a la dirección del Worker y probarlo en una placa real.</p>
+  </section>
+
+  <section aria-label="Identidad visual">
+    <h2>Identidad visual</h2>
+    <p>Una moneda que contiene el marcador de un QR: la moneda se vuelve cobro digital. Archivos en <code>sin-morralla/brand/</code>.</p>
+    <div class="brand-grid">
+      <div class="logo-card">
+        <div class="logo-row">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+          <div class="word"><span class="sin">sin</span> morralla</div>
+        </div>
+        <div class="logo-row logo-dark">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#141A2E" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#141A2E"/></svg>
+          <div class="word"><span class="sin">sin</span> morralla</div>
+        </div>
+        <p class="note">Tipografías: Bricolage Grotesque para títulos e Inter para texto.</p>
+      </div>
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#2743A8"></div><div><b>Azul Morralla</b><span>#2743A8 · color principal</span></div></div>
+        <div class="sw"><div class="chip" style="background:#F2A71B"></div><div><b>Ámbar Moneda</b><span>#F2A71B · la moneda y acentos</span></div></div>
+        <div class="sw"><div class="chip" style="background:#1FB5D6"></div><div><b>Agua</b><span>#1FB5D6 · la línea de agua y el garrafón</span></div></div>
+        <div class="sw"><div class="chip" style="background:#141A2E"></div><div><b>Tinta</b><span>#141A2E · texto</span></div></div>
+        <div class="sw"><div class="chip" style="background:#F5F7FB"></div><div><b>Papel</b><span>#F5F7FB · fondos</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Repositorio">
+    <h2>Repositorio público</h2>
+<pre class="repo">sin-morralla/
+  README.md
+  docs/            MVP, plan, hardware, investigación y segmentos
+  brand/           logo y colores
+  apps/worker/     Worker: rutas, Durable Object, migraciones de D1
+  apps/web/        landing, demo y portal
+  firmware/esp32/  código del módulo
+  herramientas/    pruebas con pey y simuladores</pre>
+    <ul>
+      <li><b>Nunca</b> se suben llaves ni secretos: van en los Secrets de Cloudflare.</li>
+      <li><b>Nunca</b> se suben datos del cliente piloto (nombre, ubicación, CLABE): van en una carpeta <code>privado/</code> fuera de git.</li>
+      <li><b>Sin licencia de código abierto</b> por ahora: el código se puede ver pero no reutilizar.</li>
+    </ul>
+  </section>
+
+  <section aria-label="Semana">
+    <h2>Plan de la semana</h2>
+    <div class="table-wrap">
+      <table class="week">
+        <thead><tr><th>Día</th><th>Claude</th><th>Tú</th></tr></thead>
+        <tbody>
+          <tr><td>Lun 24</td><td>Repo y estructura; landing estática con la identidad</td><td>Activar pey y hacer las pruebas; GitHub y Cloudflare; comprar hardware</td></tr>
+          <tr><td>Mar 25</td><td>Worker: verificación de avisos, D1, Durable Object, API del ESP32; primer deploy</td><td>Cargar la API key y el secreto del webhook en Cloudflare</td></tr>
+          <tr><td>Mié 26</td><td>Demo en vivo de la landing; primeros pagos reales de punta a punta</td><td>Pagar la demo y revisar la experiencia</td></tr>
+          <tr><td>Jue 27</td><td>Portal del dueño con Cloudflare Access; calcomanía imprimible</td><td>Probar el portal</td></tr>
+          <tr><td>Vie 28</td><td>Firmware: luz, bip y botón; banco de pruebas con monedero y bomba</td><td>Armar el banco de pruebas</td></tr>
+          <tr><td>Sáb–Dom</td><td>Pulido, "sin conexión" y pruebas de fallas</td><td>Visitar al dueño si ya lo encontraste</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-label="Riesgos">
+    <h2>Riesgos de la semana</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Riesgo</th><th>Qué hacemos</th></tr></thead>
+        <tbody>
+          <tr><td>Tu CLABE tarda en activarse</td><td>Probar con la cuenta de pruebas; <b>antes de abrir la demo al público, cambiar a tu cuenta</b>, o los pagos se pierden</td></tr>
+          <tr><td>Las cuentas aparecen como "Pendiente"</td><td>La de pruebas ya recibe pagos (probado el 23 de noviembre); la tuya se usa cuando pase a activa</td></tr>
+          <tr><td>Durable Objects o D1 se complican</td><td>El prototipo ya funciona en Node; se puede publicar temporalmente en otro servicio</td></tr>
+          <tr><td>El ESP32 no se conecta por HTTPS</td><td>Probar primero en tu WiFi; cargar los certificados raíz en el firmware</td></tr>
+          <tr><td>Abuso de la demo pública</td><td>Es un cobro real de $1; límite de avisos por minuto en la página</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Fuente: <code>sin-morralla/PLAN.md</code> · CoDi es marca de Banco de México.</footer>
+</div>
