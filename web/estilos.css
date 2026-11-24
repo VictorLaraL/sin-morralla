@@ -1,0 +1,321 @@
+/* Sin Morralla — estilos compartidos por la landing y el portal. */
+
+:root {
+  --azul: #2743a8;
+  --azul-osc: #1b2f7a;
+  --azul-claro: #e6ebfa;
+  --ambar: #f2a71b;
+  --ambar-osc: #c98306;
+  --agua: #1fb5d6;
+  --agua-claro: #d9f3fa;
+  --tinta: #141a2e;
+  --tinta-2: #4a5270;
+  --tinta-3: #6b7390;
+  --papel: #f5f7fb;
+  --blanco: #ffffff;
+  --borde: #dde3ee;
+  --verde: #15803d;
+  --verde-claro: #dcfce7;
+  --rojo: #b91c1c;
+  --rojo-claro: #fee2e2;
+  --sombra: 0 1px 2px rgb(20 26 46 / 6%), 0 8px 24px rgb(20 26 46 / 8%);
+  --radio: 16px;
+  --titulos: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --texto: "Inter", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 16px/1.6 var(--texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--titulos);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0 0 1em;
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--azul);
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ambar);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.contenedor {
+  width: min(1120px, 100% - 32px);
+  margin-inline: auto;
+}
+
+.oculto-visual {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Encabezado */
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgb(245 247 251 / 88%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borde);
+}
+
+.barra .contenedor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--tinta);
+  font: 800 22px/1 var(--titulos);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.logo svg {
+  width: 34px;
+  height: 34px;
+}
+
+.logo .sin {
+  color: var(--azul);
+  font-weight: 600;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.menu a {
+  color: var(--tinta-2);
+  text-decoration: none;
+}
+
+.menu a:hover {
+  color: var(--azul);
+}
+
+.menu a.boton {
+  white-space: nowrap;
+}
+
+.menu a.boton,
+.menu a.boton:hover {
+  color: var(--blanco);
+}
+
+@media (max-width: 760px) {
+  .menu .opcional {
+    display: none;
+  }
+}
+
+/* Botones */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--azul);
+  color: var(--blanco);
+  font: 600 16px/1 var(--texto);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.boton:hover {
+  background: var(--azul-osc);
+}
+
+.boton:active {
+  transform: translateY(1px);
+}
+
+.boton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.boton.secundario {
+  background: transparent;
+  color: var(--azul);
+  border-color: currentColor;
+}
+
+.boton.secundario:hover {
+  background: var(--azul-claro);
+}
+
+.boton.ambar {
+  background: var(--ambar);
+  color: var(--tinta);
+}
+
+.boton.ambar:hover {
+  background: #e19812;
+}
+
+.boton.chico {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+/* Tarjetas y etiquetas */
+.tarjeta {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--azul-claro);
+  color: var(--azul);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.etiqueta.simulado {
+  background: var(--ambar);
+  color: var(--tinta);
+  letter-spacing: 0.04em;
+}
+
+.etiqueta.verde {
+  background: var(--verde-claro);
+  color: var(--verde);
+}
+
+.etiqueta.roja {
+  background: var(--rojo-claro);
+  color: var(--rojo);
+}
+
+.punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Formularios */
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #c9d1e0;
+  border-radius: 10px;
+  background: var(--blanco);
+  color: var(--tinta);
+  font: 16px/1.4 var(--texto);
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 3px solid rgb(39 67 168 / 25%);
+  border-color: var(--azul);
+}
+
+.aviso {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.aviso.ok {
+  background: var(--verde-claro);
+  color: var(--verde);
+}
+
+.aviso.error {
+  background: var(--rojo-claro);
+  color: var(--rojo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

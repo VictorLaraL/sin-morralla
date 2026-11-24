@@ -3,10 +3,264 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sin Morralla</title>
+  <title>Sin Morralla — tu máquina de siempre, ahora sin monedas</title>
+  <meta name="description" content="Módulo que conecta las máquinas de monedas a CoDi. El cliente paga con la app de su banco y la máquina sirve como si le hubieran echado monedas.">
+  <meta name="theme-color" content="#2743A8">
+  <meta property="og:title" content="Sin Morralla">
+  <meta property="og:description" content="Tu máquina de siempre, ahora sin monedas: cobra con CoDi en máquinas de agua purificada.">
+  <link rel="icon" href="/marca.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/estilos.css">
+  <link rel="stylesheet" href="/landing.css">
 </head>
 <body>
-  <h1>Sin Morralla</h1>
-  <p>Tu máquina de siempre, ahora sin monedas.</p>
+  <header class="barra">
+    <div class="contenedor">
+      <a class="logo" href="/" aria-label="Sin Morralla, inicio">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+        <span><span class="sin">sin</span> morralla</span>
+      </a>
+      <nav class="menu" aria-label="Secciones">
+        <a class="opcional" href="#como-funciona">Cómo funciona</a>
+        <a class="opcional" href="#duenos">Para dueños</a>
+        <a class="opcional" href="#seguridad">Seguridad</a>
+        <a class="opcional" href="/portal/">Portal</a>
+        <a class="boton chico" href="#contacto">Quiero probarlo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Encabezado y demo en vivo -->
+    <section class="portada">
+      <div class="contenedor portada-rejilla">
+        <div class="portada-texto">
+          <span class="etiqueta">Máquinas de agua purificada · CoDi</span>
+          <h1>Tu máquina de siempre, <span class="resalta">ahora sin monedas.</span></h1>
+          <p class="entrada">
+            Sin Morralla es un módulo que se conecta al monedero de la máquina y la deja cobrar con CoDi. El cliente
+            escanea la calcomanía, paga desde la app de su banco y la máquina sirve como si le hubieran echado monedas.
+          </p>
+          <div class="acciones">
+            <a class="boton" href="#demo">Pruébalo con $1</a>
+            <a class="boton secundario" href="#como-funciona">Cómo funciona</a>
+          </div>
+          <ul class="ventajas">
+            <li>Sin cambiar la máquina</li>
+            <li>Sin terminal bancaria</li>
+            <li>Las monedas siguen funcionando</li>
+          </ul>
+        </div>
+
+        <div class="demo tarjeta" id="demo" aria-labelledby="demo-titulo">
+          <div class="demo-cabeza">
+            <h2 id="demo-titulo">Demo en vivo</h2>
+            <span class="etiqueta" id="conexion"><span class="punto"></span><span>Conectando…</span></span>
+          </div>
+
+          <div class="demo-cuerpo">
+            <figure class="calcomania" aria-describedby="calcomania-ayuda">
+              <div class="calcomania-cabeza">
+                <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+                <strong>Paga <span id="monto">$1.00</span> con CoDi</strong>
+              </div>
+              <div class="qr" id="qr" role="img" aria-label="Código QR CoDi de la demo">
+                <span class="qr-cargando">Cargando QR…</span>
+              </div>
+              <figcaption id="calcomania-ayuda">
+                Antes de pagar, revisa en tu banco el nombre del beneficiario y el monto. <strong>Sin cambio.</strong>
+              </figcaption>
+            </figure>
+
+            <div class="maquina-caja">
+              <svg class="maquina" id="maquina" viewBox="0 0 320 420" role="img" aria-label="Máquina de agua de la demo">
+                <defs>
+                  <clipPath id="forma-garrafon">
+                    <path d="M88 46 V20 H112 V46 C112 60 160 62 166 84 L168 226 Q168 246 148 246 L52 246 Q32 246 32 226 L34 84 C40 62 88 60 88 46 Z"/>
+                  </clipPath>
+                  <linearGradient id="brillo" x1="0" x2="1">
+                    <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+                    <stop offset="0.35" stop-color="#fff" stop-opacity="0.1"/>
+                    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <rect x="10" y="6" width="300" height="408" rx="24" fill="#2743A8"/>
+                <rect x="10" y="384" width="300" height="30" rx="0" fill="#1B2F7A"/>
+                <rect x="10" y="390" width="300" height="24" rx="12" fill="#1B2F7A"/>
+                <text x="132" y="45" text-anchor="middle" fill="#fff" font-family="Bricolage Grotesque, Segoe UI, sans-serif" font-weight="800" font-size="19" letter-spacing="1.5">AGUA PURIFICADA</text>
+                <rect x="34" y="62" width="196" height="318" rx="16" fill="#E9EFF8"/>
+                <rect x="34" y="62" width="196" height="14" rx="7" fill="#D3DCEB"/>
+                <rect x="120" y="62" width="24" height="24" rx="3" fill="#8C9AB3"/>
+                <rect x="126" y="86" width="12" height="9" rx="2" fill="#6F7E99"/>
+                <rect class="chorro" x="128.5" y="95" width="7" height="70" rx="3.5" fill="#1FB5D6"/>
+                <g transform="translate(40 150) scale(0.92)">
+                  <g clip-path="url(#forma-garrafon)">
+                    <rect x="0" y="0" width="200" height="250" fill="#F4FAFE"/>
+                    <g class="agua">
+                      <path class="ola" d="M-200 52 q25 -9 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V260 H-200 Z" fill="#1FB5D6"/>
+                      <path class="ola ola-2" d="M-200 56 q25 -7 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V260 H-200 Z" fill="#17A3C2" opacity="0.6"/>
+                    </g>
+                    <rect x="0" y="0" width="200" height="250" fill="url(#brillo)"/>
+                  </g>
+                  <path d="M88 46 V20 H112 V46 C112 60 160 62 166 84 L168 226 Q168 246 148 246 L52 246 Q32 246 32 226 L34 84 C40 62 88 60 88 46 Z" fill="none" stroke="#9FB3CF" stroke-width="3"/>
+                  <path d="M36 120 H164 M36 180 H166" stroke="#9FB3CF" stroke-width="2" opacity="0.7"/>
+                  <rect x="84" y="16" width="32" height="8" rx="3" fill="#9FB3CF"/>
+                </g>
+                <circle class="led" cx="270" cy="84" r="9" fill="#22C55E"/>
+                <text x="270" y="112" text-anchor="middle" fill="#C7D2F0" font-family="Inter, Segoe UI, sans-serif" font-size="11" font-weight="600">CoDi</text>
+                <rect x="254" y="128" width="32" height="46" rx="7" fill="#1B2F7A"/>
+                <rect x="268" y="136" width="4" height="30" rx="2" fill="#0B1440"/>
+                <circle class="moneda" cx="270" cy="152" r="9" fill="#F2A71B" stroke="#C98306" stroke-width="2"/>
+                <circle class="boton-servir" cx="270" cy="208" r="17" fill="#F2A71B" stroke="#C98306" stroke-width="3"/>
+                <rect x="246" y="246" width="48" height="60" rx="7" fill="#fff"/>
+                <rect x="252" y="252" width="12" height="12" rx="2" fill="none" stroke="#2743A8" stroke-width="3"/>
+                <rect x="276" y="252" width="12" height="12" rx="2" fill="none" stroke="#2743A8" stroke-width="3"/>
+                <rect x="252" y="276" width="12" height="12" rx="2" fill="none" stroke="#2743A8" stroke-width="3"/>
+                <rect x="278" y="278" width="5" height="5" fill="#2743A8"/>
+                <rect x="268" y="270" width="5" height="5" fill="#2743A8"/>
+                <text x="270" y="301" text-anchor="middle" fill="#2743A8" font-family="Inter, Segoe UI, sans-serif" font-size="8" font-weight="700">CoDi</text>
+                <rect x="252" y="336" width="36" height="26" rx="6" fill="#1B2F7A"/>
+              </svg>
+              <p class="estado" id="estado" role="status" aria-live="polite">Esperando tu pago de $1.00</p>
+              <p class="pulsos" id="pulsos" aria-hidden="true">&nbsp;</p>
+            </div>
+          </div>
+
+          <dl class="contadores">
+            <div><dt>Pagos de la demo hoy</dt><dd id="pagos-hoy">—</dd></div>
+            <div><dt>Último pago</dt><dd id="ultimo-pago">—</dd></div>
+          </dl>
+
+          <div class="demo-pie">
+            <p id="nota-pago" class="nota-pago">
+              Es un <strong>pago real de $1.00</strong> con CoDi a la cuenta del proyecto. Abre la app de tu banco,
+              entra a CoDi y escanea el QR. ¿Estás en el celular? Descarga el QR y ábrelo desde la app de tu banco. Si quieres que te devolvamos tu peso, escríbenos.
+            </p>
+            <div class="demo-botones">
+              <button class="boton secundario chico" id="descargar" type="button" disabled>Descargar QR</button>
+              <button class="boton ambar chico" id="simular" type="button" hidden>Simular pago de $1</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cómo funciona -->
+    <section class="seccion" id="como-funciona">
+      <div class="contenedor">
+        <span class="etiqueta">Cómo funciona</span>
+        <h2>Un pago de CoDi se convierte en las monedas que la máquina ya entiende.</h2>
+        <ol class="pasos">
+          <li class="tarjeta">
+            <span class="numero">1</span>
+            <h3>Conectamos el módulo</h3>
+            <p>Un módulo pequeño (ESP32) se conecta en paralelo al monedero y al WiFi del local. Las monedas siguen funcionando igual.</p>
+          </li>
+          <li class="tarjeta">
+            <span class="numero">2</span>
+            <h3>Pegamos la calcomanía</h3>
+            <p>Cada máquina lleva su QR CoDi fijo con el precio ya escrito. No hace falta pantalla ni terminal.</p>
+          </li>
+          <li class="tarjeta">
+            <span class="numero">3</span>
+            <h3>Tu cliente paga y la máquina sirve</h3>
+            <p>Cuando el banco confirma el pago, el módulo manda los mismos pulsos que una moneda. La luz se pone verde y empieza a servir.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Para el dueño -->
+    <section class="seccion alterna" id="duenos">
+      <div class="contenedor duenos-rejilla">
+        <div>
+          <span class="etiqueta">Para dueños de máquinas</span>
+          <h2>Cobra con CoDi sin cambiar tu máquina.</h2>
+          <p class="entrada">Los clientes ya no traen monedas. Con Sin Morralla tu máquina acepta el pago que todos tienen en el celular, y tú lo ves llegar al instante.</p>
+          <a class="boton" href="#contacto">Quiero probarlo en mi máquina</a>
+        </div>
+        <ul class="beneficios">
+          <li class="tarjeta"><h3>Sin terminal ni comisiones de tarjeta</h3><p>El cobro llega por SPEI a tu cuenta con su clave de rastreo.</p></li>
+          <li class="tarjeta"><h3>Tu máquina, tal cual</h3><p>El módulo convive con el monedero. Si un día lo quitas, la máquina queda como estaba.</p></li>
+          <li class="tarjeta"><h3>Ventas en tiempo real</h3><p>Cada pago aparece en tu portal en segundos, con la máquina que lo cobró.</p></li>
+          <li class="tarjeta"><h3>Menos morralla que cuidar</h3><p>Menos monedas que contar, cambiar y resguardar.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Máquinas -->
+    <section class="seccion" id="maquinas">
+      <div class="contenedor">
+        <span class="etiqueta">Máquinas compatibles</span>
+        <h2>Empezamos por el agua purificada.</h2>
+        <div class="maquinas">
+          <div class="tarjeta destacada">
+            <h3>Hoy</h3>
+            <p>Despachadores de agua purificada con monedero de pulsos, la máquina de monedas más común en las colonias.</p>
+          </div>
+          <div class="tarjeta">
+            <h3>Después</h3>
+            <p>Cualquier máquina que cuente monedas por pulsos: juegos montables, masajeadores, lavanderías de autoservicio y básculas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seguridad -->
+    <section class="seccion alterna" id="seguridad">
+      <div class="contenedor">
+        <span class="etiqueta">Seguridad y reglas de cobro</span>
+        <h2>Reglas claras para el cliente y para el dueño.</h2>
+        <ul class="reglas">
+          <li><strong>Revisa el beneficiario.</strong> Tu banco te muestra el nombre del dueño y el monto antes de pagar. Si no coincide con la calcomanía, no pagues.</li>
+          <li><strong>CoDi no da cambio.</strong> El QR ya trae el precio exacto. Lo que pagas de más no se devuelve en monedas: así la máquina nunca se queda sin cambio para quien paga en efectivo.</li>
+          <li><strong>La luz te avisa.</strong> Verde: lista para cobrar con CoDi. Roja: sin conexión, usa monedas.</li>
+          <li><strong>Ningún pago se pierde.</strong> Si la máquina no pudo servir, el pago queda registrado y el dueño lo devuelve desde su banco cuando se lo pidas.</li>
+          <li><strong>Avisos firmados, cobro único.</strong> Cada aviso de pago se verifica con firma criptográfica y un mismo pago nunca se sirve dos veces.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Contacto -->
+    <section class="seccion" id="contacto">
+      <div class="contenedor contacto-rejilla">
+        <div>
+          <span class="etiqueta">Contacto</span>
+          <h2>¿Tienes una máquina de agua?</h2>
+          <p class="entrada">Déjanos tus datos y te buscamos para instalar el módulo en una de tus máquinas sin costo durante la prueba.</p>
+        </div>
+        <form class="tarjeta formulario" id="formulario" novalidate>
+          <label>Nombre <input name="nombre" autocomplete="name" required maxlength="80"></label>
+          <div class="dos">
+            <label>Teléfono <input name="telefono" type="tel" autocomplete="tel" inputmode="tel" maxlength="20"></label>
+            <label>Correo <input name="correo" type="email" autocomplete="email" maxlength="120"></label>
+          </div>
+          <label>¿Qué máquina tienes? <textarea name="mensaje" maxlength="1000" placeholder="Por ejemplo: 3 despachadores de agua en Iztapalapa"></textarea></label>
+          <label class="oculto-visual" aria-hidden="true">Sitio web <input name="sitio" tabindex="-1" autocomplete="off"></label>
+          <button class="boton" type="submit">Quiero probarlo en mi máquina</button>
+          <p class="aviso" id="formulario-aviso" role="status" hidden></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie-rejilla">
+      <a class="logo" href="/" aria-label="Sin Morralla, inicio">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+        <span><span class="sin">sin</span> morralla</span>
+      </a>
+      <p>
+        Proyecto de la Hackatón México 2026. Pagos CoDi a través de <a href="https://pey.mx" rel="noopener">pey</a>.
+        Código en <a href="https://github.com/VictorLaraL/sin-morralla" rel="noopener">GitHub</a>. <a href="/portal/">Portal del dueño</a>.
+      </p>
+      <p class="legal">CoDi® es una marca registrada de Banco de México. Sin Morralla no está afiliado a Banco de México.</p>
+    </div>
+  </footer>
+
+  <script src="/vendor/qrcode-1.4.4.js"></script>
+  <script src="/landing.js" type="module"></script>
 </body>
 </html>

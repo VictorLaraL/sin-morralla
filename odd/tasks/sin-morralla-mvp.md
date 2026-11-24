@@ -37,7 +37,7 @@ contra `wrangler dev` + revisión en el navegador integrado.
 | T2 | S6 | inline | hecho | `76d28ff` (RED: módulos inexistentes; GREEN: 18/18) + corrección de advertencias RDD (RED 3, GREEN 25/25) |
 | T3 | S2, S6 | inline | hecho | `15399d6`. RED: tokens inexistente y e2e 0/7; GREEN: unitarias 25/25, e2e 7/7 (`npm run e2e` contra `npm run dev`) |
 | T4 | S2, S4, S5 | inline | hecho | RED: validaciones inexistente y e2e 7/14; GREEN: unitarias 29/29, e2e 14/14, `tsc` limpio |
-| T5 | S3, S4 | inline | pendiente | — |
+| T5 | S3, S4 | inline | hecho | Contrato cubierto por e2e de T4; navegador integrado: QR dibujado, WebSocket "En vivo", pago simulado llena el garrafón y sube el contador, consola sin errores, 375 px sin desplazamiento horizontal |
 | T6 | S5 | inline | pendiente | — |
 | T7 | S6 | inline | pendiente | — |
 | T8 | S9, S10 | inline | pendiente | — |
