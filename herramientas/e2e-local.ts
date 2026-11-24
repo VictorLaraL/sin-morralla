@@ -393,3 +393,27 @@ test("si el módulo avisa que la entrega se interrumpió, el pago queda por aten
   assert.equal(fila?.interrumpido, 1);
   assert.equal((await fetch(`${BASE}/api/portal/creditos/${id}/devuelto`, { method: "POST", headers: PORTAL })).status, 200);
 });
+
+// ---------- Correcciones de la revisión RDD del firmware ----------
+
+test("una entrega interrumpida se puede cerrar como atendida sin registrar una devolución", async () => {
+  const modulo = await tokenNuevo();
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR }));
+  const id = /CREDITO (\S+)/.exec(await (await fetch(`${BASE}/device/poll?espera=0`, { headers: modulo })).text())?.[1];
+  assert.ok(id);
+  await fetch(`${BASE}/device/ack?id=${id}&parcial=1`, { method: "POST", headers: modulo });
+  const r = await fetch(`${BASE}/api/portal/creditos/${id}/atendido`, { method: "POST", headers: PORTAL });
+  assert.equal(r.status, 200);
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(d.porAtender.some((c: { id: string }) => c.id === id), false);
+  const [fila] = consulta(`SELECT estado FROM creditos WHERE id='${id}'`);
+  assert.equal(fila.estado, "entregado", "no se registra una devolución que no ocurrió");
+  assert.equal((await fetch(`${BASE}/api/portal/creditos/${id}/atendido`, { method: "POST", headers: PORTAL })).status, 404, "solo una vez");
+});
+
+test("solo las entregas interrumpidas se cierran como atendidas", async () => {
+  const transactionId = "SIMTX-MENOS2-" + randomBytes(4).toString("hex");
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 500, codiQrId: QR, transactionId }));
+  const [fila] = consulta(`SELECT id FROM creditos WHERE transaction_id='${transactionId}'`);
+  assert.equal((await fetch(`${BASE}/api/portal/creditos/${fila.id}/atendido`, { method: "POST", headers: PORTAL })).status, 404);
+});

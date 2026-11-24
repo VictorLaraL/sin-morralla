@@ -167,6 +167,14 @@
   align-items: center;
 }
 
+.solo-editando {
+  display: none !important;
+}
+
+form[data-editando] .solo-editando {
+  display: inline-flex !important;
+}
+
 .fila-botones select {
   width: auto;
   min-height: 36px;

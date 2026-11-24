@@ -8,6 +8,7 @@
 // POST /api/portal/maquinas/:id/token        genera el token del módulo ESP32 (se muestra una sola vez)
 // POST /api/portal/maquinas/:id/prueba       manda pulsos de prueba sin pago
 // POST /api/portal/creditos/:id/devuelto     marca un pago por atender como devuelto
+// POST /api/portal/creditos/:id/atendido     cierra una entrega interrumpida: el cliente sí recibió todo
 // GET  /api/portal/contactos                 interesados que dejaron sus datos en la landing
 
 import { compararSecreto, firmarBoleto, generarToken, sha256Hex, verificarBoleto } from "../core/tokens.ts";
@@ -123,6 +124,18 @@ export async function manejarPortal(
       .bind(devuelto[1])
       .first();
     return r ? json({ ok: true }) : json({ error: "Ese pago no está por atender" }, 404);
+  }
+
+  const atendido = /^\/api\/portal\/creditos\/(c_[0-9a-f]{12})\/atendido$/.exec(url.pathname);
+  if (metodo === "POST" && atendido) {
+    // interrumpido = 2: el dueño ya lo revisó con el cliente. No se registra una devolución que no ocurrió.
+    const r = await env.DB.prepare(
+      `UPDATE creditos SET interrumpido = 2, nota = 'Entrega interrumpida revisada: el cliente recibió todo'
+       WHERE id = ? AND origen = 'codi' AND estado = 'entregado' AND interrumpido = 1 RETURNING id`,
+    )
+      .bind(atendido[1])
+      .first();
+    return r ? json({ ok: true }) : json({ error: "Esa entrega no está por revisar" }, 404);
   }
 
   const ruta = /^\/api\/portal\/maquinas\/([a-z0-9-]{1,40})(?:\/(qr|token|prueba))?$/.exec(url.pathname);

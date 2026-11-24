@@ -16,7 +16,7 @@ Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convie
 
 | Estado | |
 |---|---|
-| Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 34 pruebas unitarias, 28 de punta a punta y 6 de la lógica del firmware en verde |
+| Software | Desplegado en Cloudflare (Worker, D1, Durable Object y cron). 34 pruebas unitarias, 30 de punta a punta y 8 de la lógica del firmware en verde |
 | Pagos CoDi | QR fijo creado con el API de pey y probado con dos pagos reales al mismo QR (23 de noviembre de 2026) |
 | Demo pública | Lista. Muestra su QR real de $1 en cuanto la cuenta de pey del proyecto termina su activación |
 | Hardware | Firmware escrito; su lógica de entrega se prueba en la PC y el protocolo con el simulador. Falta la prueba en placa con un monedero real |
@@ -189,15 +189,15 @@ npm run dev                        # http://localhost:8787
 
 ```bash
 npm test          # 34 pruebas unitarias: firma, lectura del aviso, pulsos, validaciones, boletos
-npm run e2e       # 28 pruebas de punta a punta contra npm run dev (en otra terminal)
+npm run e2e       # 30 pruebas de punta a punta contra npm run dev (en otra terminal)
 npm run typecheck # tipos de TypeScript contra los bindings de Cloudflare
-npm run test:firmware  # 6 pruebas de la entrega en dos fases del ESP32 (necesita g++, clang++ o Visual Studio Build Tools)
+npm run test:firmware  # 8 pruebas de la entrega en dos fases del ESP32 (necesita g++, clang++ o Visual Studio Build Tools)
 ```
 
 Las pruebas de punta a punta cubren, entre otras cosas: avisos sin firma rechazados, un pago que llega dos veces y se
 sirve una, la consulta larga que entrega en segundos, pagos menores al precio que no dan servicio, el ACK de un crédito
-ajeno, créditos que vencen y aparecen por atender, entregas interrumpidas, el WebSocket del portal con boleto y el
-límite del formulario de contacto.
+ajeno, créditos que vencen y aparecen por atender, entregas interrumpidas y cómo se cierran, el WebSocket del portal
+con boleto y el límite del formulario de contacto.
 
 ### Con hardware
 

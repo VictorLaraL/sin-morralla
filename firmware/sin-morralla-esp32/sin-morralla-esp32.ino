@@ -185,19 +185,21 @@ class AccionesModulo : public AccionesEntrega {
   void guardar(const char* clave, const char* valor) override { memoria.putString(clave, valor); }
 };
 
-void procesarCredito(const String& cuerpo) {
+AccionesModulo acciones;
+
+// Regresa false si la respuesta no es un crédito válido (por ejemplo, la página de un portal cautivo).
+bool procesarCredito(const String& cuerpo) {
   char id[40];
   int pulsos = 0, pulsoMs = 0, pausaMs = 0, boton = 0;
   int campos = sscanf(cuerpo.c_str(), "CREDITO %39s %d %d %d %d", id, &pulsos, &pulsoMs, &pausaMs, &boton);
   if (campos < 4) {
     Serial.printf("Respuesta no reconocida: %s\n", cuerpo.c_str());
-    return;
+    return false;
   }
   if (pulsos < 1 || pulsos > 500 || pulsoMs < 10 || pulsoMs > 500 || pausaMs < 10 || pausaMs > 1000) {
     Serial.println("Crédito fuera de rango; se ignora");
-    return;
+    return false;
   }
-  AccionesModulo acciones;
   acciones.pulsos = pulsos;
   acciones.pulsoMs = pulsoMs;
   acciones.pausaMs = pausaMs;
@@ -215,6 +217,7 @@ void procesarCredito(const String& cuerpo) {
       Serial.println("Nadie presionó el botón; el crédito sigue pendiente");
       break;
   }
+  return true;
 }
 
 // ---------- arranque ----------
@@ -235,6 +238,7 @@ void setup() {
   memoria.begin("sinmorralla", false);
   copiarId(estado.enCurso, memoria.getString("curso", "").c_str());
   copiarId(estado.hecho, memoria.getString("hecho", "").c_str());
+  copiarId(estado.porConfirmar, memoria.getString("pendiente", "").c_str());
   Serial.println("\nSin Morralla listo");
   conectarWifi();
 }
@@ -243,14 +247,19 @@ uint32_t esperaError = 2000;
 
 void loop() {
   conectarWifi();
+  if (confirmarPendiente(estado, acciones)) Serial.println("Confirmé una entrega que había quedado sin ACK");
 
   String cuerpo;
   int codigo = pedir(false, String("/device/poll?espera=") + ESPERA_POLL_SEG, cuerpo, TIMEOUT_POLL_MS);
 
-  if (codigo == 200) {
+  if (codigo == 200 && procesarCredito(cuerpo)) {
     luz(VERDE);
-    procesarCredito(cuerpo);
     esperaError = 2000;
+  } else if (codigo == 200) {
+    // Un 200 que no es un crédito no cuenta como "en línea": luz roja y espera creciente para no saturar.
+    luz(ROJA);
+    delay(esperaError);
+    esperaError = min<uint32_t>(esperaError * 2, 30000);
   } else if (codigo == 204) {
     luz(VERDE);  // en línea, sin pagos en este ciclo
     esperaError = 2000;

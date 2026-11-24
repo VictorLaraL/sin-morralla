@@ -9,6 +9,7 @@ static const int LARGO_ID = 40;
 struct EstadoEntrega {
   char enCurso[LARGO_ID] = "";  // crédito cuyos pulsos ya empezaron
   char hecho[LARGO_ID] = "";    // último crédito que no se debe volver a servir
+  char porConfirmar[LARGO_ID] = "";  // entrega completa cuyo ACK todavía no recibe el servidor
 };
 
 // Lo que la lógica necesita del hardware y de la red.
@@ -31,7 +32,10 @@ inline void copiarId(char* destino, const char* origen) {
 
 inline Resultado procesarEntrega(const char* credito, bool requiereBoton, EstadoEntrega& e, AccionesEntrega& a) {
   if (strcmp(credito, e.hecho) == 0) {
-    a.confirmar(credito, false);
+    if (a.confirmar(credito, false) && strcmp(credito, e.porConfirmar) == 0) {
+      e.porConfirmar[0] = '\0';
+      a.guardar("pendiente", "");
+    }
     return Resultado::SoloConfirmado;
   }
   if (strcmp(credito, e.enCurso) == 0) {
@@ -51,6 +55,20 @@ inline Resultado procesarEntrega(const char* credito, bool requiereBoton, Estado
   a.darPulsos();
   copiarId(e.hecho, credito);
   a.guardar("hecho", credito);  // 2. después de los pulsos
-  a.confirmar(credito, false);
+  if (!a.confirmar(credito, false)) {
+    // Sin ACK: se guarda para reintentarlo aunque el servidor ya no lo mande (por ejemplo, si venció sin red).
+    copiarId(e.porConfirmar, credito);
+    a.guardar("pendiente", credito);
+  }
   return Resultado::Entregado;
+}
+
+// Reintenta el ACK de una entrega completa que el servidor no recibió. Se llama antes de cada consulta.
+// Si el crédito ya venció en el servidor, el ACK lo pasa a entregado y sale de "Pagos por atender".
+inline bool confirmarPendiente(EstadoEntrega& e, AccionesEntrega& a) {
+  if (e.porConfirmar[0] == '\0') return false;
+  if (!a.confirmar(e.porConfirmar, false)) return false;
+  e.porConfirmar[0] = '\0';
+  a.guardar("pendiente", "");
+  return true;
 }

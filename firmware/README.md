@@ -4,8 +4,8 @@ El módulo se conecta **en paralelo** a la línea de pulsos (COIN) del monedero.
 CoDi se ve igual que una moneda: el ESP32 cierra el optoacoplador tantas veces como pulsos tenga el crédito.
 
 > **Estado:** la lógica de entrega ([entrega.h](sin-morralla-esp32/entrega.h)) se compila y se prueba en la PC con
-> `npm run test:firmware` (6 pruebas: entrega normal, ACK perdido, corte a media entrega, ACK parcial perdido, botón e
-> ids largos) y el protocolo se prueba contra el Worker con el simulador (`npm run simular:maquina`). **El sketch
+> `npm run test:firmware` (8 pruebas: entrega normal, ACK perdido, corte a media entrega, ACK parcial perdido, ACK que
+> se reintenta aunque el crédito ya venció, botón e ids largos) y el protocolo se prueba contra el Worker con el simulador (`npm run simular:maquina`). **El sketch
 > completo todavía no se compila para el ESP32 ni se prueba en una placa real.** Ese es el siguiente paso en el banco de
 > pruebas (`docs/hardware-mvp.md`, sección 2).
 
@@ -50,7 +50,8 @@ El crédito se guarda en la memoria no volátil como **en curso** antes de dar l
 | Qué pasa | Qué hace el módulo |
 |---|---|
 | Se perdió el `OK` del servidor | El servidor vuelve a mandar el crédito; el módulo ve que está **hecho** y solo confirma |
-| Se fue la luz a media entrega | Al volver, el crédito está **en curso**: no repite pulsos, confirma con `parcial=1` y el pago aparece en el portal |
+| Sin red más de 10 minutos justo después de servir | El ACK queda **pendiente** en memoria y se reintenta antes de cada consulta; al llegar, el crédito vencido pasa a entregado |
+| Se fue la luz a media entrega | Al volver, el crédito está **en curso**: no repite pulsos, confirma con `parcial=1` y el pago aparece en el portal, donde el dueño lo cierra como "Recibió todo" o "Devuelto" |
 | Tampoco llegó el aviso parcial | No lo marca como **hecho** hasta que el servidor lo recibe: el reenvío vuelve a avisar como parcial |
 | El cliente no presiona el botón en 60 s | No da pulsos ni confirma; el crédito sigue pendiente y se vuelve a ofrecer hasta que vence (10 min) |
 | El módulo no recoge un pago en 10 min | El Worker lo marca como vencido y aparece en "Pagos por atender" |

@@ -139,8 +139,10 @@ function pintar() {
   );
   pintarPorAtender();
   // Si el dueño está editando una máquina, el refresco automático no le borra lo que escribió.
+  // Solo cuenta escribir en un campo (no tener un botón enfocado); "Descartar cambios" quita el resguardo.
   const caja = $("maquinas");
-  if (!caja.contains(document.activeElement) && !caja.querySelector("form[data-editando]")) pintarMaquinas();
+  const escribiendo = caja.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
+  if (!escribiendo && !caja.querySelector("form[data-editando]")) pintarMaquinas();
   pintarPagos();
 }
 
@@ -167,6 +169,32 @@ function pintarPorAtender() {
             c.clave_rastreo ? h("p", {}, `Clave de rastreo: ${c.clave_rastreo}`) : null,
           ),
           h(
+            "div",
+            { class: "fila-botones" },
+            c.interrumpido
+              ? h(
+                  "button",
+                  {
+                    class: "boton chico",
+                    type: "button",
+                    onclick: async (e) => {
+                      const boton = e.currentTarget;
+                      if (!confirm("¿El cliente confirmó que recibió todo su llenado?")) return;
+                      boton.disabled = true;
+                      try {
+                        await api(`/api/portal/creditos/${encodeURIComponent(c.id)}/atendido`, { metodo: "POST" });
+                        avisar("Entrega revisada.", "ok");
+                        await cargar();
+                      } catch (error) {
+                        avisar(error.message, "error");
+                        boton.disabled = false;
+                      }
+                    },
+                  },
+                  "Recibió todo",
+                )
+              : null,
+          h(
             "button",
             {
               class: "boton secundario chico",
@@ -186,6 +214,7 @@ function pintarPorAtender() {
               },
             },
             "Marcar devuelto",
+          ),
           ),
         ),
       ),
@@ -297,7 +326,24 @@ function fichaMaquina(m) {
     m.virtual ? h("input", { type: "hidden", name: "pulsoMs", value: m.pulsoMs }) : null,
     m.virtual ? h("input", { type: "hidden", name: "pausaMs", value: m.pausaMs }) : null,
     m.virtual ? h("input", { type: "hidden", name: "maxPulsos", value: m.maxPulsos }) : null,
-    h("div", { class: "fila-botones ancho" }, h("button", { class: "boton chico", type: "submit" }, "Guardar")),
+    h(
+      "div",
+      { class: "fila-botones ancho" },
+      h("button", { class: "boton chico", type: "submit" }, "Guardar"),
+      h(
+        "button",
+        {
+          class: "boton secundario chico solo-editando",
+          type: "button",
+          onclick: () => {
+            document.activeElement?.blur();
+            pintarMaquinas();
+          },
+        },
+        "Descartar cambios",
+      ),
+      h("span", { class: "ayuda solo-editando" }, "Cambios sin guardar: esta ficha no se actualiza sola."),
+    ),
   );
 
   const botones = h(

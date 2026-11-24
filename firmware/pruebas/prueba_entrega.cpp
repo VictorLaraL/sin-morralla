@@ -111,6 +111,29 @@ int main() {
     VERIFICA(strlen(e.hecho) == LARGO_ID - 1, "recortado a LARGO_ID - 1");
   });
 
+  prueba("si el ACK falla tras entregar, se reintenta aunque el servidor ya no mande el crédito", [] {
+    EstadoEntrega e;
+    ModuloFalso m;
+    m.servidorResponde = false;
+    procesarEntrega("c_4", false, e, m);
+    VERIFICA(strcmp(e.porConfirmar, "c_4") == 0, "queda pendiente de confirmar");
+    VERIFICA(!confirmarPendiente(e, m), "sin red sigue pendiente");
+    m.servidorResponde = true;
+    VERIFICA(confirmarPendiente(e, m), "con red se confirma");
+    VERIFICA(e.porConfirmar[0] == '\0', "ya no queda pendiente");
+    VERIFICA(m.acks.size() == 3 && !m.acks[2].parcial, "el reintento es un ACK normal");
+    VERIFICA(m.pulsos == 1, "nunca se repiten pulsos");
+    VERIFICA(!confirmarPendiente(e, m), "sin pendientes no hace nada");
+    VERIFICA(m.acks.size() == 3, "sin ACK de más");
+  });
+
+  prueba("un ACK confirmado al entregar no deja pendientes", [] {
+    EstadoEntrega e;
+    ModuloFalso m;
+    procesarEntrega("c_5", false, e, m);
+    VERIFICA(e.porConfirmar[0] == '\0', "nada pendiente");
+  });
+
   std::printf(fallas == 0 ? "\nTodas las pruebas del firmware pasaron.\n" : "\n%d verificaciones fallaron.\n", fallas);
   return fallas == 0 ? 0 : 1;
 }

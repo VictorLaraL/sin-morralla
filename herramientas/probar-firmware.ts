@@ -35,8 +35,8 @@ if (compilador) {
     console.error("No encontré un compilador de C++ (g++, clang++ o Visual Studio Build Tools).");
     process.exit(2);
   }
-  execSync(`call "${bat}" >nul 2>nul && cl /nologo /std:c++17 /EHsc /W4 /Fo"${salida}\\\\" /Fe"${ejecutable}" "${fuente}"`, {
-    stdio: ["ignore", "ignore", "inherit"],
+  execSync(`call "${bat}" >nul 2>nul && cl /nologo /std:c++17 /EHsc /W4 /D_CRT_SECURE_NO_WARNINGS /Fo"${salida}\\\\" /Fe"${ejecutable}" "${fuente}"`, {
+    stdio: ["ignore", "inherit", "inherit"],
     shell: "cmd.exe",
   });
 }

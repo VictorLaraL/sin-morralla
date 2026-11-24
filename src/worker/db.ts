@@ -35,7 +35,7 @@ export interface FilaCredito {
   nota: string | null;
   creado_en: string;
   entregado_en: string | null;
-  /** 1 = el módulo se reinició a media entrega y no repitió los pulsos (ver migrations/0003). */
+  /** 1 = el módulo se reinició a media entrega y no repitió los pulsos; 2 = el dueño ya lo revisó (migrations/0003). */
   interrumpido?: number;
 }
 
