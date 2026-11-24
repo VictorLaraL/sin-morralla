@@ -488,3 +488,41 @@ test("el jurado también recibe el portal en vivo", async () => {
   const { boleto } = await leer(r);
   assert.equal(await abreWebSocket(`${BASE.replace(/^http/, "ws")}/api/portal/en-vivo?boleto=${encodeURIComponent(boleto)}`), true);
 });
+
+// ---------- Paginación de 5 en 5 (lo más reciente primero) ----------
+
+test("los últimos pagos se ven de 5 en 5, del más reciente al más antiguo", async () => {
+  for (let i = 0; i < 6; i++) await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300 + i, codiQrId: QR }));
+  const p1 = await leer(await fetch(`${BASE}/api/portal/resumen?pagos=1`, { headers: PORTAL }));
+  const p2 = await leer(await fetch(`${BASE}/api/portal/resumen?pagos=2`, { headers: PORTAL }));
+  assert.equal(p1.pagosRecientes.length, 5);
+  assert.equal(p1.pagosPaginacion.pagina, 1);
+  assert.ok(p1.pagosPaginacion.total >= 6);
+  assert.equal(p1.pagosPaginacion.paginas, Math.ceil(p1.pagosPaginacion.total / 5));
+  assert.equal(p1.pagosRecientes[0].monto_centavos, 1305, "el más reciente va primero");
+  const fechas = p1.pagosRecientes.map((p: { fecha_pago: string }) => p.fecha_pago);
+  assert.deepEqual([...fechas].sort().reverse(), fechas, "ordenados del más reciente al más antiguo");
+  assert.equal(p2.pagosPaginacion.pagina, 2);
+  assert.ok(p2.pagosRecientes[0].fecha_pago <= p1.pagosRecientes[4].fecha_pago);
+  const ids = new Set([...p1.pagosRecientes, ...p2.pagosRecientes].map((p: { transaction_id: string }) => p.transaction_id));
+  assert.equal(ids.size, p1.pagosRecientes.length + p2.pagosRecientes.length, "sin repetidos entre páginas");
+});
+
+test("los pagos por atender se ven de 5 en 5, del más reciente al más antiguo", async () => {
+  for (let i = 0; i < 6; i++) await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 500 + i, codiQrId: QR }));
+  const a1 = await leer(await fetch(`${BASE}/api/portal/resumen?atender=1`, { headers: PORTAL }));
+  const a2 = await leer(await fetch(`${BASE}/api/portal/resumen?atender=2`, { headers: PORTAL }));
+  assert.equal(a1.porAtender.length, 5);
+  assert.equal(a1.porAtender[0].monto_centavos, 505, "el más reciente va primero");
+  assert.ok(a1.porAtenderPaginacion.total >= 6);
+  assert.equal(a2.porAtenderPaginacion.pagina, 2);
+  const ids = new Set([...a1.porAtender, ...a2.porAtender].map((c: { id: string }) => c.id));
+  assert.equal(ids.size, a1.porAtender.length + a2.porAtender.length, "sin repetidos entre páginas");
+});
+
+test("una página inválida en el resumen se toma como la primera", async () => {
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen?pagos=abc&atender=-3`, { headers: PORTAL }));
+  assert.equal(d.pagosPaginacion.pagina, 1);
+  assert.equal(d.porAtenderPaginacion.pagina, 1);
+  assert.ok(d.pagosRecientes.length <= 5 && d.porAtender.length <= 5);
+});

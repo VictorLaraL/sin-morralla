@@ -86,6 +86,8 @@ function salir(mensaje) {
   cerrarVivo();
   // Nada de lo que se mostró (contactos, claves de rastreo, tokens) queda en la página.
   datos = null;
+  paginas.pagos = 1;
+  paginas.atender = 1;
   tokensRecientes.clear();
   $("modo-jurado").hidden = true;
   for (const id of ["cifras", "por-atender", "maquinas", "pagos", "contactos"]) $(id).replaceChildren();
@@ -125,8 +127,21 @@ let datos = null;
 // Aquí solo se ocultan los controles para que la vista sea clara.
 const soloLectura = () => datos?.rol === "jurado";
 
+// Página actual de cada lista (de 5 en 5, lo más reciente primero). Se conserva en los refrescos y avisos en vivo.
+const paginas = { pagos: 1, atender: 1 };
+
+const rutaResumen = () => `/api/portal/resumen?pagos=${paginas.pagos}&atender=${paginas.atender}`;
+
 async function cargar() {
-  datos = await api("/api/portal/resumen");
+  datos = await api(rutaResumen());
+  // Si la lista se achicó (por ejemplo, al marcar el último pago de una página como devuelto), se vuelve a la última.
+  const pp = datos.pagosPaginacion;
+  const pa = datos.porAtenderPaginacion;
+  if (paginas.pagos > pp.paginas || paginas.atender > pa.paginas) {
+    paginas.pagos = Math.min(paginas.pagos, pp.paginas);
+    paginas.atender = Math.min(paginas.atender, pa.paginas);
+    datos = await api(rutaResumen());
+  }
   pintar();
 }
 
@@ -150,6 +165,26 @@ function pintar() {
   const escribiendo = caja.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
   if (!escribiendo && !caja.querySelector("form[data-editando]")) pintarMaquinas();
   pintarPagos();
+}
+
+function controlesPagina(p, lista) {
+  // Fragmento vacío (no null): replaceChildren convertiría null en el texto "null".
+  if (p.paginas <= 1) return document.createDocumentFragment();
+  const ir = async (n) => {
+    paginas[lista] = n;
+    try {
+      await cargar();
+    } catch (error) {
+      avisar(error.message, "error");
+    }
+  };
+  return h(
+    "nav",
+    { class: "paginacion", "aria-label": "Páginas" },
+    h("button", { class: "boton secundario chico", type: "button", disabled: p.pagina <= 1, onclick: () => ir(p.pagina - 1) }, "← Más recientes"),
+    h("span", {}, `Página ${p.pagina} de ${p.paginas} · ${p.total} en total`),
+    h("button", { class: "boton secundario chico", type: "button", disabled: p.pagina >= p.paginas, onclick: () => ir(p.pagina + 1) }, "Anteriores →"),
+  );
 }
 
 function pintarPorAtender() {
@@ -227,6 +262,7 @@ function pintarPorAtender() {
         ),
       ),
     ),
+    controlesPagina(datos.porAtenderPaginacion, "atender"),
   );
 }
 
@@ -505,6 +541,7 @@ function pintarPagos() {
         ),
       ),
     ),
+    controlesPagina(datos.pagosPaginacion, "pagos"),
   );
 }
 

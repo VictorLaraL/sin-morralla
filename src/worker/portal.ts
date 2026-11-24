@@ -2,7 +2,8 @@
 // Con JURADO_TOKEN (opcional) se entra en solo lectura: resumen y canal en vivo, con las claves de rastreo
 // enmascaradas; no se puede cambiar nada ni ver a los interesados.
 //
-// GET  /api/portal/resumen                   máquinas, ventas de hoy y de la semana, pagos y créditos por atender
+// GET  /api/portal/resumen?pagos=N&atender=N máquinas, ventas de hoy y de la semana, y de 5 en 5 (lo más reciente
+//                                            primero) los últimos pagos y los pagos por atender
 // POST /api/portal/boleto                    boleto de 60 s para abrir el WebSocket (la clave no va en la URL)
 // GET  /api/portal/en-vivo?boleto=…           WebSocket con los pagos y entregas en vivo
 // PUT  /api/portal/maquinas/:id              configuración (precio, pulsos, botón)
@@ -14,13 +15,24 @@
 // GET  /api/portal/contactos                 interesados que dejaron sus datos en la landing
 
 import { compararSecreto, firmarBoleto, generarToken, sha256Hex, verificarBoleto } from "../core/tokens.ts";
-import { enmascararRastreo, inicioDelDiaCdmx, validarConfigMaquina, validarPulsosPrueba } from "../core/validaciones.ts";
+import {
+  enmascararRastreo,
+  inicioDelDiaCdmx,
+  paginaPedida,
+  totalPaginas,
+  validarConfigMaquina,
+  validarPulsosPrueba,
+} from "../core/validaciones.ts";
 import { crearCreditoPrueba, maquina, type FilaMaquina } from "./db.ts";
 import { json, log, tokenBearer } from "./http.ts";
 import { crearQrFijo } from "./pey.ts";
 
 // El módulo late cada 20 s como mínimo (LATIDO_MS); 90 s deja margen para una consulta larga y una reconexión.
 const EN_LINEA_MS = 90_000;
+const POR_PAGINA = 5;
+
+// Pagos que el dueño debe atender: no servidos, o entregas interrumpidas que aún no revisa.
+const FILTRO_POR_ATENDER = `c.origen = 'codi' AND (c.estado IN ('vencido', 'sin-servicio') OR (c.estado = 'entregado' AND c.interrumpido = 1))`;
 
 type Rol = "dueño" | "jurado";
 
@@ -71,12 +83,12 @@ function vistaMaquina(m: FilaMaquina, hoy: { pagos: number; total: number } | un
   };
 }
 
-async function resumen(db: D1Database) {
+async function resumen(db: D1Database, paginaPagos: number, paginaAtender: number) {
   const ahora = Date.now();
   const desdeHoy = inicioDelDiaCdmx();
   const desdeSemana = new Date(Date.parse(desdeHoy) - 6 * 86_400_000).toISOString();
 
-  const [maquinas, porMaquina, semana, recientes, porAtender, contactos] = await db.batch([
+  const [maquinas, porMaquina, semana, recientes, porAtender, contactos, totalPagos, totalAtender] = await db.batch([
     db.prepare("SELECT * FROM maquinas ORDER BY virtual, id"),
     db.prepare("SELECT maquina_id, COUNT(*) AS pagos, SUM(monto_centavos) AS total FROM pagos WHERE fecha_pago >= ? GROUP BY maquina_id").bind(desdeHoy),
     db.prepare("SELECT COUNT(*) AS pagos, COALESCE(SUM(monto_centavos), 0) AS total FROM pagos WHERE fecha_pago >= ?").bind(desdeSemana),
@@ -84,16 +96,20 @@ async function resumen(db: D1Database) {
       `SELECT p.transaction_id, p.maquina_id, m.nombre AS maquina_nombre, p.monto_centavos, p.fecha_pago, p.clave_rastreo,
               c.estado AS credito_estado, c.pulsos
        FROM pagos p LEFT JOIN maquinas m ON m.id = p.maquina_id LEFT JOIN creditos c ON c.transaction_id = p.transaction_id
-       ORDER BY p.fecha_pago DESC LIMIT 30`,
-    ),
+       ORDER BY p.fecha_pago DESC, p.recibido_en DESC LIMIT ? OFFSET ?`,
+    ).bind(POR_PAGINA, (paginaPagos - 1) * POR_PAGINA),
     db.prepare(
       `SELECT c.*, m.nombre AS maquina_nombre, p.clave_rastreo, p.fecha_pago
        FROM creditos c JOIN maquinas m ON m.id = c.maquina_id LEFT JOIN pagos p ON p.transaction_id = c.transaction_id
-       WHERE c.origen = 'codi' AND (c.estado IN ('vencido', 'sin-servicio') OR (c.estado = 'entregado' AND c.interrumpido = 1))
-       ORDER BY c.creado_en DESC LIMIT 50`,
-    ),
+       WHERE ${FILTRO_POR_ATENDER}
+       ORDER BY COALESCE(p.fecha_pago, c.creado_en) DESC, c.creado_en DESC LIMIT ? OFFSET ?`,
+    ).bind(POR_PAGINA, (paginaAtender - 1) * POR_PAGINA),
     db.prepare("SELECT COUNT(*) AS n FROM contactos"),
+    db.prepare("SELECT COUNT(*) AS n FROM pagos"),
+    db.prepare(`SELECT COUNT(*) AS n FROM creditos c WHERE ${FILTRO_POR_ATENDER}`),
   ]);
+  const nPagos = (totalPagos.results[0] as { n: number }).n;
+  const nAtender = (totalAtender.results[0] as { n: number }).n;
 
   const hoyPorMaquina = new Map(
     (porMaquina.results as Array<{ maquina_id: string; pagos: number; total: number }>).map((f) => [f.maquina_id, f]),
@@ -105,7 +121,9 @@ async function resumen(db: D1Database) {
     hoy: { pagos: filasHoy.reduce((a, f) => a + f.pagos, 0), totalCentavos: filasHoy.reduce((a, f) => a + (f.total ?? 0), 0) },
     semana: { pagos: s.pagos, totalCentavos: s.total },
     pagosRecientes: recientes.results,
+    pagosPaginacion: { pagina: paginaPagos, paginas: totalPaginas(nPagos, POR_PAGINA), total: nPagos, porPagina: POR_PAGINA },
     porAtender: porAtender.results,
+    porAtenderPaginacion: { pagina: paginaAtender, paginas: totalPaginas(nAtender, POR_PAGINA), total: nAtender, porPagina: POR_PAGINA },
     contactos: (contactos.results[0] as { n: number }).n,
   };
 }
@@ -133,7 +151,7 @@ export async function manejarPortal(
     return json({ boleto: await firmarBoleto(env.PORTAL_TOKEN, venceSeg), venceEn: new Date(venceSeg * 1000).toISOString() });
   }
   if (metodo === "GET" && url.pathname === "/api/portal/resumen") {
-    const datos = await resumen(env.DB);
+    const datos = await resumen(env.DB, paginaPedida(url.searchParams.get("pagos")), paginaPedida(url.searchParams.get("atender")));
     if (rol === "dueño") return json({ rol, ...datos });
     return json({
       rol,

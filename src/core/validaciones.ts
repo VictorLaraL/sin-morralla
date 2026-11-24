@@ -97,3 +97,14 @@ export function enmascararRastreo(clave: string | null): string | null {
   if (!clave) return null;
   return clave.length <= 4 ? "••••" : `••••${clave.slice(-4)}`;
 }
+
+/** Página pedida en una lista del portal: entero de 1 a 10000; cualquier otra cosa es la página 1. */
+export function paginaPedida(valor: unknown): number {
+  // Solo dígitos: Number() aceptaría "1e3" o " 0x10 ".
+  const texto = typeof valor === "number" ? String(valor) : typeof valor === "string" ? valor.trim() : "";
+  return /^\d{1,5}$/.test(texto) ? (entero(texto, 1, 10_000) ?? 1) : 1;
+}
+
+export function totalPaginas(total: number, tamano: number): number {
+  return Math.max(1, Math.ceil(total / tamano));
+}

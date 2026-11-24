@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { enmascararRastreo, inicioDelDiaCdmx, validarConfigMaquina, validarContacto, validarPulsosPrueba, vigenciaMinutos } from "../src/core/validaciones.ts";
+import { enmascararRastreo, inicioDelDiaCdmx, paginaPedida, totalPaginas, validarConfigMaquina, validarContacto, validarPulsosPrueba, vigenciaMinutos } from "../src/core/validaciones.ts";
 
 test("la configuración válida de una máquina se normaliza a enteros", () => {
   const r = validarConfigMaquina({
@@ -92,4 +92,17 @@ test("la clave de rastreo se enmascara para el jurado: solo los últimos 4 carac
   assert.equal(enmascararRastreo("ABC"), "••••");
   assert.equal(enmascararRastreo(null), null);
   assert.equal(enmascararRastreo(""), null);
+});
+
+test("la página pedida es un entero de 1 a 10000; cualquier otra cosa es la página 1", () => {
+  assert.equal(paginaPedida("3"), 3);
+  assert.equal(paginaPedida(2), 2);
+  for (const malo of [null, undefined, "", "abc", "0", "-1", "1.5", "10001", "1e3"]) assert.equal(paginaPedida(malo), 1, `con ${JSON.stringify(malo)}`);
+});
+
+test("total de páginas de 5 en 5, con al menos una", () => {
+  assert.equal(totalPaginas(0, 5), 1);
+  assert.equal(totalPaginas(5, 5), 1);
+  assert.equal(totalPaginas(6, 5), 2);
+  assert.equal(totalPaginas(11, 5), 3);
 });

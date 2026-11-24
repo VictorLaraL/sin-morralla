@@ -107,6 +107,17 @@
   color: var(--tinta);
 }
 
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--tinta-2);
+}
+
 .maquinas-lista {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
