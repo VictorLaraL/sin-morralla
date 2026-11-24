@@ -151,6 +151,12 @@ explorador de solo lectura.
   unitarias 36/36, e2e 35/35; navegador: aviso de modo jurado, campos deshabilitados, solo "Ver calcomanía", claves de
   rastreo recortadas, interesados ocultos, canal en vivo conectado. `docs/entrega.md` con los textos de §10.1
   (descripción 426 palabras, instrucciones 503).
+- **L21 RDD modo jurado (`0f7489f..0c8a6c1`, riesgo alto):** **aprobada y confirmada**. Advertencias descartadas con
+  evidencia: sin `JURADO_TOKEN` nadie entra como jurado porque `compararSecreto` rechaza todo secreto vacío (prueba
+  unitaria existente); el canal en vivo solo lleva máquina, monto, pulsos y estado, nunca claves de rastreo ni
+  contactos; la lista de interesados solo se pide con el botón "Ver interesados", que en modo jurado está oculto (el
+  navegador no mostró errores). Lista de compras en `docs/compras-mercadolibre.md`: Mercado Libre pidió sesión para ver
+  publicaciones y Claude in Chrome no estaba conectado, así que los links quedan marcados como sin verificar.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
