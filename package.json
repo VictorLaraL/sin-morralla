@@ -14,7 +14,7 @@
     "e2e": "node herramientas/e2e-local.ts",
     "simular:pago": "node herramientas/simular-pago.ts",
     "db:remote": "wrangler d1 migrations apply sin-morralla --remote",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler d1 migrations apply sin-morralla --remote && wrangler deploy"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

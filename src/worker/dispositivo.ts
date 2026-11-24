@@ -15,6 +15,15 @@ import { esperar, log, texto, tokenBearer } from "./http.ts";
 const ESPERA_MAXIMA_SEG = 25;
 const INTERVALO_MS = 1000;
 
+/** El latido es telemetría: si D1 falla al anotarlo, la consulta del módulo sigue adelante. */
+async function latir(env: Env, maquinaId: string): Promise<void> {
+  try {
+    await tocarMaquina(env.DB, maquinaId, new Date().toISOString());
+  } catch (error) {
+    log("latido_fallido", { maquina: maquinaId, mensaje: error instanceof Error ? error.message : String(error) });
+  }
+}
+
 export function limiteVigencia(env: Env, ahora = Date.now()): string {
   return new Date(ahora - vigenciaMinutos(env.TTL_CREDITO_MIN) * 60_000).toISOString();
 }
@@ -29,7 +38,7 @@ export async function manejarDispositivo(
   const m = token ? await maquinaPorToken(env.DB, await sha256Hex(token)) : null;
   if (!m) return texto("TOKEN INVALIDO\n", 401);
 
-  await tocarMaquina(env.DB, m.id, new Date().toISOString());
+  await latir(env, m.id);
 
   if (request.method === "GET" && url.pathname === "/device/poll") {
     const pedida = Number(url.searchParams.get("espera") ?? ESPERA_MAXIMA_SEG);
@@ -47,7 +56,7 @@ export async function manejarDispositivo(
       if (Date.now() >= fin || request.signal.aborted) break;
       await esperar(INTERVALO_MS);
     }
-    await tocarMaquina(env.DB, m.id, new Date().toISOString());
+    if (!request.signal.aborted) await latir(env, m.id);
     return new Response(null, { status: 204 });
   }
 

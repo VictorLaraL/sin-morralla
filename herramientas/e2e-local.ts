@@ -363,3 +363,15 @@ test("el formulario de contacto limita envíos repetidos y cuerpos enormes", asy
   const enorme = await fetch(`${BASE}/api/contacto`, { method: "POST", headers: { "content-type": "application/json" }, body: "x".repeat(10_000) });
   assert.equal(enorme.status, 413);
 });
+
+// ---------- Correcciones de la revisión RDD de la corrección de T4 ----------
+
+test("el ACK de un crédito sin servicio (nunca se mandó) da 404", async () => {
+  const modulo = await tokenNuevo();
+  const transactionId = "SIMTX-MENOS-" + randomBytes(4).toString("hex");
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 500, codiQrId: QR, transactionId }));
+  const [fila] = consulta(`SELECT id, estado FROM creditos WHERE transaction_id='${transactionId}'`);
+  assert.equal(fila.estado, "sin-servicio");
+  const ack = await fetch(`${BASE}/device/ack?id=${fila.id}`, { method: "POST", headers: modulo });
+  assert.equal(ack.status, 404);
+});

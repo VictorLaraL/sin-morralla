@@ -221,6 +221,11 @@ export async function entregarCredito(
     .bind(ahora, id, maquinaId)
     .first();
   if (tardio) return { resultado: "ya-entregado" };
-  const previo = await db.prepare("SELECT estado FROM creditos WHERE id = ? AND maquina_id = ?").bind(id, maquinaId).first();
+  // Solo un crédito ya entregado (o devuelto y anotado) cuenta como confirmación repetida. "pendiente" y "vencido" los
+  // cubre el primer UPDATE; "sin-servicio" nunca se manda a la máquina, así que su ACK es desconocido.
+  const previo = await db
+    .prepare("SELECT 1 FROM creditos WHERE id = ? AND maquina_id = ? AND estado IN ('entregado', 'devuelto')")
+    .bind(id, maquinaId)
+    .first();
   return { resultado: previo ? "ya-entregado" : "desconocido" };
 }
