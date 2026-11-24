@@ -38,7 +38,7 @@ contra `wrangler dev` + revisión en el navegador integrado.
 | T3 | S2, S6 | inline | hecho | `15399d6`. RED: tokens inexistente y e2e 0/7; GREEN: unitarias 25/25, e2e 7/7 (`npm run e2e` contra `npm run dev`) |
 | T4 | S2, S4, S5 | inline | hecho | RED: validaciones inexistente y e2e 7/14; GREEN: unitarias 29/29, e2e 14/14, `tsc` limpio |
 | T5 | S3, S4 | inline | hecho | Contrato cubierto por e2e de T4; navegador integrado: QR dibujado, WebSocket "En vivo", pago simulado llena el garrafón y sube el contador, consola sin errores, 375 px sin desplazamiento horizontal |
-| T6 | S5 | inline | pendiente | — |
+| T6 | S5 | inline | hecho | API cubierta por e2e 27/27; navegador integrado: clave incorrecta rechazada, entrada, canal en vivo con boleto, crear QR (simulado), token visible tras refrescos, pulso de prueba recibido y confirmado por el módulo, aviso en vivo de un pago firmado, calcomanía de 10 cm, 375 px sin desplazamiento horizontal |
 | T7 | S6 | inline | pendiente | — |
 | T8 | S9, S10 | inline | pendiente | — |
 | T9 | S7, S8 | inline | pendiente | — |

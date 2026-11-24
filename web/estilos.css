@@ -31,6 +31,11 @@
   box-sizing: border-box;
 }
 
+/* Que `hidden` gane aunque el componente defina su propio display (botones, etiquetas). */
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -232,6 +237,7 @@ svg {
   color: var(--azul);
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .etiqueta.simulado {

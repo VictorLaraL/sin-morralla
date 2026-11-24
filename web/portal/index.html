@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal del dueño — Sin Morralla</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#2743A8">
+  <link rel="icon" href="/marca.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/estilos.css">
+  <link rel="stylesheet" href="/portal/portal.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="contenedor">
+      <a class="logo" href="/" aria-label="Sin Morralla, inicio">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+        <span><span class="sin">sin</span> morralla</span>
+      </a>
+      <nav class="menu" aria-label="Portal">
+        <span class="etiqueta" id="vivo" hidden><span class="punto"></span><span>En vivo</span></span>
+        <button class="boton secundario chico" id="salir" type="button" hidden>Salir</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="contenedor portal">
+    <!-- Entrada -->
+    <section class="entrar tarjeta" id="entrar" aria-labelledby="entrar-titulo">
+      <h1 id="entrar-titulo">Portal del dueño</h1>
+      <p>Escribe la clave del portal. Se guarda solo mientras esta pestaña esté abierta.</p>
+      <form id="form-entrar">
+        <label>Clave del portal <input id="clave" type="password" autocomplete="current-password" required></label>
+        <button class="boton" type="submit">Entrar</button>
+        <p class="aviso error" id="entrar-error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <!-- Panel -->
+    <div id="panel" hidden>
+      <section aria-labelledby="hoy-titulo">
+        <h1 id="hoy-titulo" class="titulo-panel">Hoy</h1>
+        <div class="cifras" id="cifras"></div>
+      </section>
+
+      <section class="bloque" aria-labelledby="atender-titulo">
+        <div class="bloque-cabeza">
+          <h2 id="atender-titulo">Pagos por atender</h2>
+          <p>Pagos que la máquina no sirvió. Devuélvelos desde tu banco si el cliente lo pide y márcalos aquí.</p>
+        </div>
+        <div id="por-atender"></div>
+      </section>
+
+      <section class="bloque" aria-labelledby="maquinas-titulo">
+        <div class="bloque-cabeza">
+          <h2 id="maquinas-titulo">Máquinas</h2>
+          <p>Precio del QR, pulsos del monedero, calcomanía y módulo.</p>
+        </div>
+        <div class="maquinas-lista" id="maquinas"></div>
+      </section>
+
+      <section class="bloque" aria-labelledby="pagos-titulo">
+        <div class="bloque-cabeza">
+          <h2 id="pagos-titulo">Últimos pagos CoDi</h2>
+        </div>
+        <div class="tabla-caja" id="pagos"></div>
+      </section>
+
+      <section class="bloque" aria-labelledby="contactos-titulo">
+        <div class="bloque-cabeza">
+          <h2 id="contactos-titulo">Interesados</h2>
+          <p>Personas que dejaron sus datos en la landing.</p>
+        </div>
+        <button class="boton secundario chico" id="ver-contactos" type="button">Ver interesados</button>
+        <div class="tabla-caja" id="contactos"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Calcomanía imprimible -->
+  <dialog id="dialogo-calcomania" aria-labelledby="calcomania-titulo">
+    <div class="dialogo-controles">
+      <h2 id="calcomania-titulo">Calcomanía</h2>
+      <p>Imprímela en vinil adhesivo, lamínala y pégala junto al monedero. El QR mide 8 cm.</p>
+      <label>Nombre del beneficiario, como lo muestra el banco <input id="cal-beneficiario" maxlength="60" placeholder="Ej. Agua Pura del Centro"></label>
+      <label>Teléfono de aclaraciones <input id="cal-telefono" type="tel" maxlength="20" placeholder="55 1234 5678"></label>
+      <div class="dialogo-botones">
+        <button class="boton" id="cal-imprimir" type="button">Imprimir</button>
+        <button class="boton secundario" id="cal-png" type="button">Descargar QR</button>
+        <button class="boton secundario" id="cal-cerrar" type="button">Cerrar</button>
+      </div>
+    </div>
+    <div class="hoja" id="cal-hoja">
+      <div class="hoja-cabeza">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#fff" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#fff"/></svg>
+        <span>Paga con CoDi</span>
+      </div>
+      <p class="hoja-monto" id="cal-monto"></p>
+      <div class="hoja-qr" id="cal-qr"></div>
+      <p class="hoja-verifica">Antes de pagar, verifica que el beneficiario sea:<br><strong id="cal-nombre"></strong></p>
+      <ul class="hoja-reglas">
+        <li><strong>Sin cambio:</strong> paga el monto exacto.</li>
+        <li><strong>Luz verde:</strong> lista. <strong>Roja:</strong> usa monedas.</li>
+      </ul>
+      <p class="hoja-pie"><span id="cal-aclaraciones"></span><span id="cal-maquina"></span></p>
+    </div>
+  </dialog>
+
+  <div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+
+  <script src="/vendor/qrcode-1.4.4.js"></script>
+  <script src="/portal/portal.js" type="module"></script>
+</body>
+</html>

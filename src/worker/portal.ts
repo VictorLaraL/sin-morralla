@@ -65,7 +65,8 @@ async function resumen(db: D1Database) {
        ORDER BY p.fecha_pago DESC LIMIT 30`,
     ),
     db.prepare(
-      `SELECT c.*, m.nombre AS maquina_nombre FROM creditos c JOIN maquinas m ON m.id = c.maquina_id
+      `SELECT c.*, m.nombre AS maquina_nombre, p.clave_rastreo, p.fecha_pago
+       FROM creditos c JOIN maquinas m ON m.id = c.maquina_id LEFT JOIN pagos p ON p.transaction_id = c.transaction_id
        WHERE c.origen = 'codi' AND c.estado IN ('vencido', 'sin-servicio') ORDER BY c.creado_en DESC LIMIT 50`,
     ),
     db.prepare("SELECT COUNT(*) AS n FROM contactos"),

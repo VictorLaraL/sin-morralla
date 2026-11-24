@@ -1,0 +1,452 @@
+/* Portal del dueño. */
+
+.portal {
+  padding: 32px 0 64px;
+}
+
+.entrar {
+  max-width: 420px;
+  margin: 48px auto;
+  padding: 28px;
+}
+
+.entrar h1 {
+  font-size: 30px;
+}
+
+.entrar p {
+  color: var(--tinta-2);
+}
+
+.entrar form {
+  display: grid;
+  gap: 16px;
+}
+
+.titulo-panel {
+  font-size: 32px;
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cifra {
+  margin: 0;
+  padding: 16px 18px;
+}
+
+.cifra dt {
+  font-size: 13px;
+  color: var(--tinta-3);
+}
+
+.cifra dd {
+  margin: 2px 0 0;
+  font: 800 28px/1.2 var(--titulos);
+  font-variant-numeric: tabular-nums;
+}
+
+.cifra .detalle {
+  font-size: 13px;
+  color: var(--tinta-2);
+}
+
+.bloque {
+  margin-top: 40px;
+}
+
+.bloque-cabeza h2 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.bloque-cabeza p {
+  color: var(--tinta-2);
+  font-size: 15px;
+  margin-bottom: 14px;
+}
+
+.vacio {
+  padding: 18px;
+  border: 1px dashed #c9d1e0;
+  border-radius: 12px;
+  color: var(--tinta-3);
+  text-align: center;
+}
+
+.atender {
+  display: grid;
+  gap: 10px;
+}
+
+.atender-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.atender-fila p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--tinta-2);
+}
+
+.atender-fila .monto {
+  font: 700 18px/1.3 var(--titulos);
+  color: var(--tinta);
+}
+
+.maquinas-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.maquina-ficha {
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.maquina-ficha header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.maquina-ficha h3 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.maquina-ficha .sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--tinta-3);
+}
+
+.maquina-ficha form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.maquina-ficha form .ancho {
+  grid-column: 1 / -1;
+}
+
+.maquina-ficha .casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.maquina-ficha .casilla input {
+  width: 20px;
+  min-height: 20px;
+}
+
+.ayuda {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--tinta-3);
+}
+
+.fila-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.fila-botones select {
+  width: auto;
+  min-height: 36px;
+  padding: 4px 8px;
+}
+
+.token-caja {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--ambar);
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.token-caja code {
+  font: 600 15px/1.4 ui-monospace, Consolas, monospace;
+  word-break: break-all;
+  background: var(--blanco);
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.tabla-caja {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+  white-space: nowrap;
+}
+
+th {
+  background: var(--papel);
+  color: var(--tinta-2);
+  font-weight: 600;
+}
+
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ver-contactos {
+  margin-bottom: 12px;
+}
+
+.avisos {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+  max-width: min(360px, calc(100% - 32px));
+}
+
+.avisos .aviso {
+  box-shadow: var(--sombra);
+  animation: entra 0.25s ease-out;
+}
+
+.avisos .aviso.info {
+  background: var(--azul);
+  color: var(--blanco);
+}
+
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+#vivo.en-vivo {
+  background: var(--verde-claro);
+  color: var(--verde);
+}
+
+#vivo.sin-conexion {
+  background: var(--rojo-claro);
+  color: var(--rojo);
+}
+
+/* Calcomanía */
+dialog {
+  width: min(820px, calc(100% - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio);
+  box-shadow: 0 20px 60px rgb(20 26 46 / 30%);
+}
+
+dialog::backdrop {
+  background: rgb(20 26 46 / 55%);
+}
+
+dialog[open] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  padding: 24px;
+}
+
+.dialogo-controles {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.dialogo-controles h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.dialogo-controles p {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.dialogo-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* La hoja mide 10 cm de ancho al imprimir; en pantalla se escala igual. */
+.hoja {
+  width: 10cm;
+  padding: 0 0 0.4cm;
+  border: 1px solid var(--borde);
+  border-radius: 0.5cm;
+  overflow: hidden;
+  background: var(--blanco);
+  color: var(--tinta);
+  text-align: center;
+  font-family: var(--texto);
+}
+
+.hoja-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25cm;
+  padding: 0.3cm;
+  background: var(--azul);
+  color: var(--blanco);
+  font: 800 0.7cm/1 var(--titulos);
+}
+
+.hoja-cabeza svg {
+  width: 0.9cm;
+  height: 0.9cm;
+}
+
+.hoja-monto {
+  margin: 0.25cm 0 0;
+  font: 800 0.9cm/1.1 var(--titulos);
+  color: var(--azul);
+}
+
+.hoja-monto.libre {
+  font-size: 0.55cm;
+}
+
+.hoja-qr {
+  width: 8cm;
+  height: 8cm;
+  margin: 0.15cm auto 0;
+}
+
+.hoja-qr svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hoja-verifica {
+  margin: 0.1cm 0.5cm 0;
+  font-size: 0.34cm;
+  line-height: 1.35;
+}
+
+.hoja-verifica strong {
+  font-size: 0.45cm;
+}
+
+.hoja-reglas {
+  display: grid;
+  gap: 0.05cm;
+  margin: 0.2cm 0.5cm 0;
+  padding: 0.15cm;
+  list-style: none;
+  border-radius: 0.2cm;
+  background: #fff4dc;
+  font-size: 0.32cm;
+}
+
+.hoja-pie {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.3cm;
+  margin: 0.2cm 0.5cm 0;
+  font-size: 0.26cm;
+  color: var(--tinta-2);
+}
+
+@media (max-width: 860px) {
+  .cifras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .maquinas-lista {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  dialog[open] {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .maquina-ficha form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .atender-fila {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hoja {
+    zoom: 0.78;
+  }
+}
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #cal-hoja,
+  #cal-hoja * {
+    visibility: visible;
+  }
+
+  #cal-hoja {
+    position: fixed;
+    top: 0;
+    left: 0;
+    zoom: 1;
+    border-color: #999;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  dialog {
+    box-shadow: none;
+  }
+
+  dialog::backdrop {
+    background: none;
+  }
+}

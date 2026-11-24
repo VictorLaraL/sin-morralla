@@ -1,5 +1,7 @@
 // Demo en vivo de la landing: muestra el QR de la máquina virtual y llena el garrafón cuando llega un pago.
 
+import { descargarPng, svgQr } from "/qr.js";
+
 const $ = (id) => document.getElementById(id);
 const maquina = $("maquina");
 const estado = $("estado");
@@ -64,15 +66,6 @@ async function cargarDemo() {
 
 let qrActual = null;
 
-function crearQr(texto) {
-  const qrcode = globalThis.qrcode;
-  qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
-  const qr = qrcode(0, "M");
-  qr.addData(texto, "Byte");
-  qr.make();
-  return qr;
-}
-
 function pintarQr(texto) {
   const caja = $("qr");
   if (!texto) {
@@ -80,46 +73,15 @@ function pintarQr(texto) {
     $("descargar").disabled = true;
     return;
   }
-  if (qrActual?.texto === texto) return;
-  const qr = crearQr(texto);
-  const n = qr.getModuleCount();
-  const margen = 4;
-  let trazo = "";
-  for (let fila = 0; fila < n; fila++) {
-    for (let col = 0; col < n; col++) {
-      if (qr.isDark(fila, col)) trazo += `M${col + margen} ${fila + margen}h1v1h-1z`;
-    }
-  }
-  const lado = n + margen * 2;
-  caja.innerHTML =
-    `<svg viewBox="0 0 ${lado} ${lado}" shape-rendering="crispEdges" aria-hidden="true">` +
-    `<rect width="${lado}" height="${lado}" fill="#fff"/><path d="${trazo}" fill="#141A2E"/></svg>`;
-  qrActual = { texto, qr };
+  if (qrActual === texto) return;
+  caja.innerHTML = svgQr(texto);
+  qrActual = texto;
   $("descargar").disabled = false;
 }
 
 // Para pagar desde el mismo celular: muchas apps de banco leen el QR desde una imagen guardada.
 $("descargar").addEventListener("click", () => {
-  if (!qrActual) return;
-  const { qr } = qrActual;
-  const n = qr.getModuleCount();
-  const escala = 12;
-  const margen = 4;
-  const lienzo = document.createElement("canvas");
-  lienzo.width = lienzo.height = (n + margen * 2) * escala;
-  const ctx = lienzo.getContext("2d");
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, lienzo.width, lienzo.height);
-  ctx.fillStyle = "#141A2E";
-  for (let fila = 0; fila < n; fila++) {
-    for (let col = 0; col < n; col++) {
-      if (qr.isDark(fila, col)) ctx.fillRect((col + margen) * escala, (fila + margen) * escala, escala, escala);
-    }
-  }
-  const enlace = document.createElement("a");
-  enlace.href = lienzo.toDataURL("image/png");
-  enlace.download = "sin-morralla-demo-codi.png";
-  enlace.click();
+  if (qrActual) descargarPng(qrActual, "sin-morralla-demo-codi.png");
 });
 
 // ---------- Llenado del garrafón ----------
