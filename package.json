@@ -1,0 +1,25 @@
+{
+  "name": "sin-morralla",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Módulo que conecta máquinas de monedas a CoDi: el pago con QR se convierte en los pulsos del monedero.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "wrangler d1 migrations apply sin-morralla --local && wrangler dev --port 8787",
+    "test": "node --test \"tests/*.test.ts\"",
+    "typecheck": "wrangler types && tsc --noEmit",
+    "e2e": "node herramientas/e2e-local.ts",
+    "simular:pago": "node herramientas/simular-pago.ts",
+    "db:remote": "wrangler d1 migrations apply sin-morralla --remote",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "standardwebhooks": "^1.0.0",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.0.0"
+  }
+}

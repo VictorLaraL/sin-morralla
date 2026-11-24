@@ -20,3 +20,4 @@ firmware/**/config.h
 
 .DS_Store
 Thumbs.db
+worker-configuration.d.ts

@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sin-morralla",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-11-23",
+
+  // Landing, demo y portal: archivos estáticos. Las rutas /api, /webhooks y /device las atiende el Worker.
+  "assets": {
+    "directory": "./web",
+    "binding": "ASSETS"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sin-morralla",
+      // Se reemplaza por el id real al crear la base en Cloudflare (`wrangler d1 create sin-morralla`).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "vars": {
+    "TTL_CREDITO_MIN": "10",
+    "DEMO_MONTO_CENTAVOS": "100"
+  },
+
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true }
+  }
+}
