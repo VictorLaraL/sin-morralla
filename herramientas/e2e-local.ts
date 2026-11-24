@@ -445,3 +445,46 @@ test("un pago de un centavo a la demo cuenta como servido y no queda por atender
   const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
   assert.equal(d.porAtender.some((c: { id: string }) => c.id === credito.id), false);
 });
+
+// ---------- Modo jurado: solo lectura ----------
+
+const JURADO = { Authorization: `Bearer ${vars.JURADO_TOKEN}`, "content-type": "application/json" };
+
+test("el jurado ve el resumen en solo lectura y con las claves de rastreo enmascaradas", async () => {
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR }));
+  const r = await fetch(`${BASE}/api/portal/resumen`, { headers: JURADO });
+  assert.equal(r.status, 200);
+  const d = await leer(r);
+  assert.equal(d.rol, "jurado");
+  assert.ok(d.pagosRecientes.length > 0);
+  for (const p of [...d.pagosRecientes, ...d.porAtender]) {
+    if (p.clave_rastreo !== null) assert.match(p.clave_rastreo, /^••••.{0,4}$/, `clave sin enmascarar: ${p.clave_rastreo}`);
+  }
+  const dueno = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  assert.equal(dueno.rol, "dueño");
+  assert.ok(dueno.pagosRecientes.some((p: { clave_rastreo: string | null }) => p.clave_rastreo?.startsWith("SIM")), "el dueño ve la clave completa");
+});
+
+test("el jurado no puede cambiar nada ni ver a los interesados", async () => {
+  const config = JSON.stringify({ nombre: "Despachador de agua", ubicacion: "", precioCentavos: 1300, valorPulsoCentavos: 100, pulsoMs: 50, pausaMs: 50, maxPulsos: 50, requiereBoton: false });
+  const intentos: Array<[string, string, string?]> = [
+    ["PUT", "/api/portal/maquinas/agua-01", config],
+    ["POST", "/api/portal/maquinas/agua-01/qr"],
+    ["POST", "/api/portal/maquinas/agua-01/token"],
+    ["POST", "/api/portal/maquinas/agua-01/prueba", '{"pulsos":1}'],
+    ["POST", "/api/portal/creditos/c_000000000000/devuelto"],
+    ["POST", "/api/portal/creditos/c_000000000000/atendido"],
+    ["GET", "/api/portal/contactos"],
+  ];
+  for (const [metodo, ruta, cuerpo] of intentos) {
+    const r = await fetch(`${BASE}${ruta}`, { method: metodo, headers: JURADO, body: cuerpo });
+    assert.equal(r.status, 403, `${metodo} ${ruta}`);
+  }
+});
+
+test("el jurado también recibe el portal en vivo", async () => {
+  const r = await fetch(`${BASE}/api/portal/boleto`, { method: "POST", headers: JURADO });
+  assert.equal(r.status, 200);
+  const { boleto } = await leer(r);
+  assert.equal(await abreWebSocket(`${BASE.replace(/^http/, "ws")}/api/portal/en-vivo?boleto=${encodeURIComponent(boleto)}`), true);
+});

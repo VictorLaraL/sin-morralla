@@ -32,6 +32,7 @@
     <section class="entrar tarjeta" id="entrar" aria-labelledby="entrar-titulo">
       <h1 id="entrar-titulo">Portal del dueño</h1>
       <p>Escribe la clave del portal. Se guarda solo mientras esta pestaña esté abierta.</p>
+      <p>¿Eres del jurado? Usa la clave de solo lectura que viene en la entrega del proyecto.</p>
       <form id="form-entrar">
         <label>Clave del portal <input id="clave" type="password" autocomplete="current-password" required></label>
         <button class="boton" type="submit">Entrar</button>
@@ -41,6 +42,11 @@
 
     <!-- Panel -->
     <div id="panel" hidden>
+      <p class="aviso modo-jurado" id="modo-jurado" role="note" hidden>
+        <strong>Modo jurado (solo lectura).</strong> Ves las ventas, las máquinas y sus calcomanías tal como las ve el dueño.
+        Los cambios están desactivados, las claves de rastreo se muestran recortadas y los datos de los interesados no se
+        muestran. Para ver un pago en vivo, paga el QR de la demo en la landing con esta página abierta.
+      </p>
       <section aria-labelledby="hoy-titulo">
         <h1 id="hoy-titulo" class="titulo-panel">Hoy</h1>
         <div class="cifras" id="cifras"></div>
@@ -69,7 +75,7 @@
         <div class="tabla-caja" id="pagos"></div>
       </section>
 
-      <section class="bloque" aria-labelledby="contactos-titulo">
+      <section class="bloque" id="bloque-contactos" aria-labelledby="contactos-titulo">
         <div class="bloque-cabeza">
           <h2 id="contactos-titulo">Interesados</h2>
           <p>Personas que dejaron sus datos en la landing.</p>

@@ -91,3 +91,9 @@ export function validarPulsosPrueba(e: unknown): Resultado<number> {
   }
   return { ok: true, valor: pulsos };
 }
+
+/** Para el jurado: la clave de rastreo SPEI se muestra solo con sus últimos 4 caracteres. */
+export function enmascararRastreo(clave: string | null): string | null {
+  if (!clave) return null;
+  return clave.length <= 4 ? "••••" : `••••${clave.slice(-4)}`;
+}

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { inicioDelDiaCdmx, validarConfigMaquina, validarContacto, validarPulsosPrueba, vigenciaMinutos } from "../src/core/validaciones.ts";
+import { enmascararRastreo, inicioDelDiaCdmx, validarConfigMaquina, validarContacto, validarPulsosPrueba, vigenciaMinutos } from "../src/core/validaciones.ts";
 
 test("la configuración válida de una máquina se normaliza a enteros", () => {
   const r = validarConfigMaquina({
@@ -85,4 +85,11 @@ test("los pulsos de prueba deben ser un entero de 1 a 20", () => {
   for (const cuerpo of [null, {}, { pulsos: 0 }, { pulsos: 21 }, { pulsos: 1.5 }, { pulsos: "2" }, { pulsos: true }, { pulsos: [2] }]) {
     assert.equal(validarPulsosPrueba(cuerpo).ok, false, `con ${JSON.stringify(cuerpo)}`);
   }
+});
+
+test("la clave de rastreo se enmascara para el jurado: solo los últimos 4 caracteres", () => {
+  assert.equal(enmascararRastreo("4510026044"), "••••6044");
+  assert.equal(enmascararRastreo("ABC"), "••••");
+  assert.equal(enmascararRastreo(null), null);
+  assert.equal(enmascararRastreo(""), null);
 });

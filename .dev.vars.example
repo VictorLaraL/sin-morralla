@@ -5,6 +5,8 @@ SIMULACION=1
 
 # Clave para entrar al portal del dueño.
 PORTAL_TOKEN=cambia-esta-clave
+# Clave de solo lectura para el jurado (opcional): ve ventas y máquinas, no cambia nada ni ve a los interesados.
+JURADO_TOKEN=cambia-esta-otra-clave
 
 # Secreto con el que pey firma los avisos (formato whsec_<base64>). En producción se copia del portal de pey.
 PEY_WEBHOOK_SECRET=whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw

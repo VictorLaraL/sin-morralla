@@ -1,4 +1,6 @@
 // API del portal del dueño (un solo cliente). Todo exige la clave PORTAL_TOKEN.
+// Con JURADO_TOKEN (opcional) se entra en solo lectura: resumen y canal en vivo, con las claves de rastreo
+// enmascaradas; no se puede cambiar nada ni ver a los interesados.
 //
 // GET  /api/portal/resumen                   máquinas, ventas de hoy y de la semana, pagos y créditos por atender
 // POST /api/portal/boleto                    boleto de 60 s para abrir el WebSocket (la clave no va en la URL)
@@ -12,13 +14,32 @@
 // GET  /api/portal/contactos                 interesados que dejaron sus datos en la landing
 
 import { compararSecreto, firmarBoleto, generarToken, sha256Hex, verificarBoleto } from "../core/tokens.ts";
-import { inicioDelDiaCdmx, validarConfigMaquina, validarPulsosPrueba } from "../core/validaciones.ts";
+import { enmascararRastreo, inicioDelDiaCdmx, validarConfigMaquina, validarPulsosPrueba } from "../core/validaciones.ts";
 import { crearCreditoPrueba, maquina, type FilaMaquina } from "./db.ts";
 import { json, log, tokenBearer } from "./http.ts";
 import { crearQrFijo } from "./pey.ts";
 
 // El módulo late cada 20 s como mínimo (LATIDO_MS); 90 s deja margen para una consulta larga y una reconexión.
 const EN_LINEA_MS = 90_000;
+
+type Rol = "dueño" | "jurado";
+
+async function rolDe(request: Request, env: Env): Promise<Rol | null> {
+  const recibido = tokenBearer(request);
+  if (await compararSecreto(recibido, env.PORTAL_TOKEN)) return "dueño";
+  const jurado = (env as { JURADO_TOKEN?: string }).JURADO_TOKEN ?? "";
+  if (await compararSecreto(recibido, jurado)) return "jurado";
+  return null;
+}
+
+/** Lo único que el jurado puede pedir: el resumen y el boleto del canal en vivo. */
+function permitidoAlJurado(metodo: string, ruta: string): boolean {
+  return (metodo === "GET" && ruta === "/api/portal/resumen") || (metodo === "POST" && ruta === "/api/portal/boleto");
+}
+
+function enmascararFilas<T extends { clave_rastreo?: unknown }>(filas: T[]): T[] {
+  return filas.map((f) => ({ ...f, clave_rastreo: enmascararRastreo((f.clave_rastreo as string | null) ?? null) }));
+}
 
 async function leerJson(request: Request): Promise<unknown> {
   try {
@@ -103,13 +124,24 @@ export async function manejarPortal(
     if (!(await verificarBoleto(env.PORTAL_TOKEN, url.searchParams.get("boleto") ?? ""))) return json({ error: "Boleto inválido" }, 401);
     return conectar("portal");
   }
-  if (!(await compararSecreto(tokenBearer(request), env.PORTAL_TOKEN))) return json({ error: "Clave incorrecta" }, 401);
+  const rol = await rolDe(request, env);
+  if (!rol) return json({ error: "Clave incorrecta" }, 401);
+  if (rol === "jurado" && !permitidoAlJurado(metodo, url.pathname)) return json({ error: "Acceso de solo lectura (jurado)" }, 403);
 
   if (metodo === "POST" && url.pathname === "/api/portal/boleto") {
     const venceSeg = Math.floor(Date.now() / 1000) + 60;
     return json({ boleto: await firmarBoleto(env.PORTAL_TOKEN, venceSeg), venceEn: new Date(venceSeg * 1000).toISOString() });
   }
-  if (metodo === "GET" && url.pathname === "/api/portal/resumen") return json(await resumen(env.DB));
+  if (metodo === "GET" && url.pathname === "/api/portal/resumen") {
+    const datos = await resumen(env.DB);
+    if (rol === "dueño") return json({ rol, ...datos });
+    return json({
+      rol,
+      ...datos,
+      pagosRecientes: enmascararFilas(datos.pagosRecientes as Array<{ clave_rastreo?: unknown }>),
+      porAtender: enmascararFilas(datos.porAtender as Array<{ clave_rastreo?: unknown }>),
+    });
+  }
   if (metodo === "GET" && url.pathname === "/api/portal/contactos") {
     const r = await env.DB.prepare("SELECT * FROM contactos ORDER BY creado_en DESC LIMIT 100").all();
     return json(r.results);

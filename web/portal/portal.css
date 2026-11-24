@@ -23,6 +23,12 @@
   gap: 16px;
 }
 
+.modo-jurado {
+  margin: 0 0 20px;
+  background: var(--azul-claro);
+  color: var(--azul);
+}
+
 .titulo-panel {
   font-size: 32px;
 }

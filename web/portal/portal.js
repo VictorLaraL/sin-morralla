@@ -87,6 +87,7 @@ function salir(mensaje) {
   // Nada de lo que se mostró (contactos, claves de rastreo, tokens) queda en la página.
   datos = null;
   tokensRecientes.clear();
+  $("modo-jurado").hidden = true;
   for (const id of ["cifras", "por-atender", "maquinas", "pagos", "contactos"]) $(id).replaceChildren();
   $("panel").hidden = true;
   $("salir").hidden = true;
@@ -120,6 +121,9 @@ $("salir").addEventListener("click", () => salir());
 // ---------- Resumen ----------
 
 let datos = null;
+// El jurado entra con JURADO_TOKEN: el servidor responde rol "jurado" y rechaza cualquier cambio (403).
+// Aquí solo se ocultan los controles para que la vista sea clara.
+const soloLectura = () => datos?.rol === "jurado";
 
 async function cargar() {
   datos = await api("/api/portal/resumen");
@@ -137,6 +141,8 @@ function pintar() {
     cifra("Máquinas en línea", `${enLinea} de ${fisicas.length}`, enLinea < fisicas.length ? "Revisa el WiFi del local" : "Todo en orden"),
     cifra("Interesados", String(datos.contactos), "desde la landing"),
   );
+  $("modo-jurado").hidden = !soloLectura();
+  $("bloque-contactos").hidden = soloLectura();
   pintarPorAtender();
   // Si el dueño está editando una máquina, el refresco automático no le borra lo que escribió.
   // Solo cuenta escribir en un campo (no tener un botón enfocado); "Descartar cambios" quita el resguardo.
@@ -168,7 +174,9 @@ function pintarPorAtender() {
             c.nota ? h("p", {}, c.nota) : null,
             c.clave_rastreo ? h("p", {}, `Clave de rastreo: ${c.clave_rastreo}`) : null,
           ),
-          h(
+          soloLectura()
+            ? null
+            : h(
             "div",
             { class: "fila-botones" },
             c.interrumpido
@@ -345,6 +353,32 @@ function fichaMaquina(m) {
       h("span", { class: "ayuda solo-editando" }, "Cambios sin guardar: esta ficha no se actualiza sola."),
     ),
   );
+
+  if (soloLectura()) {
+    // Jurado: la configuración se ve pero no se edita; solo queda la calcomanía.
+    for (const campo of formulario.elements) campo.disabled = true;
+    formulario.querySelector(".fila-botones")?.remove();
+    return h(
+      "article",
+      { class: "maquina-ficha tarjeta" },
+      h(
+        "header",
+        {},
+        h(
+          "div",
+          {},
+          h("h3", {}, m.nombre),
+          h("p", { class: "sub" }, [m.ubicacion, m.id].filter(Boolean).join(" · ")),
+          h("p", { class: "sub" }, `Hoy: ${m.hoy.pagos} pagos · ${deCentavos(m.hoy.totalCentavos)}`),
+        ),
+        estado,
+      ),
+      formulario,
+      m.qrString
+        ? h("div", { class: "fila-botones" }, h("button", { class: "boton secundario chico", type: "button", onclick: () => abrirCalcomania(m) }, "Ver calcomanía"))
+        : null,
+    );
+  }
 
   const botones = h(
     "div",
