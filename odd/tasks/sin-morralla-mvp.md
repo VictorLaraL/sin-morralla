@@ -157,6 +157,13 @@ explorador de solo lectura.
   contactos; la lista de interesados solo se pide con el botón "Ver interesados", que en modo jurado está oculto (el
   navegador no mostró errores). Lista de compras en `docs/compras-mercadolibre.md`: Mercado Libre pidió sesión para ver
   publicaciones y Claude in Chrome no estaba conectado, así que los links quedan marcados como sin verificar.
+- **L22 (2026-11-24) Paginación y dominio propio:** "ponle limite a los registros de pedidos por atender pionle
+  paginacion de 5 registros, iguala ultimos pagos de codi paginacion de 5 comenzando ambos por el ultimo en hacerse" y
+  "configura el nombre de dominio sinmorralla que acabo de adquirir". Paginación en el servidor (`?pagos=N&atender=N`,
+  5 por página, lo más reciente primero): RED 2 unitarias y 3 e2e; GREEN unitarias 38/38, e2e 38/38; navegador: 5 filas
+  por lista, "Página 2 de 43", páginas independientes. RDD: riesgo medio, bajo presupuesto, sin revisión debida.
+  Dominio: `sinmorralla.com` y `www.sinmorralla.com` como dominios propios del Worker; landing, portal, API y WebSocket
+  responden en ambos con certificado válido. `workers.dev` sigue activo para el webhook de pey.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
