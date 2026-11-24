@@ -35,6 +35,8 @@ export interface FilaCredito {
   nota: string | null;
   creado_en: string;
   entregado_en: string | null;
+  /** 1 = el módulo se reinició a media entrega y no repitió los pulsos (ver migrations/0003). */
+  interrumpido?: number;
 }
 
 export function maquina(db: D1Database, id: string) {
@@ -203,13 +205,17 @@ export async function entregarCredito(
   id: string,
   maquinaId: string,
   ahora: string,
+  interrumpido = false,
 ): Promise<{ resultado: "entregado"; credito: FilaCredito } | { resultado: "ya-entregado" | "desconocido" }> {
   const credito = await db
     .prepare(
-      `UPDATE creditos SET estado = 'entregado', entregado_en = ?
+      `UPDATE creditos SET estado = 'entregado', entregado_en = ?, interrumpido = ?,
+         nota = CASE WHEN ? = 1
+           THEN 'La entrega se interrumpió (corte de luz o reinicio del módulo): confirma con el cliente si recibió todo'
+           ELSE nota END
        WHERE id = ? AND maquina_id = ? AND estado IN ('pendiente', 'vencido') RETURNING *`,
     )
-    .bind(ahora, id, maquinaId)
+    .bind(ahora, interrumpido ? 1 : 0, interrumpido ? 1 : 0, id, maquinaId)
     .first<FilaCredito>();
   if (credito) return { resultado: "entregado", credito };
   // Un crédito devuelto que la máquina entrega tarde: se acepta para que el módulo no reintente, y se anota.

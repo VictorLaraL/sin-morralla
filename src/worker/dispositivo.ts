@@ -62,14 +62,16 @@ export async function manejarDispositivo(
 
   if (request.method === "POST" && url.pathname === "/device/ack") {
     const id = url.searchParams.get("id") ?? "";
-    const r = await entregarCredito(env.DB, id, m.id, new Date().toISOString());
+    // parcial=1: el módulo arrancó con una entrega a medias y no repitió los pulsos (ver firmware).
+    const parcial = url.searchParams.get("parcial") === "1";
+    const r = await entregarCredito(env.DB, id, m.id, new Date().toISOString(), parcial);
     if (r.resultado === "desconocido") {
       // No existe o es de otra máquina: el módulo deja de reintentar.
       log("ack_desconocido", { maquina: m.id, credito: id });
       return texto("CREDITO DESCONOCIDO\n", 404);
     }
     if (r.resultado === "entregado") {
-      log("credito_entregado", { maquina: m.id, credito: id, pulsos: r.credito.pulsos });
+      log(parcial ? "credito_interrumpido" : "credito_entregado", { maquina: m.id, credito: id, pulsos: r.credito.pulsos });
       if (alEntregar) {
         try {
           await alEntregar(m, r.credito);

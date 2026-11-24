@@ -375,3 +375,21 @@ test("el ACK de un crédito sin servicio (nunca se mandó) da 404", async () => 
   const ack = await fetch(`${BASE}/device/ack?id=${fila.id}`, { method: "POST", headers: modulo });
   assert.equal(ack.status, 404);
 });
+
+// ---------- T7: entregas interrumpidas (corte de luz a media entrega) ----------
+
+test("si el módulo avisa que la entrega se interrumpió, el pago queda por atender", async () => {
+  const modulo = await tokenNuevo();
+  const transactionId = "SIMTX-CORTE-" + randomBytes(4).toString("hex");
+  await enviarAviso(`${BASE}/webhooks/pey`, SECRETO, avisoDePago({ montoCentavos: 1300, codiQrId: QR, transactionId }));
+  const id = /CREDITO (\S+)/.exec(await (await fetch(`${BASE}/device/poll?espera=0`, { headers: modulo })).text())?.[1];
+  assert.ok(id);
+  const ack = await fetch(`${BASE}/device/ack?id=${id}&parcial=1`, { method: "POST", headers: modulo });
+  assert.equal(await ack.text(), "OK\n");
+  assert.equal((await fetch(`${BASE}/device/poll?espera=0`, { headers: modulo })).status, 204, "no se vuelve a mandar");
+  const d = await leer(await fetch(`${BASE}/api/portal/resumen`, { headers: PORTAL }));
+  const fila = d.porAtender.find((c: { id: string }) => c.id === id);
+  assert.equal(fila?.estado, "entregado");
+  assert.equal(fila?.interrumpido, 1);
+  assert.equal((await fetch(`${BASE}/api/portal/creditos/${id}/devuelto`, { method: "POST", headers: PORTAL })).status, 200);
+});

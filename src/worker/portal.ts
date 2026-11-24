@@ -67,7 +67,8 @@ async function resumen(db: D1Database) {
     db.prepare(
       `SELECT c.*, m.nombre AS maquina_nombre, p.clave_rastreo, p.fecha_pago
        FROM creditos c JOIN maquinas m ON m.id = c.maquina_id LEFT JOIN pagos p ON p.transaction_id = c.transaction_id
-       WHERE c.origen = 'codi' AND c.estado IN ('vencido', 'sin-servicio') ORDER BY c.creado_en DESC LIMIT 50`,
+       WHERE c.origen = 'codi' AND (c.estado IN ('vencido', 'sin-servicio') OR (c.estado = 'entregado' AND c.interrumpido = 1))
+       ORDER BY c.creado_en DESC LIMIT 50`,
     ),
     db.prepare("SELECT COUNT(*) AS n FROM contactos"),
   ]);
@@ -116,7 +117,8 @@ export async function manejarPortal(
   const devuelto = /^\/api\/portal\/creditos\/(c_[0-9a-f]{12})\/devuelto$/.exec(url.pathname);
   if (metodo === "POST" && devuelto) {
     const r = await env.DB.prepare(
-      "UPDATE creditos SET estado = 'devuelto' WHERE id = ? AND origen = 'codi' AND estado IN ('vencido', 'sin-servicio') RETURNING id",
+      `UPDATE creditos SET estado = 'devuelto' WHERE id = ? AND origen = 'codi'
+         AND (estado IN ('vencido', 'sin-servicio') OR (estado = 'entregado' AND interrumpido = 1)) RETURNING id`,
     )
       .bind(devuelto[1])
       .first();
