@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "wrangler d1 migrations apply sin-morralla --local && wrangler dev --port 8787 --test-scheduled",
     "test": "node --test \"tests/*.test.ts\"",
+    "test:firmware": "node herramientas/probar-firmware.ts",
     "typecheck": "wrangler types && tsc --noEmit",
     "e2e": "node herramientas/e2e-local.ts",
     "simular:pago": "node herramientas/simular-pago.ts",

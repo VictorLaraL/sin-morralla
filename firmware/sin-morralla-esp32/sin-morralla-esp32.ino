@@ -6,11 +6,13 @@
 //   Luz verde  = en línea: se puede pagar con CoDi.      Luz roja = sin conexión: usar monedas.
 //   Bip doble  = pago recibido.                          Verde parpadeando = esperando el botón "Servir con CoDi".
 //
-// Entrega en dos fases para no dar servicio doble ni perder un pago:
+// Entrega en dos fases para no dar servicio doble ni perder un pago (lógica en entrega.h, probada en la PC con
+// `npm run test:firmware`):
 //   1. Antes de dar pulsos guarda el crédito como "en curso" (memoria no volátil).
 //   2. Después de darlos lo guarda como "hecho" y confirma.
 //   Si arranca y el servidor le vuelve a mandar el crédito "en curso" (se fue la luz a media entrega), NO repite los
-//   pulsos: confirma con parcial=1 y el pago aparece en el portal para que el dueño lo revise con el cliente.
+//   pulsos: confirma con parcial=1 hasta que el servidor lo reciba, y el pago aparece en el portal para que el dueño
+//   lo revise con el cliente.
 //
 // Placa: ESP32 Dev Module (Arduino core para ESP32 2.x o 3.x). Sin librerías externas.
 // Antes de compilar: copia config.example.h a config.h y llena tus datos (config.h no se sube al repositorio).
@@ -21,6 +23,7 @@
 #include <HTTPClient.h>
 #include <Preferences.h>
 #include "config.h"
+#include "entrega.h"
 
 #ifndef PIN_LED_VERDE
 #define PIN_LED_VERDE -1
@@ -45,8 +48,7 @@ static const int ESPERA_POLL_SEG = 25;          // el Worker sostiene la consult
 static const uint32_t TIMEOUT_POLL_MS = 35000;  // margen sobre la espera del servidor
 
 Preferences memoria;
-String enCurso;  // crédito cuyos pulsos ya empezaron
-String hecho;    // último crédito con todos sus pulsos dados
+EstadoEntrega estado;  // copia en RAM de lo guardado en memoria no volátil
 
 // ---------- luz, bip y botón ----------
 
@@ -78,7 +80,7 @@ bool botonPresionado() {
 
 // Espera a que el cliente presione "Servir con CoDi". Regresa false si no lo presiona a tiempo: el crédito sigue
 // pendiente en el servidor y se vuelve a ofrecer en la siguiente consulta, hasta que venza.
-bool esperarBoton() {
+bool esperarBotonFisico() {
   if (PIN_BOTON < 0) return true;
   Serial.println("Esperando el botón \"Servir con CoDi\"");
   uint32_t inicio = millis();
@@ -159,22 +161,29 @@ void emitirPulsos(int pulsos, int pulsoMs, int pausaMs) {
   }
 }
 
-void guardar(const char* clave, String& variable, const String& valor) {
-  variable = valor;
-  memoria.putString(clave, valor);
-}
-
-// Confirma la entrega. 200 = listo; 404 = el servidor no reconoce el crédito (deja de reintentar).
-void confirmar(const String& id, bool parcial) {
-  String ruta = "/device/ack?id=" + id + (parcial ? "&parcial=1" : "");
+// Confirma la entrega. true si el servidor la recibió (200) o no reconoce el crédito (404: deja de reintentar).
+// Si no contesta, el servidor vuelve a mandar el crédito y entrega.h decide qué hacer sin repetir pulsos.
+bool confirmarConServidor(const char* id, bool parcial) {
+  String ruta = String("/device/ack?id=") + id + (parcial ? "&parcial=1" : "");
   for (int intento = 0; intento < 3; intento++) {
     String respuesta;
     int codigo = pedir(true, ruta, respuesta, 10000);
-    if (codigo == 200 || codigo == 404) return;
+    if (codigo == 200 || codigo == 404) return true;
     delay(1000 * (intento + 1));
   }
-  // Sin confirmación: el servidor lo vuelve a mandar, se reconoce como "hecho" y solo se confirma.
+  return false;
 }
+
+// Une la lógica de entrega (entrega.h) con el hardware y la red de este módulo.
+class AccionesModulo : public AccionesEntrega {
+ public:
+  int pulsos = 0, pulsoMs = 50, pausaMs = 50;
+  void avisarPago() override { bip(2, 80); }
+  bool esperarBoton() override { return esperarBotonFisico(); }
+  void darPulsos() override { emitirPulsos(pulsos, pulsoMs, pausaMs); }
+  bool confirmar(const char* id, bool parcial) override { return confirmarConServidor(id, parcial); }
+  void guardar(const char* clave, const char* valor) override { memoria.putString(clave, valor); }
+};
 
 void procesarCredito(const String& cuerpo) {
   char id[40];
@@ -188,31 +197,24 @@ void procesarCredito(const String& cuerpo) {
     Serial.println("Crédito fuera de rango; se ignora");
     return;
   }
-  String credito(id);
-
-  if (credito == hecho) {
-    Serial.printf("Crédito %s ya entregado; solo confirmo\n", id);
-    confirmar(credito, false);
-    return;
+  AccionesModulo acciones;
+  acciones.pulsos = pulsos;
+  acciones.pulsoMs = pulsoMs;
+  acciones.pausaMs = pausaMs;
+  switch (procesarEntrega(id, boton == 1, estado, acciones)) {
+    case Resultado::Entregado:
+      Serial.printf("Crédito %s: %d pulsos de %d ms entregados\n", id, pulsos, pulsoMs);
+      break;
+    case Resultado::SoloConfirmado:
+      Serial.printf("Crédito %s ya entregado; solo confirmé\n", id);
+      break;
+    case Resultado::Parcial:
+      Serial.printf("Crédito %s interrumpido por un reinicio; avisé como parcial\n", id);
+      break;
+    case Resultado::SinBoton:
+      Serial.println("Nadie presionó el botón; el crédito sigue pendiente");
+      break;
   }
-  if (credito == enCurso) {
-    // Se reinició a media entrega: no se repiten los pulsos y el dueño lo revisa en el portal.
-    Serial.printf("Crédito %s interrumpido por un reinicio; confirmo como parcial\n", id);
-    guardar("hecho", hecho, credito);
-    confirmar(credito, true);
-    return;
-  }
-
-  Serial.printf("Pago recibido: crédito %s, %d pulsos de %d ms\n", id, pulsos, pulsoMs);
-  bip(2, 80);
-  if (boton == 1 && !esperarBoton()) {
-    Serial.println("Nadie presionó el botón; el crédito sigue pendiente");
-    return;
-  }
-  guardar("curso", enCurso, credito);  // 1. antes de los pulsos
-  emitirPulsos(pulsos, pulsoMs, pausaMs);
-  guardar("hecho", hecho, credito);    // 2. después de los pulsos
-  confirmar(credito, false);
 }
 
 // ---------- arranque ----------
@@ -231,8 +233,8 @@ void setup() {
   luz(ROJA);
 
   memoria.begin("sinmorralla", false);
-  enCurso = memoria.getString("curso", "");
-  hecho = memoria.getString("hecho", "");
+  copiarId(estado.enCurso, memoria.getString("curso", "").c_str());
+  copiarId(estado.hecho, memoria.getString("hecho", "").c_str());
   Serial.println("\nSin Morralla listo");
   conectarWifi();
 }
