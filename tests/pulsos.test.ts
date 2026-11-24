@@ -33,6 +33,18 @@ test("pulsos de $5 (lavadoras y otras máquinas)", () => {
   assert.equal(calcularCredito({ valorPulsoCentavos: 500, maxPulsos: 20, precioCentavos: 3000 }, 3000).pulsos, 6);
 });
 
+test("una máquina mal configurada (valor de pulso o tope en 0) no regala pulsos", () => {
+  for (const config of [
+    { valorPulsoCentavos: 0, maxPulsos: 50, precioCentavos: 0 },
+    { valorPulsoCentavos: 100, maxPulsos: 0, precioCentavos: 0 },
+  ]) {
+    const c = calcularCredito(config, 1300);
+    assert.equal(c.pulsos, 0);
+    assert.equal(c.excedenteCentavos, 1300);
+    assert.match(c.nota ?? "", /configuración/i);
+  }
+});
+
 test("la línea de crédito para el ESP32 se arma y se lee igual", () => {
   const linea = lineaCredito({ id: "c_1a2b", pulsos: 13, pulsoMs: 50, pausaMs: 60, requiereBoton: true });
   assert.equal(linea, "CREDITO c_1a2b 13 50 60 1\n");

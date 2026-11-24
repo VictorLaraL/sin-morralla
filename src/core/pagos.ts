@@ -39,6 +39,8 @@ export function normalizarPago(webhookId: string, aviso: unknown, ahora = new Da
   if (!coincidencia) return null;
 
   const transactionId = texto(datos.transactionId);
+  // Number(null) y Number("") dan 0: un aviso sin monto no debe pasar como pago de $0.
+  if (datos.amount === undefined || datos.amount === null || datos.amount === "") return null;
   const monto = Number(datos.amount);
   if (!transactionId || !Number.isFinite(monto) || monto < 0) return null;
 
@@ -52,8 +54,12 @@ export function normalizarPago(webhookId: string, aviso: unknown, ahora = new Da
     }
   }
 
+  // pey manda segundos Unix. Si llega algo fuera de rango (milisegundos, negativo, futuro lejano),
+  // se usa la hora de recepción para no guardar fechas absurdas.
   const segundos = Number(datos.datePaid);
-  const fechaPago = Number.isFinite(segundos) && segundos > 0 ? new Date(segundos * 1000) : ahora;
+  const desde2020 = Date.UTC(2020, 0, 1) / 1000;
+  const hastaManana = ahora.getTime() / 1000 + 86_400;
+  const fechaPago = Number.isFinite(segundos) && segundos >= desde2020 && segundos <= hastaManana ? new Date(segundos * 1000) : ahora;
 
   return {
     webhookId,

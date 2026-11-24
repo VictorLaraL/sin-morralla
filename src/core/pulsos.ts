@@ -17,6 +17,13 @@ export interface Credito {
 }
 
 export function calcularCredito(config: ConfigPulsos, montoCentavos: number): Credito {
+  if (!(config.valorPulsoCentavos > 0) || !(config.maxPulsos > 0)) {
+    return {
+      pulsos: 0,
+      excedenteCentavos: montoCentavos,
+      nota: "Configuración de pulsos inválida (valor del pulso o tope en 0): revisa la máquina; requiere devolución",
+    };
+  }
   if (config.precioCentavos > 0 && montoCentavos < config.precioCentavos) {
     return {
       pulsos: 0,

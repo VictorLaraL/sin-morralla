@@ -51,6 +51,19 @@ test("acepta los campos dentro de data y la metadata como texto JSON", () => {
   assert.deepEqual(p?.metadata, { maquina: "demo" });
 });
 
+test("un aviso sin monto no se toma como pago de $0", () => {
+  for (const amount of [null, undefined, ""]) {
+    assert.equal(normalizarPago("m", { ...avisoQr, amount }), null, `amount=${String(amount)}`);
+  }
+});
+
+test("una fecha de pago fuera de rango (milisegundos o absurda) usa la hora de recepción", () => {
+  const ahora = new Date("2026-11-23T18:00:00Z");
+  for (const datePaid of [1795480200000, -5, 99999999999]) {
+    assert.equal(normalizarPago("m", { ...avisoQr, datePaid }, ahora)?.fechaPago, ahora.toISOString(), `datePaid=${datePaid}`);
+  }
+});
+
 test("ignora eventos que no son pagos CoDi recibidos", () => {
   assert.equal(normalizarPago("m", { type: "bank.account.updated", codiStatus: "ACTIVE" }), null);
   assert.equal(normalizarPago("m", { type: "codi.qr.payment_received", amount: 5 }), null, "sin transactionId");

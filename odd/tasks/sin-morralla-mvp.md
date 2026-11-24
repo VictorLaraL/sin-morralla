@@ -33,8 +33,8 @@ contra `wrangler dev` + revisión en el navegador integrado.
 
 | ID | Specs | Ruta | Estado | Commit / evidencia |
 |---|---|---|---|---|
-| T1 | S1, S3 | inline | en curso | Docs en `main`: `f1714e5` |
-| T2 | S6 | inline | pendiente | — |
+| T1 | S1, S3 | inline | hecho | Docs en `main`: `f1714e5`; estructura `5a8a4f2` (dev local: salud 200, landing 200) |
+| T2 | S6 | inline | hecho | `76d28ff` (RED: módulos inexistentes; GREEN: 18/18) + corrección de advertencias RDD (RED 3, GREEN 25/25) |
 | T3 | S2, S6 | inline | pendiente | — |
 | T4 | S2, S4, S5 | inline | pendiente | — |
 | T5 | S3, S4 | inline | pendiente | — |
@@ -81,5 +81,9 @@ explorador de solo lectura.
   de `~/.codex/AGENTS.md`; RDD activo (global) con consentimiento permanente; el ESP32 usa long-poll HTTPS contra el
   Worker (el Worker consulta D1 cada segundo) para no mantener despierto un Durable Object; los navegadores usan
   WebSockets en hibernación.
+- **L6 RDD tramo T1–T2 (`main..76d28ff`):** evaluado medio/"under_budget"; escalado a alto (ítem 2: verificación de
+  firmas) para cerrarlo antes de T3. Revisión `review-141590e8d9977364` con lentes riesgo, legibilidad y confiabilidad:
+  **aprobada y confirmada**. Advertencias no bloqueantes atendidas con pruebas en el commit siguiente: valor de pulso o
+  tope en 0 regalaba pulsos; un aviso sin monto pasaba como $0; fechas de pago fuera de rango.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
   transacciones exitosas (`docs/MVP.md`, H2).
