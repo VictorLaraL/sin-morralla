@@ -164,6 +164,11 @@ explorador de solo lectura.
   por lista, "Página 2 de 43", páginas independientes. RDD: riesgo medio, bajo presupuesto, sin revisión debida.
   Dominio: `sinmorralla.com` y `www.sinmorralla.com` como dominios propios del Worker; landing, portal, API y WebSocket
   responden en ambos con certificado válido. `workers.dev` sigue activo para el webhook de pey.
+- **L23 (2026-11-25) Identidad de marca v2:** "vamos a mejorar el tema estatico del producto agrega todo esto en docs
+  como parte de la parte de diseño de marca" y "solo deja el documento aun no modifiquemos la landing page". Documento en
+  `docs/marca/README.md` con logo conceptual y tableros de referencia. Contraste calculado: Agua Viva y Verde Pulso dan
+  ~3.2:1 sobre Blanco Hielo, así que para texto pequeño se documentan `#0369A1` y `#15803D`. Landing, portal y calcomanía
+  sin cambios.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos
