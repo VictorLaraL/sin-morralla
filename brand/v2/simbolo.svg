@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 48" role="img" aria-label="Sin Morralla" fill="none" stroke="#0F2A4A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Identidad v2: dos monedas apiladas de las que salen líneas de flujo. Trazo en una tinta (cambia el stroke). -->
+  <ellipse cx="27" cy="13" rx="13" ry="7.5"/>
+  <path d="M14 13v7a13 7.5 0 0 0 26 0v-7"/>
+  <path d="M6 27.5A13 7.5 0 0 1 14 20.6M6 27.5a13 7.5 0 0 0 26 0M6 27.5v7a13 7.5 0 0 0 26 0v-7"/>
+  <path d="M45 12c4-2.6 7.5-2.6 11.5 0s7.5 2.6 11.5 0M44 20.5c4-2.6 8-2.6 12 0s8 2.6 12 0M37 31c5-3 10-3 15.5 0s10.5 3 15.5 0"/>
+</svg>
