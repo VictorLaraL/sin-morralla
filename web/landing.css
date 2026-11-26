@@ -1,168 +1,11 @@
 /* Landing de Sin Morralla — identidad de marca v2 (docs/marca/README.md).
-   Estos tokens se cargan después de estilos.css y solo aplican a la landing: el portal sigue con la v1. */
+   Los tokens, la barra, los botones, las etiquetas y las tarjetas viven en estilos.css (compartidos con el portal).
+   Aquí solo va lo propio de la landing. */
 
-:root {
-  --azul: #0f2a4a; /* Azul Profundo Confianza */
-  --azul-osc: #0a1d33;
-  --azul-noche: #081729;
-  --azul-claro: #e0f2fe;
-  --agua: #0095d9; /* Agua Viva: acentos, íconos y texto grande */
-  --agua-texto: #0369a1; /* agua para texto pequeño (5.67:1 sobre hielo) */
-  --agua-suave: #7dd3fc;
-  --verde: #15803d; /* verde para texto y botones (blanco encima: 5.02:1) */
-  --verde-osc: #166534;
-  --verde-pulso: #16a34a; /* Verde Pulso Listo: indicadores */
-  --verde-claro: #dcfce7;
-  --tinta: #1e293b; /* Carbón Suave */
-  --tinta-2: #475569;
-  --tinta-3: #64748b;
-  --papel: #f8fafc; /* Blanco Hielo */
-  --borde: #e2e8f0;
-  --sombra: 0 1px 2px rgb(15 42 74 / 6%), 0 10px 30px rgb(15 42 74 / 8%);
-  --sombra-alta: 0 2px 4px rgb(15 42 74 / 6%), 0 24px 48px rgb(15 42 74 / 14%);
-  --radio: 20px;
-  --suave: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --titulos: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
-  --texto: "DM Sans", "Segoe UI", system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-}
-
-:focus-visible {
-  outline-color: var(--agua);
-}
-
-/* Montos y cifras: ancho fijo para que no "bailen" al actualizarse en vivo. */
-[data-monto] {
-  font-family: var(--mono);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-/* ---------- Barra ---------- */
-
-.barra {
-  background: rgb(15 42 74 / 78%);
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
-  backdrop-filter: blur(14px) saturate(140%);
-  transition: background 0.25s, box-shadow 0.25s;
-}
-
+/* La barra se vuelve más sólida al bajar (efectos.js). */
 .barra.desplazada {
   background: rgb(10 29 51 / 94%);
   box-shadow: 0 10px 30px rgb(2 12 27 / 28%);
-}
-
-.barra .contenedor {
-  min-height: 68px;
-}
-
-.logo {
-  gap: 12px;
-  color: #fff;
-  font: 800 17px/1 var(--titulos);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.logo svg {
-  width: 48px;
-  height: 32px;
-  transition: transform 0.4s var(--suave);
-}
-
-.logo:hover svg {
-  transform: translateX(3px);
-}
-
-.menu a {
-  position: relative;
-  color: #cbd5e1;
-}
-
-.menu a:not(.boton)::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 -7px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--agua);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.25s var(--suave);
-}
-
-.menu a:not(.boton):hover {
-  color: #fff;
-}
-
-.menu a:not(.boton):hover::after {
-  transform: scaleX(1);
-}
-
-/* ---------- Botones y etiquetas ---------- */
-
-.boton {
-  background: var(--verde);
-  font-family: var(--texto);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 8px 20px rgb(22 163 74 / 28%);
-  transition: background 0.15s, transform 0.2s var(--suave), box-shadow 0.2s;
-}
-
-.boton:hover {
-  background: var(--verde-osc);
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 14px 28px rgb(22 163 74 / 36%);
-}
-
-.boton:active {
-  transform: translateY(0);
-}
-
-.boton:disabled {
-  transform: none;
-  box-shadow: none;
-}
-
-.boton.secundario {
-  color: var(--azul);
-  border-color: #cbd5e1;
-  box-shadow: none;
-}
-
-.boton.secundario:hover {
-  background: var(--azul-claro);
-  border-color: var(--agua);
-  box-shadow: none;
-}
-
-/* La clase se llama "ambar" por la v1; en la v2 es el botón de acento en agua. */
-.boton.ambar {
-  background: var(--agua-texto);
-  color: #fff;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 8px 20px rgb(3 105 161 / 26%);
-}
-
-.boton.ambar:hover {
-  background: #075985;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 14px 28px rgb(3 105 161 / 32%);
-}
-
-.etiqueta {
-  background: var(--azul-claro);
-  color: var(--agua-texto);
-}
-
-.etiqueta.simulado {
-  background: var(--azul);
-  color: #fff;
-  font-family: var(--mono);
-  letter-spacing: 0.06em;
-}
-
-.tarjeta {
-  border-color: var(--borde);
-  border-radius: var(--radio);
-  box-shadow: var(--sombra);
 }
 
 /* ---------- Portada ---------- */
@@ -247,34 +90,11 @@
   align-items: center;
 }
 
-.portada-texto .etiqueta {
-  gap: 8px;
-  padding: 6px 12px;
-  border: 1px solid rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 8%);
-  color: #bae6fd;
-  backdrop-filter: blur(6px);
-}
 
-.portada-texto .etiqueta::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 0 0 rgb(34 197 94 / 60%);
-  animation: latir 2.2s ease-out infinite;
-}
 
-@keyframes latir {
-  70%,
-  100% {
-    box-shadow: 0 0 0 9px rgb(34 197 94 / 0%);
-  }
-}
 
 .portada h1 {
-  margin-top: 20px;
+  margin-top: 0;
   color: #fff;
   font-size: clamp(40px, 5.4vw, 66px);
   font-weight: 800;
@@ -807,7 +627,7 @@
 
 .seccion h2 {
   max-width: 20em;
-  margin-top: 16px;
+  margin-top: 0;
   color: var(--azul);
   font-size: clamp(28px, 3.6vw, 44px);
   font-weight: 800;
@@ -1032,11 +852,6 @@ html:not(.con-movimiento) .beneficios li:hover {
   color: #fff;
 }
 
-.oscura .etiqueta {
-  border: 1px solid rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 8%);
-  color: #bae6fd;
-}
 
 .oscura > .marca-agua {
   top: 50%;
@@ -1115,20 +930,6 @@ html:not(.con-movimiento) .reglas li:hover {
   color: var(--azul);
 }
 
-.formulario input,
-.formulario textarea {
-  border-color: #cbd5e1;
-  border-radius: 12px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.formulario input:focus,
-.formulario textarea:focus {
-  outline: 0;
-  border-color: var(--agua);
-  box-shadow: 0 0 0 4px rgb(0 149 217 / 22%);
-}
-
 .formulario .boton {
   min-height: 52px;
   font-size: 17px;
@@ -1187,20 +988,6 @@ html:not(.con-movimiento) .reglas li:hover {
 }
 
 @media (max-width: 640px) {
-  .barra .contenedor {
-    min-height: 60px;
-  }
-
-  .logo {
-    gap: 9px;
-    font-size: 14px;
-  }
-
-  .logo svg {
-    width: 40px;
-    height: 27px;
-  }
-
   .demo {
     padding: 16px;
     border-radius: 22px;

@@ -1,27 +1,32 @@
-/* Sin Morralla — estilos compartidos por la landing y el portal. */
+/* Sin Morralla — estilos compartidos por la landing y el portal. Identidad de marca v2 (docs/marca/README.md). */
 
 :root {
-  --azul: #2743a8;
-  --azul-osc: #1b2f7a;
-  --azul-claro: #e6ebfa;
-  --ambar: #f2a71b;
-  --ambar-osc: #c98306;
-  --agua: #1fb5d6;
-  --agua-claro: #d9f3fa;
-  --tinta: #141a2e;
-  --tinta-2: #4a5270;
-  --tinta-3: #6b7390;
-  --papel: #f5f7fb;
-  --blanco: #ffffff;
-  --borde: #dde3ee;
-  --verde: #15803d;
+  --azul: #0f2a4a; /* Azul Profundo Confianza */
+  --azul-osc: #0a1d33;
+  --azul-noche: #081729;
+  --azul-claro: #e0f2fe;
+  --agua: #0095d9; /* Agua Viva: acentos, íconos y texto grande */
+  --agua-texto: #0369a1; /* agua para texto pequeño (5.67:1 sobre hielo) */
+  --agua-suave: #7dd3fc;
+  --verde: #15803d; /* verde para texto y botones (blanco encima: 5.02:1) */
+  --verde-osc: #166534;
+  --verde-pulso: #16a34a; /* Verde Pulso Listo: indicadores */
   --verde-claro: #dcfce7;
   --rojo: #b91c1c;
   --rojo-claro: #fee2e2;
-  --sombra: 0 1px 2px rgb(20 26 46 / 6%), 0 8px 24px rgb(20 26 46 / 8%);
-  --radio: 16px;
-  --titulos: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --texto: "Inter", "Segoe UI", system-ui, sans-serif;
+  --tinta: #1e293b; /* Carbón Suave */
+  --tinta-2: #475569;
+  --tinta-3: #64748b;
+  --papel: #f8fafc; /* Blanco Hielo */
+  --blanco: #ffffff;
+  --borde: #e2e8f0;
+  --sombra: 0 1px 2px rgb(15 42 74 / 6%), 0 10px 30px rgb(15 42 74 / 8%);
+  --sombra-alta: 0 2px 4px rgb(15 42 74 / 6%), 0 24px 48px rgb(15 42 74 / 14%);
+  --radio: 20px;
+  --suave: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --titulos: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --texto: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
   color-scheme: light;
 }
 
@@ -64,7 +69,7 @@ p {
 }
 
 a {
-  color: var(--azul);
+  color: var(--agua-texto);
 }
 
 img,
@@ -73,9 +78,16 @@ svg {
 }
 
 :focus-visible {
-  outline: 3px solid var(--ambar);
+  outline: 3px solid var(--agua);
   outline-offset: 2px;
   border-radius: 6px;
+}
+
+/* Montos y cifras: ancho fijo para que no "bailen" al actualizarse en vivo. */
+[data-monto] {
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .contenedor {
@@ -92,14 +104,16 @@ svg {
   white-space: nowrap;
 }
 
-/* Encabezado */
+/* ---------- Barra superior (Azul Profundo) ---------- */
+
 .barra {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgb(245 247 251 / 88%);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--borde);
+  background: rgb(15 42 74 / 78%);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  backdrop-filter: blur(14px) saturate(140%);
+  transition: background 0.25s, box-shadow 0.25s;
 }
 
 .barra .contenedor {
@@ -107,28 +121,29 @@ svg {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 64px;
+  min-height: 68px;
 }
 
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  color: #fff;
+  font: 800 17px/1 var(--titulos);
+  letter-spacing: 0.09em;
   text-decoration: none;
-  color: var(--tinta);
-  font: 800 22px/1 var(--titulos);
-  letter-spacing: -0.02em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .logo svg {
-  width: 34px;
-  height: 34px;
+  width: 48px;
+  height: 32px;
+  transition: transform 0.4s var(--suave);
 }
 
-.logo .sin {
-  color: var(--azul);
-  font-weight: 600;
+.logo:hover svg {
+  transform: translateX(3px);
 }
 
 .menu {
@@ -140,21 +155,35 @@ svg {
 }
 
 .menu a {
-  color: var(--tinta-2);
+  position: relative;
+  color: #cbd5e1;
   text-decoration: none;
 }
 
-.menu a:hover {
-  color: var(--azul);
+.menu a:not(.boton)::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -7px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--agua);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--suave);
 }
 
-.menu a.boton {
-  white-space: nowrap;
+.menu a:not(.boton):hover {
+  color: #fff;
+}
+
+.menu a:not(.boton):hover::after {
+  transform: scaleX(1);
 }
 
 .menu a.boton,
 .menu a.boton:hover {
   color: var(--blanco);
+  white-space: nowrap;
 }
 
 @media (max-width: 760px) {
@@ -163,7 +192,24 @@ svg {
   }
 }
 
-/* Botones */
+@media (max-width: 640px) {
+  .barra .contenedor {
+    min-height: 60px;
+  }
+
+  .logo {
+    gap: 9px;
+    font-size: 14px;
+  }
+
+  .logo svg {
+    width: 40px;
+    height: 27px;
+  }
+}
+
+/* ---------- Botones ---------- */
+
 .boton {
   display: inline-flex;
   align-items: center;
@@ -173,44 +219,55 @@ svg {
   padding: 0 20px;
   border: 2px solid transparent;
   border-radius: 999px;
-  background: var(--azul);
+  background: var(--verde);
   color: var(--blanco);
   font: 600 16px/1 var(--texto);
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 8px 20px rgb(22 163 74 / 28%);
+  transition: background 0.15s, transform 0.2s var(--suave), box-shadow 0.2s, border-color 0.2s;
 }
 
 .boton:hover {
-  background: var(--azul-osc);
+  background: var(--verde-osc);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 14px 28px rgb(22 163 74 / 36%);
 }
 
 .boton:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 .boton:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .boton.secundario {
   background: transparent;
   color: var(--azul);
-  border-color: currentColor;
+  border-color: #cbd5e1;
+  box-shadow: none;
 }
 
 .boton.secundario:hover {
   background: var(--azul-claro);
+  border-color: var(--agua);
+  box-shadow: none;
 }
 
+/* La clase se llama "ambar" por la v1; en la v2 es el botón de acento en agua. */
 .boton.ambar {
-  background: var(--ambar);
-  color: var(--tinta);
+  background: var(--agua-texto);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 8px 20px rgb(3 105 161 / 26%);
 }
 
 .boton.ambar:hover {
-  background: #e19812;
+  background: #075985;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 14px 28px rgb(3 105 161 / 32%);
 }
 
 .boton.chico {
@@ -219,7 +276,8 @@ svg {
   font-size: 14px;
 }
 
-/* Tarjetas y etiquetas */
+/* ---------- Tarjetas y etiquetas ---------- */
+
 .tarjeta {
   background: var(--blanco);
   border: 1px solid var(--borde);
@@ -234,16 +292,17 @@ svg {
   padding: 4px 10px;
   border-radius: 999px;
   background: var(--azul-claro);
-  color: var(--azul);
+  color: var(--agua-texto);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .etiqueta.simulado {
-  background: var(--ambar);
-  color: var(--tinta);
-  letter-spacing: 0.04em;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
 }
 
 .etiqueta.verde {
@@ -263,7 +322,8 @@ svg {
   background: currentColor;
 }
 
-/* Formularios */
+/* ---------- Formularios ---------- */
+
 label {
   display: grid;
   gap: 6px;
@@ -277,11 +337,12 @@ select {
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  border: 1px solid #c9d1e0;
-  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
   background: var(--blanco);
   color: var(--tinta);
   font: 16px/1.4 var(--texto);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 textarea {
@@ -292,8 +353,16 @@ textarea {
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 3px solid rgb(39 67 168 / 25%);
-  border-color: var(--azul);
+  outline: 0;
+  border-color: var(--agua);
+  box-shadow: 0 0 0 4px rgb(0 149 217 / 22%);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: var(--papel);
+  color: var(--tinta-2);
 }
 
 .aviso {
