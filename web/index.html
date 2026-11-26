@@ -5,24 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sin Morralla — tu máquina de siempre, ahora sin monedas</title>
   <meta name="description" content="Módulo que conecta las máquinas de monedas a CoDi. El cliente paga con la app de su banco y la máquina sirve como si le hubieran echado monedas.">
-  <meta name="theme-color" content="#2743A8">
+  <meta name="theme-color" content="#0F2A4A">
   <link rel="canonical" href="https://sinmorralla.com/">
   <meta property="og:url" content="https://sinmorralla.com/">
   <meta property="og:title" content="Sin Morralla">
   <meta property="og:description" content="Tu máquina de siempre, ahora sin monedas: cobra con CoDi en máquinas de agua purificada.">
-  <link rel="icon" href="/marca.svg" type="image/svg+xml">
+  <link rel="icon" href="/simbolo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
   <link rel="stylesheet" href="/estilos.css">
   <link rel="stylesheet" href="/landing.css">
 </head>
 <body>
+  <!-- Símbolo de la marca (identidad v2, docs/marca): se reutiliza con <use href="#simbolo">. -->
+  <svg width="0" height="0" class="oculto-visual" aria-hidden="true" focusable="false">
+    <symbol id="simbolo" viewBox="0 0 72 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="27" cy="13" rx="13" ry="7.5"/>
+      <path d="M14 13v7a13 7.5 0 0 0 26 0v-7"/>
+      <path d="M6 27.5A13 7.5 0 0 1 14 20.6M6 27.5a13 7.5 0 0 0 26 0M6 27.5v7a13 7.5 0 0 0 26 0v-7"/>
+      <path d="M45 12c4-2.6 7.5-2.6 11.5 0s7.5 2.6 11.5 0M44 20.5c4-2.6 8-2.6 12 0s8 2.6 12 0M37 31c5-3 10-3 15.5 0s10.5 3 15.5 0"/>
+    </symbol>
+  </svg>
+
   <header class="barra">
     <div class="contenedor">
       <a class="logo" href="/" aria-label="Sin Morralla, inicio">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
-        <span><span class="sin">sin</span> morralla</span>
+        <svg viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
+        <span>Sin Morralla</span>
       </a>
       <nav class="menu" aria-label="Secciones">
         <a class="opcional" href="#como-funciona">Cómo funciona</a>
@@ -37,6 +47,14 @@
   <main>
     <!-- Encabezado y demo en vivo -->
     <section class="portada">
+      <svg class="portada-flujo" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path class="f1" d="M-400 96 q100 -34 200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0"/>
+        <path class="f2" d="M-400 208 q100 -46 200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0"/>
+        <path class="f3" d="M-400 330 q100 -38 200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0"/>
+        <path class="f4" d="M-400 446 q100 -50 200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0"/>
+        <path class="f5" d="M-400 548 q100 -30 200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0 t200 0"/>
+      </svg>
+
       <div class="contenedor portada-rejilla">
         <div class="portada-texto">
           <span class="etiqueta">Máquinas de agua purificada · CoDi</span>
@@ -65,7 +83,7 @@
           <div class="demo-cuerpo">
             <figure class="calcomania" aria-describedby="calcomania-ayuda">
               <div class="calcomania-cabeza">
-                <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
+                <svg viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
                 <strong>Paga <span id="monto" data-monto>$0.01</span> con CoDi</strong>
               </div>
               <div class="qr" id="qr" role="img" aria-label="Código QR CoDi de la demo">
@@ -87,43 +105,57 @@
                     <stop offset="0.35" stop-color="#fff" stop-opacity="0.1"/>
                     <stop offset="1" stop-color="#fff" stop-opacity="0"/>
                   </linearGradient>
+                  <linearGradient id="cuerpo" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#16406B"/>
+                    <stop offset="0.45" stop-color="#0F2A4A"/>
+                    <stop offset="1" stop-color="#0B2038"/>
+                  </linearGradient>
+                  <linearGradient id="agua-llena" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#22A8E8"/>
+                    <stop offset="1" stop-color="#0077B6"/>
+                  </linearGradient>
                 </defs>
-                <rect x="10" y="6" width="300" height="408" rx="24" fill="#2743A8"/>
-                <rect x="10" y="384" width="300" height="30" rx="0" fill="#1B2F7A"/>
-                <rect x="10" y="390" width="300" height="24" rx="12" fill="#1B2F7A"/>
-                <text x="132" y="45" text-anchor="middle" fill="#fff" font-family="Bricolage Grotesque, Segoe UI, sans-serif" font-weight="800" font-size="19" letter-spacing="1.5">AGUA PURIFICADA</text>
-                <rect x="34" y="62" width="196" height="318" rx="16" fill="#E9EFF8"/>
-                <rect x="34" y="62" width="196" height="14" rx="7" fill="#D3DCEB"/>
-                <rect x="120" y="62" width="24" height="24" rx="3" fill="#8C9AB3"/>
-                <rect x="126" y="86" width="12" height="9" rx="2" fill="#6F7E99"/>
-                <rect class="chorro" x="128.5" y="95" width="7" height="70" rx="3.5" fill="#1FB5D6"/>
+                <rect x="10" y="6" width="300" height="408" rx="24" fill="url(#cuerpo)"/>
+                <rect x="10" y="384" width="300" height="30" rx="0" fill="#0A1D33"/>
+                <rect x="10" y="390" width="300" height="24" rx="12" fill="#0A1D33"/>
+                <text x="132" y="45" text-anchor="middle" fill="#fff" font-family="Plus Jakarta Sans, Segoe UI, sans-serif" font-weight="800" font-size="17" letter-spacing="2">AGUA PURIFICADA</text>
+                <rect x="34" y="62" width="196" height="318" rx="16" fill="#EEF4FA"/>
+                <rect x="34" y="62" width="196" height="14" rx="7" fill="#D5DFEA"/>
+                <rect x="120" y="62" width="24" height="24" rx="3" fill="#94A3B8"/>
+                <rect x="126" y="86" width="12" height="9" rx="2" fill="#64748B"/>
+                <rect class="chorro" x="128.5" y="95" width="7" height="70" rx="3.5" fill="#0095D9"/>
                 <g transform="translate(40 150) scale(0.92)">
                   <g clip-path="url(#forma-garrafon)">
                     <rect x="0" y="0" width="200" height="250" fill="#F4FAFE"/>
                     <g class="agua">
-                      <path class="ola" d="M-200 52 q25 -9 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V260 H-200 Z" fill="#1FB5D6"/>
-                      <path class="ola ola-2" d="M-200 56 q25 -7 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V260 H-200 Z" fill="#17A3C2" opacity="0.6"/>
+                      <path class="ola" d="M-200 52 q25 -9 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V260 H-200 Z" fill="url(#agua-llena)"/>
+                      <path class="ola ola-2" d="M-200 56 q25 -7 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V260 H-200 Z" fill="#0369A1" opacity="0.35"/>
+                      <circle class="burbuja" cx="68" cy="236" r="4" fill="#fff"/>
+                      <circle class="burbuja b2" cx="104" cy="240" r="3" fill="#fff"/>
+                      <circle class="burbuja b3" cx="132" cy="234" r="5" fill="#fff"/>
+                      <circle class="burbuja b4" cx="88" cy="242" r="2.5" fill="#fff"/>
                     </g>
                     <rect x="0" y="0" width="200" height="250" fill="url(#brillo)"/>
                   </g>
-                  <path d="M88 46 V20 H112 V46 C112 60 160 62 166 84 L168 226 Q168 246 148 246 L52 246 Q32 246 32 226 L34 84 C40 62 88 60 88 46 Z" fill="none" stroke="#9FB3CF" stroke-width="3"/>
-                  <path d="M36 120 H164 M36 180 H166" stroke="#9FB3CF" stroke-width="2" opacity="0.7"/>
-                  <rect x="84" y="16" width="32" height="8" rx="3" fill="#9FB3CF"/>
+                  <path d="M88 46 V20 H112 V46 C112 60 160 62 166 84 L168 226 Q168 246 148 246 L52 246 Q32 246 32 226 L34 84 C40 62 88 60 88 46 Z" fill="none" stroke="#A3B5CC" stroke-width="3"/>
+                  <path d="M36 120 H164 M36 180 H166" stroke="#A3B5CC" stroke-width="2" opacity="0.7"/>
+                  <rect x="84" y="16" width="32" height="8" rx="3" fill="#A3B5CC"/>
                 </g>
-                <circle class="led" cx="270" cy="84" r="9" fill="#22C55E"/>
-                <text x="270" y="112" text-anchor="middle" fill="#C7D2F0" font-family="Inter, Segoe UI, sans-serif" font-size="11" font-weight="600">CoDi</text>
-                <rect x="254" y="128" width="32" height="46" rx="7" fill="#1B2F7A"/>
-                <rect x="268" y="136" width="4" height="30" rx="2" fill="#0B1440"/>
-                <circle class="moneda" cx="270" cy="152" r="9" fill="#F2A71B" stroke="#C98306" stroke-width="2"/>
-                <circle class="boton-servir" cx="270" cy="208" r="17" fill="#F2A71B" stroke="#C98306" stroke-width="3"/>
+                <circle class="led-halo" cx="270" cy="84" r="15" fill="#22C55E" opacity="0.22"/>
+                <circle class="led" cx="270" cy="84" r="9" fill="#16A34A"/>
+                <text x="270" y="114" text-anchor="middle" fill="#BAE6FD" font-family="DM Sans, Segoe UI, sans-serif" font-size="11" font-weight="600">CoDi</text>
+                <rect x="254" y="128" width="32" height="46" rx="7" fill="#0A1D33"/>
+                <rect x="268" y="136" width="4" height="30" rx="2" fill="#050F1C"/>
+                <circle class="moneda" cx="270" cy="152" r="9" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+                <circle class="boton-servir" cx="270" cy="208" r="17" fill="#16A34A" stroke="#15803D" stroke-width="3"/>
                 <rect x="246" y="246" width="48" height="60" rx="7" fill="#fff"/>
-                <rect x="252" y="252" width="12" height="12" rx="2" fill="none" stroke="#2743A8" stroke-width="3"/>
-                <rect x="276" y="252" width="12" height="12" rx="2" fill="none" stroke="#2743A8" stroke-width="3"/>
-                <rect x="252" y="276" width="12" height="12" rx="2" fill="none" stroke="#2743A8" stroke-width="3"/>
-                <rect x="278" y="278" width="5" height="5" fill="#2743A8"/>
-                <rect x="268" y="270" width="5" height="5" fill="#2743A8"/>
-                <text x="270" y="301" text-anchor="middle" fill="#2743A8" font-family="Inter, Segoe UI, sans-serif" font-size="8" font-weight="700">CoDi</text>
-                <rect x="252" y="336" width="36" height="26" rx="6" fill="#1B2F7A"/>
+                <rect x="252" y="252" width="12" height="12" rx="2" fill="none" stroke="#0F2A4A" stroke-width="3"/>
+                <rect x="276" y="252" width="12" height="12" rx="2" fill="none" stroke="#0F2A4A" stroke-width="3"/>
+                <rect x="252" y="276" width="12" height="12" rx="2" fill="none" stroke="#0F2A4A" stroke-width="3"/>
+                <rect x="278" y="278" width="5" height="5" fill="#0F2A4A"/>
+                <rect x="268" y="270" width="5" height="5" fill="#0F2A4A"/>
+                <text x="270" y="301" text-anchor="middle" fill="#0F2A4A" font-family="DM Sans, Segoe UI, sans-serif" font-size="8" font-weight="700">CoDi</text>
+                <rect x="252" y="336" width="36" height="26" rx="6" fill="#0A1D33"/>
               </svg>
               <p class="estado" id="estado" role="status" aria-live="polite">Esperando tu pago de $0.01</p>
               <p class="pulsos" id="pulsos" aria-hidden="true">&nbsp;</p>
@@ -147,25 +179,32 @@
           </div>
         </div>
       </div>
+
+      <svg class="onda" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0 46 C220 86 430 4 720 34 S1210 84 1440 30 V80 H0 Z"/></svg>
     </section>
 
     <!-- Cómo funciona -->
     <section class="seccion" id="como-funciona">
       <div class="contenedor">
-        <span class="etiqueta">Cómo funciona</span>
-        <h2>Un pago de CoDi se convierte en las monedas que la máquina ya entiende.</h2>
+        <div data-revelar>
+          <span class="etiqueta">Cómo funciona</span>
+          <h2>Un pago de CoDi se convierte en las monedas que la máquina ya entiende.</h2>
+        </div>
         <ol class="pasos">
-          <li class="tarjeta">
+          <li class="tarjeta" data-revelar style="--orden: 0">
+            <svg class="paso-icono" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></svg>
             <span class="numero">1</span>
             <h3>Conectamos el módulo</h3>
             <p>Un módulo pequeño (ESP32) se conecta en paralelo al monedero y al WiFi del local. Las monedas siguen funcionando igual.</p>
           </li>
-          <li class="tarjeta">
+          <li class="tarjeta" data-revelar style="--orden: 1">
+            <svg class="paso-icono" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="6" height="6" rx="1.2"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.2"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.2"/><path d="M14.5 14.5h2.5v2.5M20.5 14.5v1M14.5 20.5h1M19 18.5h1.5v2h-2"/></svg>
             <span class="numero">2</span>
             <h3>Pegamos la calcomanía</h3>
             <p>Cada máquina lleva su QR CoDi fijo con el precio ya escrito. No hace falta pantalla ni terminal.</p>
           </li>
-          <li class="tarjeta">
+          <li class="tarjeta" data-revelar style="--orden: 2">
+            <svg class="paso-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2s6 6.3 6 10.6a6 6 0 0 1-12 0c0-4.3 6-10.6 6-10.6Z"/><path d="M9.2 14.2a2.9 2.9 0 0 0 2.4 2.7"/></svg>
             <span class="numero">3</span>
             <h3>Tu cliente paga y la máquina sirve</h3>
             <p>Cuando el banco confirma el pago, el módulo manda los mismos pulsos que una moneda. La luz se pone verde y empieza a servir.</p>
@@ -177,17 +216,29 @@
     <!-- Para el dueño -->
     <section class="seccion alterna" id="duenos">
       <div class="contenedor duenos-rejilla">
-        <div>
+        <div data-revelar>
           <span class="etiqueta">Para dueños de máquinas</span>
           <h2>Cobra con CoDi sin cambiar tu máquina.</h2>
           <p class="entrada">Los clientes ya no traen monedas. Con Sin Morralla tu máquina acepta el pago que todos tienen en el celular, y tú lo ves llegar al instante.</p>
           <a class="boton" href="#contacto">Quiero probarlo en mi máquina</a>
         </div>
         <ul class="beneficios">
-          <li class="tarjeta"><h3>Sin terminal ni comisiones de tarjeta</h3><p>El cobro llega por SPEI a tu cuenta con su clave de rastreo.</p></li>
-          <li class="tarjeta"><h3>Tu máquina, tal cual</h3><p>El módulo convive con el monedero. Si un día lo quitas, la máquina queda como estaba.</p></li>
-          <li class="tarjeta"><h3>Ventas en tiempo real</h3><p>Cada pago aparece en tu portal en segundos, con la máquina que lo cobró.</p></li>
-          <li class="tarjeta"><h3>Menos morralla que cuidar</h3><p>Menos monedas que contar, cambiar y resguardar.</p></li>
+          <li class="tarjeta" data-revelar style="--orden: 0">
+            <span class="icono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5 12 4l8.5 5.5M5 10v7M9.5 10v7M14.5 10v7M19 10v7M3.5 19.5h17"/></svg></span>
+            <h3>Sin terminal ni comisiones de tarjeta</h3><p>El cobro llega por SPEI a tu cuenta con su clave de rastreo.</p>
+          </li>
+          <li class="tarjeta" data-revelar style="--orden: 1">
+            <span class="icono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5M15 3v5M6.5 8h11v4a5.5 5.5 0 0 1-11 0V8ZM12 17.5V21"/></svg></span>
+            <h3>Tu máquina, tal cual</h3><p>El módulo convive con el monedero. Si un día lo quitas, la máquina queda como estaba.</p>
+          </li>
+          <li class="tarjeta" data-revelar style="--orden: 2">
+            <span class="icono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg></span>
+            <h3>Ventas en tiempo real</h3><p>Cada pago aparece en tu portal en segundos, con la máquina que lo cobró.</p>
+          </li>
+          <li class="tarjeta" data-revelar style="--orden: 3">
+            <span class="icono"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="7" rx="7" ry="3.2"/><path d="M5 7v5c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2V7M5 12v5c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2v-5"/></svg></span>
+            <h3>Menos morralla que cuidar</h3><p>Menos monedas que contar, cambiar y resguardar.</p>
+          </li>
         </ul>
       </div>
     </section>
@@ -195,14 +246,17 @@
     <!-- Máquinas -->
     <section class="seccion" id="maquinas">
       <div class="contenedor">
-        <span class="etiqueta">Máquinas compatibles</span>
-        <h2>Empezamos por el agua purificada.</h2>
+        <div data-revelar>
+          <span class="etiqueta">Máquinas compatibles</span>
+          <h2>Empezamos por el agua purificada.</h2>
+        </div>
         <div class="maquinas">
-          <div class="tarjeta destacada">
+          <div class="tarjeta destacada" data-revelar style="--orden: 0">
+            <svg class="marca-agua" viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
             <h3>Hoy</h3>
             <p>Despachadores de agua purificada con monedero de pulsos, la máquina de monedas más común en las colonias.</p>
           </div>
-          <div class="tarjeta">
+          <div class="tarjeta" data-revelar style="--orden: 1">
             <h3>Después</h3>
             <p>Cualquier máquina que cuente monedas por pulsos: juegos montables, masajeadores, lavanderías de autoservicio y básculas.</p>
           </div>
@@ -211,29 +265,34 @@
     </section>
 
     <!-- Seguridad -->
-    <section class="seccion alterna" id="seguridad">
+    <section class="seccion oscura" id="seguridad">
+      <svg class="onda arriba" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0 46 C220 86 430 4 720 34 S1210 84 1440 30 V80 H0 Z"/></svg>
+      <svg class="marca-agua" viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
       <div class="contenedor">
-        <span class="etiqueta">Seguridad y reglas de cobro</span>
-        <h2>Reglas claras para el cliente y para el dueño.</h2>
+        <div data-revelar>
+          <span class="etiqueta">Seguridad y reglas de cobro</span>
+          <h2>Reglas claras para el cliente y para el dueño.</h2>
+        </div>
         <ul class="reglas">
-          <li><strong>Revisa el beneficiario.</strong> Tu banco te muestra el nombre del dueño y el monto antes de pagar. Si no coincide con la calcomanía, no pagues.</li>
-          <li><strong>CoDi no da cambio.</strong> El QR ya trae el precio exacto. Lo que pagas de más no se devuelve en monedas: así la máquina nunca se queda sin cambio para quien paga en efectivo.</li>
-          <li><strong>La luz te avisa.</strong> Verde: lista para cobrar con CoDi. Roja: sin conexión, usa monedas.</li>
-          <li><strong>Ningún pago se pierde.</strong> Si la máquina no pudo servir, el pago queda registrado y el dueño lo devuelve desde su banco cuando se lo pidas.</li>
-          <li><strong>Avisos firmados, cobro único.</strong> Cada aviso de pago se verifica con firma criptográfica y un mismo pago nunca se sirve dos veces.</li>
+          <li data-revelar style="--orden: 0"><strong>Revisa el beneficiario.</strong> Tu banco te muestra el nombre del dueño y el monto antes de pagar. Si no coincide con la calcomanía, no pagues.</li>
+          <li data-revelar style="--orden: 1"><strong>CoDi no da cambio.</strong> El QR ya trae el precio exacto. Lo que pagas de más no se devuelve en monedas: así la máquina nunca se queda sin cambio para quien paga en efectivo.</li>
+          <li data-revelar style="--orden: 2"><strong>La luz te avisa.</strong> Verde: lista para cobrar con CoDi. Roja: sin conexión, usa monedas.</li>
+          <li data-revelar style="--orden: 3"><strong>Ningún pago se pierde.</strong> Si la máquina no pudo servir, el pago queda registrado y el dueño lo devuelve desde su banco cuando se lo pidas.</li>
+          <li data-revelar style="--orden: 4"><strong>Avisos firmados, cobro único.</strong> Cada aviso de pago se verifica con firma criptográfica y un mismo pago nunca se sirve dos veces.</li>
         </ul>
       </div>
+      <svg class="onda" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0 46 C220 86 430 4 720 34 S1210 84 1440 30 V80 H0 Z"/></svg>
     </section>
 
     <!-- Contacto -->
     <section class="seccion" id="contacto">
       <div class="contenedor contacto-rejilla">
-        <div>
+        <div data-revelar>
           <span class="etiqueta">Contacto</span>
           <h2>¿Tienes una máquina de agua?</h2>
           <p class="entrada">Déjanos tus datos y te buscamos para instalar el módulo en una de tus máquinas sin costo durante la prueba.</p>
         </div>
-        <form class="tarjeta formulario" id="formulario" novalidate>
+        <form class="tarjeta formulario" id="formulario" novalidate data-revelar style="--orden: 1">
           <label>Nombre <input name="nombre" autocomplete="name" required maxlength="80"></label>
           <div class="dos">
             <label>Teléfono <input name="telefono" type="tel" autocomplete="tel" inputmode="tel" maxlength="20"></label>
@@ -251,8 +310,8 @@
   <footer class="pie">
     <div class="contenedor pie-rejilla">
       <a class="logo" href="/" aria-label="Sin Morralla, inicio">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
-        <span><span class="sin">sin</span> morralla</span>
+        <svg viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
+        <span>Sin Morralla</span>
       </a>
       <p>
         Proyecto de la Hackatón México 2026. Pagos CoDi a través de <a href="https://pey.mx" rel="noopener">pey</a>.
@@ -264,5 +323,6 @@
 
   <script src="/vendor/qrcode-1.4.4.js"></script>
   <script src="/landing.js" type="module"></script>
+  <script src="/efectos.js" type="module"></script>
 </body>
 </html>
