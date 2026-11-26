@@ -160,8 +160,7 @@ flowchart LR
 Abre la **[demo en vivo](https://sinmorralla.com)**. La tarjeta "Demo en vivo" muestra el QR
 real de $0.01 de la máquina virtual:
 
-1. Abre la app de tu banco, entra a CoDi y escanea el QR (o usa **Descargar QR** y ábrelo desde la app si estás en el
-   celular).
+1. Abre la app de tu banco, entra a CoDi y escanea el QR.
 2. Revisa el beneficiario y el monto de **$0.01**, y paga. Es un pago real con CoDi, procesado por pey.
 3. En segundos la página dice "¡Pago recibido!", la máquina recibe su pulso y **el garrafón se llena**. El contador de
    pagos de hoy sube para todos los que tengan la página abierta.

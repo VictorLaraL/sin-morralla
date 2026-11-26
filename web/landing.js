@@ -1,6 +1,6 @@
 // Demo en vivo de la landing: muestra el QR de la máquina virtual y llena el garrafón cuando llega un pago.
 
-import { descargarPng, svgQr } from "/qr.js";
+import { svgQr } from "/qr.js";
 
 const $ = (id) => document.getElementById(id);
 const maquina = $("maquina");
@@ -70,19 +70,12 @@ function pintarQr(texto) {
   const caja = $("qr");
   if (!texto) {
     caja.innerHTML = '<span class="qr-cargando">La demo se está preparando. Vuelve en unos minutos.</span>';
-    $("descargar").disabled = true;
     return;
   }
   if (qrActual === texto) return;
   caja.innerHTML = svgQr(texto);
   qrActual = texto;
-  $("descargar").disabled = false;
 }
-
-// Para pagar desde el mismo celular: muchas apps de banco leen el QR desde una imagen guardada.
-$("descargar").addEventListener("click", () => {
-  if (qrActual) descargarPng(qrActual, "sin-morralla-demo-codi.png");
-});
 
 // ---------- Llenado del garrafón ----------
 

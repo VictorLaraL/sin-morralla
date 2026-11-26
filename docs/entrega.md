@@ -83,8 +83,7 @@ llena un garrafón en la página, en vivo, con el mismo camino que usaría una m
 
 1. Abre https://sinmorralla.com. La tarjeta "Demo en vivo" muestra el QR CoDi real de $0.01
    de una máquina de agua virtual. Ese QR lo creó el portal de Sin Morralla con el API de pey (`POST /codi/qr`).
-2. Abre la app de tu banco, entra a CoDi y escanea el QR. Si estás en el celular, presiona "Descargar QR" y ábrelo
-   desde la app del banco (opción de leer un QR desde una imagen).
+2. Abre la app de tu banco, entra a CoDi y escanea el QR.
 3. Revisa el monto ($0.01) y paga. Mientras pey aprueba la cuenta CoDi propia del proyecto, el beneficiario que muestra
    tu banco es el titular de la cuenta de pruebas "Pruebas Pey".
 4. En segundos pey avisa al Worker por webhook; el Worker verifica la firma, registra el pago una sola vez y lo manda en
