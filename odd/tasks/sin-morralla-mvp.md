@@ -42,6 +42,7 @@ contra `wrangler dev` + revisión en el navegador integrado.
 | T7 | S6 | inline | hecho | Protocolo de 5 campos y ACK parcial cubiertos por e2e 28/28; entrega en dos fases; **sin compilar** (no hay arduino-cli ni placa en esta máquina) |
 | T8 | S9, S10 | inline | hecho | Unitarias 34/34, e2e 31/31 (30/30 dos corridas seguidas antes de la última prueba), firmware 8/8 (`npm run test:firmware`, MSVC), `typecheck` limpio; navegador integrado en landing y portal; servidor local corriendo en el puerto 8787 |
 | T9 | S7, S8 | inline | hecho | `README.md` con un solo diagrama Mermaid (servicio, flujo y hardware) validado con Mermaid 10.9.1 sin errores; `firmware/README.md` |
+| T11 | S3 | inline | hecho | Rediseño de la landing con la identidad v2. Navegador integrado en 1280 px y 375 px: portada, demo, pago simulado con brillo verde y burbujas, secciones, formulario; consola sin errores; sin desplazamiento horizontal; portal sin cambios (sigue en v1) |
 | T10 | S1, S2 | inline | hecho | D1 `sin-morralla` (WNAM), migraciones remotas 0001–0003, Worker en https://sin-morralla.victormlaralopez.workers.dev (salud, landing, portal y demo 200); repo público https://github.com/VictorLaraL/sin-morralla con `main` y `feat/mvp-cloudflare`. Faltan los secretos, que pone el usuario |
 
 - **T1** Estructura del proyecto (Worker, D1, configuración, scripts) sobre la documentación existente.
@@ -169,6 +170,13 @@ explorador de solo lectura.
   `docs/marca/README.md` con logo conceptual y tableros de referencia. Contraste calculado: Agua Viva y Verde Pulso dan
   ~3.2:1 sobre Blanco Hielo, así que para texto pequeño se documentan `#0369A1` y `#15803D`. Landing, portal y calcomanía
   sin cambios.
+- **L24 (2026-11-25) Rediseño de la landing con la identidad v2:** "con la nueva identidad de marca que tenemos audita y
+  haz un refactor estetico de la landing page solo enfocate en el UI por que el UX y el contenido esta perfecto solo
+  necesitamos mejorar la UI, animaciones e impacto visual, apegados a la nueva identidad logos etc." Contenido, flujo e
+  identificadores de la demo sin cambios (`landing.js` intacto). Tokens v2 solo en `web/landing.css`; logo vectorial en
+  `brand/v2`; efectos de presentación en `web/efectos.js` (si no carga, la página se ve completa). El commit de la página
+  pasa de 400 líneas porque es la reescritura visual de una sola hoja. Los colores Agua Viva y Verde Pulso se usan solo
+  en íconos, indicadores y texto grande; el texto pequeño usa `#0369A1` y `#15803D`.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos

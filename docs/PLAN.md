@@ -106,9 +106,9 @@ dirección del Worker y probarlo en una placa real.
 
 ## 5. Identidad visual
 
-> **Hay una identidad v2 aprobada y todavía sin aplicar** (Azul Profundo, Agua Viva, Verde Pulso; Plus Jakarta Sans,
-> DM Sans y JetBrains Mono): [docs/marca](marca/README.md). Lo que sigue es la v1, la que hoy usan la landing, el
-> portal y la calcomanía.
+> **La identidad v2** (Azul Profundo, Agua Viva, Verde Pulso; Plus Jakarta Sans, DM Sans y JetBrains Mono) está en
+> [docs/marca](marca/README.md) y **ya se aplicó en la landing**. Lo que sigue es la v1, que todavía usan el portal y
+> su calcomanía.
 
 | Rol | Color | Uso |
 |---|---|---|
