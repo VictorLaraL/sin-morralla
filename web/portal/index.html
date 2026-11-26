@@ -121,6 +121,17 @@
     </div>
     <!-- Calcomanía de marca: Azul Profundo, logo blanco y el QR oscuro sobre un recuadro blanco (docs/marca, sección 5). -->
     <div class="hoja" id="cal-hoja">
+      <!-- Fondo como relleno SVG (no como fondo CSS): se imprime aunque esté apagada la opción de imprimir fondos. -->
+      <svg class="hoja-fondo" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="hoja-degradado" x1="0" y1="0" x2="0.35" y2="1">
+            <stop offset="0" stop-color="#16406B"/>
+            <stop offset="0.5" stop-color="#0F2A4A"/>
+            <stop offset="1" stop-color="#0B2240"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(#hoja-degradado)"/>
+      </svg>
       <div class="hoja-cabeza">
         <svg viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
         <span>Sin Morralla</span>

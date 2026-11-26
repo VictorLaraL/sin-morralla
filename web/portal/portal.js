@@ -695,17 +695,36 @@ if (clave) cargar().then(mostrarPanel, () => {});
 // ---------- Barra lateral: marca la sección que se está viendo ----------
 
 const enlacesSeccion = [...document.querySelectorAll(".secciones a[data-seccion]")];
+
+function marcarSeccion(id) {
+  for (const a of enlacesSeccion) {
+    const activo = a.dataset.seccion === id;
+    a.classList.toggle("activa", activo);
+    if (activo) a.setAttribute("aria-current", "location");
+    else a.removeAttribute("aria-current");
+  }
+}
+
+for (const a of enlacesSeccion) a.addEventListener("click", () => marcarSeccion(a.dataset.seccion));
+
+// La última sección puede no llegar a la franja que observa el espía si la página no baja lo suficiente:
+// al tocar el final de la página se marca la última sección visible.
+addEventListener(
+  "scroll",
+  () => {
+    if (innerHeight + scrollY < document.documentElement.scrollHeight - 4) return;
+    const visibles = enlacesSeccion.filter((a) => a.offsetParent !== null);
+    const ultima = visibles.at(-1);
+    if (ultima) marcarSeccion(ultima.dataset.seccion);
+  },
+  { passive: true },
+);
+
 if ("IntersectionObserver" in window && enlacesSeccion.length > 0) {
   const espia = new IntersectionObserver(
     (entradas) => {
       const visible = entradas.find((e) => e.isIntersecting);
-      if (!visible) return;
-      for (const a of enlacesSeccion) {
-        const activo = a.dataset.seccion === visible.target.id;
-        a.classList.toggle("activa", activo);
-        if (activo) a.setAttribute("aria-current", "location");
-        else a.removeAttribute("aria-current");
-      }
+      if (visible) marcarSeccion(visible.target.id);
     },
     { rootMargin: "-15% 0px -70% 0px" },
   );
