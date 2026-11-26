@@ -200,14 +200,14 @@ function pintarPorAtender() {
       datos.porAtender.map((c) =>
         h(
           "article",
-          { class: "atender-fila tarjeta" },
+          { class: c.interrumpido ? "atender-fila tarjeta interrumpida" : "atender-fila tarjeta" },
           h(
             "div",
             {},
-            h("p", { class: "monto" }, `${deCentavos(c.monto_centavos)} · ${c.maquina_nombre}`),
+            h("p", { class: "monto" }, h("span", { class: "cantidad" }, deCentavos(c.monto_centavos)), ` · ${c.maquina_nombre}`),
             h("p", {}, `${c.interrumpido ? "Entrega interrumpida" : (ESTADOS[c.estado] ?? c.estado)} · ${fecha(c.fecha_pago ?? c.creado_en)}`),
             c.nota ? h("p", {}, c.nota) : null,
-            c.clave_rastreo ? h("p", {}, `Clave de rastreo: ${c.clave_rastreo}`) : null,
+            c.clave_rastreo ? h("p", {}, "Clave de rastreo: ", h("code", { class: "clave" }, c.clave_rastreo)) : null,
           ),
           soloLectura()
             ? null
@@ -536,7 +536,7 @@ function pintarPagos() {
             h("td", {}, p.maquina_nombre ?? "QR sin máquina"),
             h("td", { class: "num" }, deCentavos(p.monto_centavos)),
             h("td", {}, p.credito_estado ? `${ESTADOS[p.credito_estado] ?? p.credito_estado}${p.pulsos ? ` · ${p.pulsos} pulsos` : ""}` : "—"),
-            h("td", {}, p.clave_rastreo ?? "—"),
+            h("td", { class: "clave" }, p.clave_rastreo ?? "—"),
           ),
         ),
       ),
@@ -691,3 +691,26 @@ function mostrarPanel() {
 }
 
 if (clave) cargar().then(mostrarPanel, () => {});
+
+// ---------- Barra lateral: marca la sección que se está viendo ----------
+
+const enlacesSeccion = [...document.querySelectorAll(".secciones a[data-seccion]")];
+if ("IntersectionObserver" in window && enlacesSeccion.length > 0) {
+  const espia = new IntersectionObserver(
+    (entradas) => {
+      const visible = entradas.find((e) => e.isIntersecting);
+      if (!visible) return;
+      for (const a of enlacesSeccion) {
+        const activo = a.dataset.seccion === visible.target.id;
+        a.classList.toggle("activa", activo);
+        if (activo) a.setAttribute("aria-current", "location");
+        else a.removeAttribute("aria-current");
+      }
+    },
+    { rootMargin: "-15% 0px -70% 0px" },
+  );
+  for (const a of enlacesSeccion) {
+    const destino = document.getElementById(a.dataset.seccion);
+    if (destino) espia.observe(destino);
+  }
+}

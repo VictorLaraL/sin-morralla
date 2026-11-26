@@ -5,21 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal del dueño — Sin Morralla</title>
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#2743A8">
-  <link rel="icon" href="/marca.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#0F2A4A">
+  <link rel="icon" href="/simbolo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
   <link rel="stylesheet" href="/estilos.css">
   <link rel="stylesheet" href="/portal/portal.css">
 </head>
 <body>
-  <header class="barra">
+  <!-- Símbolo de la marca (identidad v2, docs/marca): se reutiliza con <use href="#simbolo">. -->
+  <svg width="0" height="0" class="oculto-visual" aria-hidden="true" focusable="false">
+    <symbol id="simbolo" viewBox="0 0 72 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="27" cy="13" rx="13" ry="7.5"/>
+      <path d="M14 13v7a13 7.5 0 0 0 26 0v-7"/>
+      <path d="M6 27.5A13 7.5 0 0 1 14 20.6M6 27.5a13 7.5 0 0 0 26 0M6 27.5v7a13 7.5 0 0 0 26 0v-7"/>
+      <path d="M45 12c4-2.6 7.5-2.6 11.5 0s7.5 2.6 11.5 0M44 20.5c4-2.6 8-2.6 12 0s8 2.6 12 0M37 31c5-3 10-3 15.5 0s10.5 3 15.5 0"/>
+    </symbol>
+  </svg>
+
+  <!-- En escritorio, con la sesión abierta, esta barra se vuelve la barra lateral del portal. -->
+  <header class="barra lateral">
     <div class="contenedor">
       <a class="logo" href="/" aria-label="Sin Morralla, inicio">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#2743A8" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#2743A8"/></svg>
-        <span><span class="sin">sin</span> morralla</span>
+        <svg viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
+        <span>Sin Morralla</span>
       </a>
+      <span class="lateral-titulo">Portal del dueño</span>
+      <nav class="secciones" aria-label="Secciones del portal">
+        <a href="#hoy-titulo" data-seccion="hoy-titulo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M21 19H3"/></svg>Hoy</a>
+        <a href="#atender-titulo" data-seccion="atender-titulo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Por atender</a>
+        <a href="#maquinas-titulo" data-seccion="maquinas-titulo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M12 13.5s-2 2.2-2 3.4a2 2 0 0 0 4 0c0-1.2-2-3.4-2-3.4Z"/></svg>Máquinas</a>
+        <a href="#pagos-titulo" data-seccion="pagos-titulo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Últimos pagos</a>
+        <a href="#contactos-titulo" data-seccion="contactos-titulo" class="solo-dueno"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5M16 5.5a3.5 3.5 0 0 1 0 6.5M17.5 14.6c1.8.6 3 2.4 3.5 4.9"/></svg>Interesados</a>
+      </nav>
       <nav class="menu" aria-label="Portal">
         <span class="etiqueta" id="vivo" hidden><span class="punto"></span><span>En vivo</span></span>
         <button class="boton secundario chico" id="salir" type="button" hidden>Salir</button>
@@ -30,6 +49,7 @@
   <main class="contenedor portal">
     <!-- Entrada -->
     <section class="entrar tarjeta" id="entrar" aria-labelledby="entrar-titulo">
+      <svg class="entrar-simbolo" viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
       <h1 id="entrar-titulo">Portal del dueño</h1>
       <p>Escribe la clave del portal. Se guarda solo mientras esta pestaña esté abierta.</p>
       <p>¿Eres del jurado? Usa la clave de solo lectura que viene en la entrega del proyecto.</p>
@@ -99,17 +119,20 @@
         <button class="boton secundario" id="cal-cerrar" type="button">Cerrar</button>
       </div>
     </div>
+    <!-- Calcomanía de marca: Azul Profundo, logo blanco y el QR oscuro sobre un recuadro blanco (docs/marca, sección 5). -->
     <div class="hoja" id="cal-hoja">
       <div class="hoja-cabeza">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#F2A71B"/><circle cx="32" cy="32" r="25.5" fill="none" stroke="#C98306" stroke-width="2"/><rect x="19" y="19" width="26" height="26" rx="6" fill="none" stroke="#fff" stroke-width="5"/><rect x="27" y="27" width="10" height="10" rx="2.5" fill="#fff"/></svg>
-        <span>Paga con CoDi</span>
+        <svg viewBox="0 0 72 48" aria-hidden="true"><use href="#simbolo"/></svg>
+        <span>Sin Morralla</span>
       </div>
+      <p class="hoja-paga">Paga con CoDi</p>
       <p class="hoja-monto" id="cal-monto"></p>
       <div class="hoja-qr" id="cal-qr"></div>
+      <p class="hoja-escanea">Escanea con la app de tu banco</p>
       <p class="hoja-verifica">Antes de pagar, verifica que el beneficiario sea:<br><strong id="cal-nombre"></strong></p>
       <ul class="hoja-reglas">
-        <li><strong>Sin cambio:</strong> paga el monto exacto.</li>
-        <li><strong>Luz verde:</strong> lista. <strong>Roja:</strong> usa monedas.</li>
+        <li><span class="hoja-icono">=</span><span><strong>Monto exacto,</strong> sin cambio.</span></li>
+        <li><span class="hoja-luz"></span><span><strong>Luz verde:</strong> lista. <strong>Roja:</strong> usa monedas.</span></li>
       </ul>
       <p class="hoja-pie"><span id="cal-aclaraciones"></span><span id="cal-maquina"></span></p>
     </div>
