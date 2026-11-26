@@ -1,0 +1,71 @@
+Sin Morralla — Licencia propietaria. Todos los derechos reservados.
+
+Copyright (c) 2026 VictorLaraL, autor de Sin Morralla. Todos los derechos reservados.
+
+Este repositorio NO es software libre ni de código abierto. Que el repositorio sea público no concede ninguna licencia.
+
+1. Qué cubre. El código fuente del servidor, de la página web, del portal y del firmware; la documentación; los
+   diseños, diagramas, imágenes y textos; el nombre "Sin Morralla", sus logotipos y su identidad visual (en conjunto,
+   "la Obra").
+
+2. Qué no está permitido. Sin autorización previa y por escrito del autor, nadie puede usar, copiar, reproducir,
+   modificar, adaptar, traducir, compilar, ejecutar, desplegar, distribuir, publicar, sublicenciar, vender ni explotar
+   de ninguna otra forma la Obra o cualquier parte de ella, ni crear obras derivadas a partir de ella, con o sin fines
+   de lucro. Esto incluye usar la Obra para construir, entrenar o mejorar productos o servicios, propios o de terceros.
+
+3. Marca. El nombre "Sin Morralla" y sus logotipos identifican al proyecto y a su autor. No se otorga ningún derecho
+   para usarlos.
+
+4. Lo único permitido.
+   a) Consultar el repositorio y la demostración pública para evaluar el proyecto dentro de la Hackatón México 2026,
+      con el alcance y durante el plazo que fijan las bases de esa competencia.
+   b) Ver el repositorio y hacer una bifurcación (fork) dentro de GitHub, únicamente en lo que exigen los Términos de
+      Servicio de GitHub. Ese permiso no autoriza ningún otro uso de la Obra.
+
+5. Componentes de terceros. Los componentes de terceros conservan sus propias licencias y no forman parte de la Obra
+   para efectos de esta licencia; por ejemplo, qrcode-generator 1.4.4 (licencia MIT, en web/vendor) y las dependencias
+   de desarrollo listadas en package.json.
+
+6. Sin garantía. La Obra se ofrece "tal cual", sin garantía de ningún tipo. El autor no responde por daños derivados de
+   su consulta o de cualquier uso no autorizado.
+
+Para solicitar una autorización de uso, abre un issue en el repositorio o contacta al autor en
+https://github.com/VictorLaraL.
+
+---
+
+English translation (the Spanish text prevails)
+
+Sin Morralla — Proprietary license. All rights reserved.
+
+Copyright (c) 2026 VictorLaraL, author of Sin Morralla. All rights reserved.
+
+This repository is NOT free or open-source software. The repository being public does not grant any license.
+
+1. Scope. The source code of the server, the website, the owner portal and the firmware; the documentation; the
+   designs, diagrams, images and texts; the name "Sin Morralla", its logos and its visual identity (together, the
+   "Work").
+
+2. Not permitted. Without the author's prior written permission, no one may use, copy, reproduce, modify, adapt,
+   translate, compile, run, deploy, distribute, publish, sublicense, sell or otherwise exploit the Work or any part
+   of it, or create derivative works from it, whether for profit or not. This includes using the Work to build, train
+   or improve products or services, one's own or anyone else's.
+
+3. Trademarks. The name "Sin Morralla" and its logos identify the project and its author. No right to use them is
+   granted.
+
+4. The only things permitted.
+   a) Reviewing the repository and the public demo to evaluate the project within Hackatón México 2026, to the extent
+      and for the period set by that competition's rules.
+   b) Viewing the repository and forking it within GitHub, solely as required by GitHub's Terms of Service. That
+      permission does not authorize any other use of the Work.
+
+5. Third-party components. Third-party components keep their own licenses and are not part of the Work for the
+   purposes of this license; for example, qrcode-generator 1.4.4 (MIT license, in web/vendor) and the development
+   dependencies listed in package.json.
+
+6. No warranty. The Work is provided "as is", without warranty of any kind. The author is not liable for any damage
+   arising from viewing it or from any unauthorized use.
+
+To request permission to use the Work, open an issue in the repository or contact the author at
+https://github.com/VictorLaraL.

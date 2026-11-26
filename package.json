@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Módulo que conecta máquinas de monedas a CoDi: el pago con QR se convierte en los pulsos del monedero.",
+  "license": "UNLICENSED",
   "type": "module",
   "engines": {
     "node": ">=22.18"

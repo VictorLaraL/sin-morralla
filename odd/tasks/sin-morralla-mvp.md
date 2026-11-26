@@ -184,6 +184,20 @@ explorador de solo lectura.
   infinitas sí respetan "reducir movimiento" por la regla global de `web/estilos.css` (líneas 315–327). Verificación
   tras publicar: `sinmorralla.com` con QR real, canal en vivo, tres tipografías cargadas y consola sin errores;
   unitarias 38/38 y e2e 38/38.
+- **L26 (2026-11-25) Portal con la identidad v2, ajustes de la landing, documentación y licencia:** "Sí, migra el
+  portal"; "quita lo de devolver el dinero, no lo devolveremos ni lo de descargar el qr quitalo igual"; "igual quita
+  esos titulos de cada apartado todos ellos"; "actualiza tambien la documentacion en github para que lleve el logo y se
+  apegue a la v2 de la imagen de la marca"; "ponle licencia por que no es opensource es de nuestra autoria entonces
+  nadie puede usar el codigo ni la idea". Tokens y componentes v2 en `web/estilos.css`; portal con barra lateral,
+  calcomanía nueva y `web/marca.svg` retirado; la demo ya no ofrece devolución ni descarga del QR; sin etiquetas de
+  sección en la landing; README con encabezado de marca (`docs/marca/banner.png`, generado con Edge sin ventana y las
+  fuentes reales); archivos v1 en `brand/v1/`; `LICENSE` propietaria y `"license": "UNLICENSED"`. Pruebas: unitarias
+  38/38, e2e 38/38; navegador en 1280 px y 375 px (dueño y jurado), sin desplazamiento horizontal ni errores.
+  **RDD (`2293313..d938060`, escalado): aprobada y confirmada.** Atendidas: el fondo de la calcomanía pasa a relleno SVG
+  para que se imprima aunque el navegador no imprima fondos (probado quitando todos los fondos CSS); la última sección
+  de la barra lateral se marca al hacer clic o al llegar al final de la página. Descartadas con evidencia: el QR ya trae
+  su margen blanco de 4 módulos (`web/qr.js`); nada hace referencia a `web/marca.svg`. Encontrado y corregido antes: las
+  cifras repetían su animación de entrada en cada refresco y en cada pago en vivo.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos

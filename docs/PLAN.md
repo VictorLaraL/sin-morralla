@@ -106,9 +106,9 @@ dirección del Worker y probarlo en una placa real.
 
 ## 5. Identidad visual
 
-> **La identidad v2** (Azul Profundo, Agua Viva, Verde Pulso; Plus Jakarta Sans, DM Sans y JetBrains Mono) está en
-> [docs/marca](marca/README.md) y **ya se aplicó en la landing**. Lo que sigue es la v1, que todavía usan el portal y
-> su calcomanía.
+> **La identidad vigente es la v2** (Azul Profundo, Agua Viva, Verde Pulso; Plus Jakarta Sans, DM Sans y JetBrains
+> Mono): [docs/marca](marca/README.md). Ya está aplicada en la landing, el portal y la calcomanía. Lo que sigue es la
+> v1, que queda solo como historia.
 
 | Rol | Color | Uso |
 |---|---|---|
@@ -119,7 +119,7 @@ dirección del Worker y probarlo en una placa real.
 | Papel | `#F5F7FB` | Fondos |
 
 - **Tipografías:** Bricolage Grotesque para títulos e Inter para texto (Google Fonts).
-- **Logo:** una moneda que contiene el marcador de un QR: la moneda se vuelve cobro digital. Archivos en `brand/`
+- **Logo:** una moneda que contiene el marcador de un QR: la moneda se vuelve cobro digital. Archivos en `brand/v1/`
   (`marca.svg`, `logo.svg`, `logo-negativo.svg`). Antes de imprimir hay que convertir el texto a curvas.
 
 ## 6. Repositorio
@@ -138,8 +138,8 @@ sin-morralla/
 **Reglas por ser público:**
 - **Nunca** subir llaves ni secretos: van en los Secrets de Cloudflare y en `.dev.vars`, que queda fuera de git.
 - **Nunca** subir datos del cliente piloto (nombre, ubicación, CLABE): van en una carpeta `privado/` fuera de git.
-- **Licencia:** sin licencia de código abierto por ahora, así el código se puede ver pero no reutilizar. Se puede
-  cambiar después.
+- **Licencia:** propietaria, todos los derechos reservados ([LICENSE](../LICENSE)). El repositorio es público solo para
+  la evaluación del hackatón; nadie puede usar el código, los diseños ni la marca sin autorización escrita.
 
 ## 7. Plan de la semana
 

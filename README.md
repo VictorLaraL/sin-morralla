@@ -1,9 +1,8 @@
 <p align="center">
-  <img src="brand/logo.svg" alt="Sin Morralla" width="320">
+  <img src="docs/marca/banner.png" alt="Sin Morralla — Tu máquina de siempre, ahora sin monedas. Cobra con CoDi." width="100%">
 </p>
 
-<p align="center"><b>Tu máquina de siempre, ahora sin monedas.</b><br>
-Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convierte en los pulsos del monedero.</p>
+<p align="center">Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convierte en los pulsos del monedero.</p>
 
 <p align="center">
   <a href="https://sinmorralla.com"><b>Demo en vivo</b></a> ·
@@ -11,6 +10,7 @@ Un módulo que conecta las máquinas de monedas a CoDi: el pago con QR se convie
   <a href="#pruébalo">Pruébalo</a> ·
   <a href="#cómo-funciona-por-dentro">Diagrama</a> ·
   <a href="firmware/README.md">Firmware</a> ·
+  <a href="docs/marca/README.md">Marca</a> ·
   Hackatón México 2026
 </p>
 
@@ -241,6 +241,7 @@ Todo corre en una cuenta de Cloudflare: **Worker** con archivos estáticos, **D1
 | [firmware/](firmware) | Módulo ESP32 |
 | [herramientas/](herramientas) | Simuladores de pago y de máquina, y las pruebas de punta a punta |
 | [docs/](docs) | MVP, plan, hardware, investigación de mercado y prospectos |
+| [docs/marca/](docs/marca/README.md) y [brand/](brand) | Identidad de marca v2: logo, colores, tipografías y tono; archivos vectoriales del logo |
 | [odd/tasks/](odd/tasks) | Bitácora del desarrollo: especificación, tareas, evidencia de pruebas y revisiones |
 
 **Cómo se construyó.** Cada tarea empezó con pruebas que fallaban (RED) antes del código (GREEN). Cada tramo de commits
@@ -314,6 +315,9 @@ Para cumplir con la declaración de código previo de las bases:
 
 ## Licencia
 
-Todos los derechos reservados. El código es público para la evaluación del hackatón.
+**Software propietario. Todos los derechos reservados.** Este repositorio no es de código abierto: es público solo para
+que el jurado de la Hackatón México 2026 pueda evaluarlo. Nadie puede usar, copiar, modificar, desplegar ni distribuir
+el código, la documentación, los diseños, el nombre ni el logo de Sin Morralla sin autorización escrita de su autor.
+Los términos completos están en [LICENSE](LICENSE). Los componentes de terceros conservan sus propias licencias.
 
 CoDi® es una marca registrada de Banco de México. Sin Morralla no está afiliado a Banco de México.

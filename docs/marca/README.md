@@ -1,10 +1,10 @@
 # Sin Morralla — Identidad de marca v2
 
-**25 de noviembre de 2026 · Estado: aplicada en la landing.** El portal del dueño y su calcomanía imprimible siguen
-con la identidad v1 (Azul Morralla y Ámbar Moneda, en [PLAN.md](../PLAN.md#5-identidad-visual) y en
-[`brand/`](../../brand)). Lo que falta está en la sección 7.
+**25 de noviembre de 2026 · Estado: aplicada en la landing, el portal del dueño, la calcomanía imprimible y este
+repositorio.** La identidad v1 (Azul Morralla y Ámbar Moneda) queda solo como historia, en
+[PLAN.md](../PLAN.md#5-identidad-visual) y en [`brand/v1/`](../../brand/v1).
 
-<p align="center"><img src="logo-concepto.png" alt="Logo conceptual de Sin Morralla: monedas apiladas con líneas de flujo, sobre azul profundo" width="360"></p>
+<p align="center"><img src="banner.png" alt="Sin Morralla — Tu máquina de siempre, ahora sin monedas" width="100%"></p>
 
 ## 1. Enfoque visual
 
@@ -133,19 +133,27 @@ Los tableros son **conceptos generados**: sirven para la dirección visual, pero
 |---|---|---|
 | [`brand/v2/simbolo.svg`](../../brand/v2/simbolo.svg) | Símbolo vectorial en una tinta: trazo propio a partir del concepto | — |
 | [`brand/v2/logo.svg`](../../brand/v2/logo.svg), [`logo-negativo.svg`](../../brand/v2/logo-negativo.svg) | Logo completo para fondos claros y oscuros | Convertir el texto a curvas antes de imprimir |
-| [`web/simbolo.svg`](../../web/simbolo.svg) | Ícono de pestaña de la landing | — |
+| [`web/simbolo.svg`](../../web/simbolo.svg) | Ícono de pestaña de la landing y del portal | — |
+| [`banner.png`](banner.png) | Encabezado del README (2560 × 800, con las tipografías de la marca) | — |
 | [`logo-concepto.png`](logo-concepto.png) | Logo conceptual de referencia, raster de 1024 px | — |
 | [`tablero-claro.webp`](tablero-claro.webp), [`tablero-oscuro.webp`](tablero-oscuro.webp) | Tableros de marca de referencia | — |
 
 ## 7. De la v1 a la v2
 
-**Hecho (25 de noviembre): la landing.** Los tokens v2 viven en `web/landing.css`, que se carga después de
-`web/estilos.css`; por eso el portal, que no carga esa hoja, conserva la v1. Se aplicaron el logo vectorial, las tres
-tipografías, la portada en Azul Profundo con líneas de flujo, la calcomanía de marca, la máquina de la demo con la luz
-Verde Pulso, las secciones con íconos y la sección de seguridad en oscuro, más las animaciones (entrada de la portada,
-aparición al hacer scroll, brillo verde al llegar un pago), que se apagan con "reducir movimiento".
+**Hecho (25 de noviembre).**
 
-**Pendiente:** el portal del dueño y su calcomanía imprimible.
+- **Landing:** logo vectorial, tres tipografías, portada en Azul Profundo con líneas de flujo, calcomanía de marca,
+  máquina de la demo con la luz Verde Pulso, secciones con íconos, seguridad en oscuro y animaciones (entrada de la
+  portada, aparición al hacer scroll y brillo verde al llegar un pago).
+- **Portal del dueño:** barra lateral en Azul Profundo en escritorio (en celular, barra superior con las secciones en
+  una fila), entrada sobre fondo oscuro, la venta del día destacada, montos y claves de rastreo en JetBrains Mono y
+  pagos por atender con borde rojo (no se sirvió) o agua (entrega interrumpida).
+- **Calcomanía imprimible:** 10 cm en Azul Profundo, logo nuevo y QR de 8 cm sobre recuadro blanco.
+- **Código:** los tokens y componentes v2 viven en `web/estilos.css`, compartidos por las dos páginas; se retiró
+  `web/marca.svg` y los archivos v1 pasaron a `brand/v1/`.
+- **Repositorio:** el README abre con el encabezado de la marca (`banner.png`).
+
+Todo el movimiento se apaga con "reducir movimiento" (regla global en `web/estilos.css`).
 
 | Token actual (`web/estilos.css`) | v1 | v2 |
 |---|---|---|
@@ -158,15 +166,8 @@ aparición al hacer scroll, brillo verde al llegar un pago), que se apagan con "
 | Títulos | Bricolage Grotesque | Plus Jakarta Sans |
 | Texto | Inter | DM Sans |
 | Montos | Inter con `tabular-nums` | JetBrains Mono |
-| Logo | Moneda con el marcador de un QR (`brand/`) | Monedas con líneas de flujo (por vectorizar) |
+| Logo | Moneda con el marcador de un QR (`brand/v1/`) | Monedas con líneas de flujo (`brand/v2/`) |
 
-Orden sugerido para el portal:
-
-1. Pasar los tokens y las fuentes v2 de `web/landing.css` a `web/estilos.css`, para que los compartan las dos páginas.
-2. Revisar el contraste de cada botón y enlace del portal con la tabla de la sección 2.
-3. Rehacer la calcomanía imprimible con el símbolo nuevo y el QR sobre recuadro blanco.
-4. Cambiar el ícono de pestaña del portal a `web/simbolo.svg` y retirar `web/marca.svg`.
-5. Probar en el navegador, en escritorio y en celular.
 
 CoDi® es una marca registrada de Banco de México: su nombre se usa solo para explicar el medio de pago, nunca como parte
 del logo de Sin Morralla.
