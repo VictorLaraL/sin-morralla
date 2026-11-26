@@ -177,6 +177,13 @@ explorador de solo lectura.
   `brand/v2`; efectos de presentación en `web/efectos.js` (si no carga, la página se ve completa). El commit de la página
   pasa de 400 líneas porque es la reescritura visual de una sola hoja. Los colores Agua Viva y Verde Pulso se usan solo
   en íconos, indicadores y texto grande; el texto pequeño usa `#0369A1` y `#15803D`.
+- **L25 RDD rediseño de la landing (`dfa1103..0e78dac`):** evaluado riesgo medio y bajo presupuesto; escalado para
+  revisarlo de todos modos por ser una reescritura de 1,242 líneas de la página pública. **Aprobada y confirmada.**
+  Atendida: los trazos de las líneas de flujo terminaban en x = 1800 y, al desplazarse 400, dejaban un hueco a la
+  derecha en pantallas muy anchas; ahora llegan a 2400 (medido con `getBBox`). Descartada con evidencia: las animaciones
+  infinitas sí respetan "reducir movimiento" por la regla global de `web/estilos.css` (líneas 315–327). Verificación
+  tras publicar: `sinmorralla.com` con QR real, canal en vivo, tres tipografías cargadas y consola sin errores;
+  unitarias 38/38 y e2e 38/38.
 - **L9 T4 tamaño:** el commit del Worker de T4 pasa de ~400 líneas (≈470 de código y 113 de pruebas e2e) porque el
   ruteo de la demo, el portal y el difusor vive en el mismo `index.ts`; las validaciones van en un commit previo.
 - **L5 Evidencia previa:** prueba del 23 de noviembre: el mismo QR fijo de $0.01 aceptó dos pagos y pey registró dos

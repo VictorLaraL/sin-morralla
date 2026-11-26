@@ -179,7 +179,9 @@
     linear-gradient(180deg, #0f2a4a, #0b2240);
 }
 
-/* Líneas de flujo del símbolo, en movimiento lento. Cada trazo repite su onda cada 400 unidades. */
+/* Líneas de flujo del símbolo, en movimiento lento. Cada trazo repite su onda cada 400 unidades y va de x = -400 a
+   x = 2400: al desplazarse 400 sigue cubriendo los 1600 del lienzo. Con "reducir movimiento", la regla global de
+   estilos.css detiene esta y todas las demás animaciones de la página. */
 .portada-flujo {
   position: absolute;
   inset: 0;
